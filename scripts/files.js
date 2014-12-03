@@ -39,12 +39,12 @@ exports.setup = function (tree) {
     var file = prompt("Name of file:");
 
     if (file !== null && file.length > 0) {
-      if (!validateName(file)) {
-        return getName();
-      }
-
       if (path.extname(file) === "") {
         file += ".grace";
+      }
+
+      if (!validateName(file)) {
+        return getName();
       }
 
       return file;
@@ -187,44 +187,56 @@ exports.setup = function (tree) {
   }
 
   input.change(function () {
-    var file, fileName, reader;
+    var i, l, file, fileName, fileNameList;
 
-    if (this.files.length > 0) {
-      file = this.files[0];
+    function readFileList(currentFileName, currentFile){
+      var reader = new FileReader();
+
+      reader.onload = function (event) {
+        var result = event.target.result;
+
+        if (!isText(currentFileName)) {
+          result = btoa(result);
+        }
+
+        localStorage["file:" + currentFileName] = result;
+        addFile(currentFileName);
+        openFile(currentFileName);
+      };
+
+      if (isText(currentFileName)) {
+        reader.readAsText(currentFile);
+      } else {
+        reader.readAsBinaryString(currentFile);
+      }
+    }
+
+    fileNameList = [];
+
+    for (i = 0, l = this.files.length; i < l; i += 1) {
+      file = this.files[i];
       fileName = file.name;
 
       if (path.extname(fileName) === ".grace") {
         if (!validateName(fileName)) {
           if (!confirm("Rename the file on upload?")) {
-            return;
+            continue;
           }
 
           fileName = getName();
 
           if (!fileName) {
-            return;
+            continue;
           }
         }
       }
 
-      reader = new FileReader();
+      fileNameList[i] = fileName;
+    }
 
-      reader.onload = function (event) {
-        var result = event.target.result;
-
-        if (!isText(fileName)) {
-          result = btoa(result);
-        }
-
-        localStorage["file:" + fileName] = result;
-        addFile(fileName);
-        openFile(fileName);
-      };
-
-      if (isText(fileName)) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsBinaryString(file);
+    for (i = 0; i < l; i += 1) {
+      if (fileNameList[i] !== undefined) {
+        readFileList(fileNameList[i], this.files[i]);
       }
     }
   });
@@ -295,4 +307,3 @@ exports.setup = function (tree) {
     isChanged: isChanged
   };
 };
-
