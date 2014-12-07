@@ -75,9 +75,17 @@ exports.setup = function (tree) {
     localStorage.currentFile = name;
     content = localStorage["file:" + name];
 
-    onOpenCallbacks.forEach(function (callback) {
-      callback(name, content);
-    });
+    if (isText(name)) {
+      $("#image-view").addClass("hidden");
+      onOpenCallbacks.forEach(function (callback) {
+        callback(name, content);
+      });
+    } else if (isImage(name)) {
+      $("#grace-view").addClass("hidden");
+      $("#image-view").removeClass("hidden");
+      var imageTag = document.querySelector('img');
+      imageTag.src = content;
+    }
   }
 
   function save(content) {
@@ -178,16 +186,22 @@ exports.setup = function (tree) {
     input.click();
   });
 
-  function isText() {
-    return true;
-    //var ext = path.extname(name);
+  function isText(name) {
+    var ext = path.extname(name);
 
-    //return ext === ".grace" || ext === ".txt" || ext === ".json" ||
-      //ext === ".xml" || ext === ".js" || ext === ".html" || ext === ".xhtml";
+    return ext === "" ||
+    ext === ".grace" || ext === ".txt" || ext === ".json" ||
+    ext === ".xml" || ext === ".js" || ext === ".html" || ext === ".xhtml";
+  }
+
+  function isImage(name) {
+    var ext = path.extname(name);
+
+    return ext === ".jpg" || ext === ".jpeg" || ext === ".bmp" || ext === ".gif" || ext === ".png";
   }
 
   input.change(function () {
-    var i, l, file, fileName, fileNameList;
+    var i, l, file, fileName, fileNameList, lastValid;
 
     function readFileList(currentFileName, currentFile){
       var reader = new FileReader();
@@ -195,19 +209,18 @@ exports.setup = function (tree) {
       reader.onload = function (event) {
         var result = event.target.result;
 
-        if (!isText(currentFileName)) {
-          result = btoa(result);
-        }
-
         localStorage["file:" + currentFileName] = result;
         addFile(currentFileName);
-        openFile(currentFileName);
+
+        if (lastValid === currentFileName) {
+          openFile(currentFileName);
+        }
       };
 
       if (isText(currentFileName)) {
         reader.readAsText(currentFile);
-      } else {
-        reader.readAsBinaryString(currentFile);
+      } else if (isImage(currentFileName)){
+        reader.readAsDataURL(currentFile);
       }
     }
 
@@ -237,6 +250,7 @@ exports.setup = function (tree) {
     for (i = 0; i < l; i += 1) {
       if (fileNameList[i] !== undefined) {
         readFileList(fileNameList[i], this.files[i]);
+        lastValid = fileNameList[i];
       }
     }
   });
@@ -263,12 +277,8 @@ exports.setup = function (tree) {
   });
 
   tree.on("click", ".file", function () {
-    tree.children().removeClass("show-options");
-    $(this).addClass("show-options");
-  });
-
-  tree.on("click", ".grace", function () {
-    openFile($(this).find(".file-name").text());
+    var name = $(this).find(".file-name").text();
+    openFile(name);
   });
 
   for (name in localStorage) {
