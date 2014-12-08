@@ -35,16 +35,16 @@ exports.setup = function (tree) {
     return true;
   }
 
-  function getName() {
+  function getName(lastName) {
     var file = prompt("Name of file:");
 
     if (file !== null && file.length > 0) {
       if (path.extname(file) === "") {
-        file += ".grace";
+        file += path.extname(lastName);
       }
 
       if (!validateName(file)) {
-        return getName();
+        return getName(file);
       }
 
       return file;
@@ -275,19 +275,17 @@ exports.setup = function (tree) {
       file = this.files[i];
       fileName = file.name;
 
-      if (path.extname(fileName) === ".grace") {
         if (!validateName(fileName)) {
           if (!confirm("Rename the file on upload?")) {
             continue;
           }
 
-          fileName = getName();
+          fileName = getName(fileName);
 
           if (!fileName) {
             continue;
           }
         }
-      }
 
       fileNameList[i] = fileName;
     }
@@ -309,7 +307,7 @@ exports.setup = function (tree) {
       }
 
       if (!validateName(file)) {
-        file = getName();
+        file = getName(file);
 
         if (!file) {
           return;
