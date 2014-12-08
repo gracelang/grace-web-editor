@@ -77,14 +77,34 @@ exports.setup = function (tree) {
 
     if (isText(name)) {
       $("#image-view").addClass("hidden");
+      $("#audio-view").addClass("hidden");
+
+      var audioTag = document.querySelector('audio');
+      audioTag.src = "";
+      audioTag.type = "";
+
       onOpenCallbacks.forEach(function (callback) {
         callback(name, content);
       });
     } else if (isImage(name)) {
       $("#grace-view").addClass("hidden");
+      $("#audio-view").addClass("hidden");
       $("#image-view").removeClass("hidden");
+
+      var audioTag = document.querySelector('audio');
+      audioTag.src = "";
+      audioTag.type = "";
+
       var imageTag = document.querySelector('img');
       imageTag.src = content;
+    } else if (isAudio(name)) {
+      $("#grace-view").addClass("hidden");
+      $("#image-view").addClass("hidden");
+      $("#audio-view").removeClass("hidden");
+
+      var audioTag = document.querySelector('audio');
+      audioTag.src = content;
+      audioTag.type = mediaType(name);
     }
   }
 
@@ -200,6 +220,31 @@ exports.setup = function (tree) {
     return ext === ".jpg" || ext === ".jpeg" || ext === ".bmp" || ext === ".gif" || ext === ".png";
   }
 
+  function isAudio(name) {
+    var ext = path.extname(name);
+
+    return ext === ".mp3" || ext === ".ogg" || ext === ".wav";
+  }
+
+  function mediaType(name) {
+    var ext = path.extname(name);
+    var type = "";
+
+    switch (ext) {
+      case ".mp3":
+        type = "audio/mpeg";
+        break;
+      case ".ogg":
+        type = "audio/ogg";
+        break;
+      case ".wav":
+        type = "audio/wav";
+        break;
+    }
+
+    return type;
+  }
+
   input.change(function () {
     var i, l, file, fileName, fileNameList, lastValid;
 
@@ -219,7 +264,7 @@ exports.setup = function (tree) {
 
       if (isText(currentFileName)) {
         reader.readAsText(currentFile);
-      } else if (isImage(currentFileName)){
+      } else if (isImage(currentFileName) || isAudio(currentFileName)){
         reader.readAsDataURL(currentFile);
       }
     }
