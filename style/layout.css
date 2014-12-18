@@ -203,7 +203,7 @@ a {
   cursor: default;
 }
 
-.file-name, .file-name-input {
+.file-name, .file-name-input, .directory-name {
   font-size: 10pt;
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
   white-space: nowrap;
@@ -213,9 +213,13 @@ a {
   font-weight: bold;
 }
 
-.file {
+#file-tree .file {
+  font-weight: normal;
+}
+
+.file, .directory {
   position: relative;
-  padding: 0px 5px;
+  padding: 0px 10px;
   margin: 5px 0px;
   cursor: pointer;
 }
