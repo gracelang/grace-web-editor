@@ -173,6 +173,12 @@ exports.setup = function (files, view, fdbk) {
   });
 
   files.onOpen(function (name, content) {
+    var slashIndex = name.lastIndexOf("/");
+
+    if (slashIndex !== -1) {
+      name = name.substring(slashIndex + 1);
+    } 
+    
     fileName.text(name);
     setDownload(name, content);
 
