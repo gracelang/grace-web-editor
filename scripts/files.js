@@ -270,6 +270,11 @@ exports.setup = function (tree) {
     li.attr("dire-name", name);
 
     div = $("<div>");
+    div.addClass("icon");
+    div.addClass("close");
+    li.append(div);
+
+    div = $("<div>");
     div.addClass("directory-name");
 
     slashIndex = name.lastIndexOf("/");
@@ -280,6 +285,7 @@ exports.setup = function (tree) {
 
     div.text(name);
     ul = $("<ul>");
+    ul.css({'display': 'block'});
 
     div.append(ul);
     li.append(div);
@@ -477,8 +483,8 @@ exports.setup = function (tree) {
     }
   }
 
-  var DELAY = 300, clicks = 0, timer = null, current = null;
   var noChange, slashIndex, dir;
+  var current = null;
 
   tree.on("click", ".directory", function(e) {
     e.stopPropagation();
@@ -517,29 +523,18 @@ exports.setup = function (tree) {
       currentDirectory = current;
     }
 
-    clicks++;  
-    
-    if(clicks === 1) {
-      timer = setTimeout(function() {
-        clicks = 0;           
-      }, DELAY);
-
-    } else {
-      clearTimeout(timer); 
-
-      if (current.find("ul").css('display') === "none") {
-        current.children().children("ul").css({'display': 'block'});
-      } else if (current.find("ul").css('display') === "block") {
-        current.children().children("ul").css({'display': 'none'});
-      }
-
-      clicks = 0;            
+    if (current.find("ul").css('display') === "none") {
+      current.children().children("ul").css({'display': 'block'});
+      current.children(".icon").removeClass("close");
+      current.children(".icon").addClass("open");
+        
+    } else if (current.find("ul").css('display') === "block") {
+      current.children().children("ul").css({'display': 'none'});
+      current.children(".icon").removeClass("open");
+      current.children(".icon").addClass("close");
     }
 
     lastSelect = current.find("*");
-
-  }).on("dblclick", function(e){
-    e.preventDefault();  
   });
 
   tree.on("click", ".file", function (e) {
