@@ -8,26 +8,30 @@ var path = require("path");
 require("setimmediate");
 
 exports.setup = function (tree) {
-  var input, onOpenCallbacks, name, newFile, upload;
-
+  var input, onOpenCallbacks, name, newFile, upload, currentDirectory, lastSelect;
+  
   input = $("#upload-input");
   upload = $("#upload");
   newFile = $("#new-file");
 
   onOpenCallbacks = [];
 
-  function validateName(file) {
-    if (file[0] === ".") {
-      alert("File names must not begin with a dot.");
+  function validateName(givenName, category) {
+    if (givenName[0] === ".") {
+      alert("Names must not begin with a dot.");
       return false;
     }
 
-    if (!/^[\w.]+$/.test(file)) {
+    if (!/^[\w.]+$/.test(givenName)) {
       alert("Only letters, dots, numbers, and underscores are allowed.");
       return false;
     }
 
-    if (localStorage.hasOwnProperty("file:" + file)) {
+    if (currentDirectory !== undefined) {
+      givenName = currentDirectory.attr("dire-name") + "/" + givenName;
+    }
+
+    if (localStorage.hasOwnProperty(category + ":" + givenName)) {
       alert("That name is already taken.");
       return false;
     }
@@ -35,19 +39,19 @@ exports.setup = function (tree) {
     return true;
   }
 
-  function getName(lastName) {
-    var file = prompt("Name of file:");
+  function getName(lastName, category) {
+    var name = prompt("Name of " + category + ":");
 
-    if (file !== null && file.length > 0) {
-      if (path.extname(file) === "") {
-        file += path.extname(lastName);
+    if (name !== null && name.length > 0) {
+      if (path.extname(name) === "") {
+        name += path.extname(lastName);
       }
 
-      if (!validateName(file)) {
-        return getName(file);
+      if (!validateName(name, category)) {
+        return getName(name, category);
       }
 
-      return file;
+      return name;
     }
 
     return false;
@@ -66,12 +70,51 @@ exports.setup = function (tree) {
   }
 
   function openFile(name) {
-    var content;
+    var content, slashIndex, dir, noChange;
 
     if (!localStorage.hasOwnProperty("file:" + name)) {
       throw new Error("Open of unknown file " + name);
     }
 
+    noChange = false;
+
+    if (currentDirectory !== undefined) {
+
+      if (currentDirectory.hasClass("directory")) {
+
+        if (currentDirectory.find("ul").css('display') === "none") {
+          slashIndex = name.lastIndexOf("/");
+
+          if (slashIndex !== -1) {
+            dir = name.substring(0, slashIndex);
+          } 
+
+          if (currentDirectory.attr("dire-name") === dir) {
+            noChange = true;
+          }
+        }
+      }
+    } 
+
+    if (!noChange) {
+
+      if (lastSelect !== undefined) {
+        lastSelect.css({'font-weight': '', 'color': ''});
+      }
+
+      tree.find('[data-name="' + name + '"]').css({'font-weight': 'bold', 'color': '#FF0000'});
+      lastSelect = tree.find('[data-name="' + name + '"]');
+    }
+    
+    slashIndex = name.lastIndexOf("/");
+
+    if (slashIndex !== -1) {
+      dir = name.substring(0, slashIndex);
+      currentDirectory = tree.find('[dire-name="' + dir + '"]');
+    } else {
+      currentDirectory = undefined;
+    }
+    
     localStorage.currentFile = name;
     content = localStorage["file:" + name];
 
@@ -118,6 +161,7 @@ exports.setup = function (tree) {
 
   function rename(to) {
     var content, file;
+    var newDataName = to;
 
     file = localStorage.currentFile;
 
@@ -133,19 +177,23 @@ exports.setup = function (tree) {
       to += ".grace";
     }
 
-    if (!validateName(to)) {
+    if (!validateName(to, "file")) {
       return;
     }
 
     content = localStorage["file:" + file];
     delete localStorage["file:" + file];
 
-    localStorage["file:" + to] = content;
-    tree.find('[data-name="' + file + '"]').attr("data-name", to)
-      .find(".file-name").text(to);
-    localStorage.currentFile = to;
+    if (currentDirectory !== undefined) {
+      newDataName = currentDirectory.attr("dire-name") + "/" + newDataName;
+    }
 
-    openFile(to);
+    localStorage["file:" + newDataName] = content;
+    tree.find('[data-name="' + file + '"]').attr("data-name", newDataName);
+    tree.find('[data-name="' + newDataName + '"]').find(".file-name").text(to);
+    localStorage.currentFile = newDataName;
+
+    openFile(newDataName);
   }
 
   function remove() {
@@ -169,7 +217,7 @@ exports.setup = function (tree) {
   }
 
   function addFile(name) {
-    var div, inserted, li;
+    var div, inserted, li, parent, slashIndex;
 
     li = $("<li>");
     li.addClass("file");
@@ -177,8 +225,14 @@ exports.setup = function (tree) {
 
     div = $("<div>");
     div.addClass("file-name");
-    div.text(name);
 
+    slashIndex = name.lastIndexOf("/");
+
+    if (slashIndex !== -1) {
+      name = name.substring(slashIndex + 1);
+    } 
+
+    div.text(name);
     li.append(div);
 
     if (path.extname(name) === ".grace") {
@@ -187,16 +241,73 @@ exports.setup = function (tree) {
 
     inserted = false;
 
-    tree.children().each(function () {
-      if ($(this).text() > name) {
+    if (currentDirectory === undefined) {
+      parent = tree;
+    } else {
+      parent = currentDirectory.children().children();
+    }
+    
+    parent.children().each(function () {
+      if ($(this).text() > name && $(this).hasClass("file")) {
         $(this).before(li);
         inserted = true;
         return false;
       }
     });
-
+  
     if (!inserted) {
-      tree.append(li);
+      parent.append(li);
+    }
+
+    return li;
+  }
+
+  function addDirectory(name) {
+    var div, inserted, li, ul, parent, slashIndex;
+
+    li = $("<li>");
+    li.addClass("directory");
+    li.attr("dire-name", name);
+
+    div = $("<div>");
+    div.addClass("icon");
+    div.addClass("close");
+    li.append(div);
+
+    div = $("<div>");
+    div.addClass("directory-name");
+
+    slashIndex = name.lastIndexOf("/");
+
+    if (slashIndex !== -1) {
+      name = name.substring(slashIndex + 1);
+    } 
+
+    div.text(name);
+    ul = $("<ul>");
+    ul.css({'display': 'block'});
+
+    div.append(ul);
+    li.append(div);
+
+    if (currentDirectory === undefined) {
+      parent = tree;
+    } else {
+      parent = currentDirectory.children().children();
+    }
+
+    inserted = false;
+
+    parent.children().each(function () {
+      if ($(this).text() > name || $(this).hasClass("file")) {
+        $(this).before(li);
+        inserted = true;
+        return false;
+      }
+    });
+  
+    if (!inserted) {
+      parent.append(li);
     }
 
     return li;
@@ -253,9 +364,17 @@ exports.setup = function (tree) {
 
       reader.onload = function (event) {
         var result = event.target.result;
-
-        localStorage["file:" + currentFileName] = result;
+        
+        try {
+          localStorage["file:" + currentFileName] = result;
+        }
+        catch (err) {
+          console.error(err.message);
+          return;
+        }
+        
         addFile(currentFileName);
+
 
         if (lastValid === currentFileName) {
           openFile(currentFileName);
@@ -275,17 +394,21 @@ exports.setup = function (tree) {
       file = this.files[i];
       fileName = file.name;
 
-        if (!validateName(fileName)) {
+        if (!validateName(fileName, "file")) {
           if (!confirm("Rename the file on upload?")) {
             continue;
           }
 
-          fileName = getName(fileName);
+          fileName = getName(fileName, "file");
 
           if (!fileName) {
             continue;
           }
         }
+
+      if (currentDirectory !== undefined) {
+        fileName = currentDirectory.attr("dire-name") + "/" + fileName;
+      }
 
       fileNameList[i] = fileName;
     }
@@ -299,6 +422,22 @@ exports.setup = function (tree) {
   });
 
   newFile.click(function () {
+    var creation = prompt("New file or New directory?", "directory");
+
+    if (creation !== null && creation.length > 0) {
+      if (creation === "file") {
+        createFile();
+      } else if (creation === "directory") {
+        createDirectory();
+      } else {
+        if (confirm("Only file and directory acceptable") === true){
+          newFile.click();
+        }
+      }
+    }
+  });
+
+  function createFile() {
     var file = prompt("Name of new file:");
 
     if (file !== null && file.length > 0) {
@@ -306,21 +445,101 @@ exports.setup = function (tree) {
         file += ".grace";
       }
 
-      if (!validateName(file)) {
-        file = getName(file);
+      if (!validateName(file, "file")) {
+        file = getName(file, "file");
 
         if (!file) {
           return;
         }
       }
 
+      if (currentDirectory !== undefined) {
+        file = currentDirectory.attr("dire-name") + "/" + file;
+      }
+
       localStorage["file:" + file] = "";
       addFile(file).click();
     }
+  }
+
+  function createDirectory() {
+    var directory = prompt("Name of new directory:");
+
+    if (directory !== null && directory.length > 0) {
+      if (!validateName(directory, "directory")) {
+        directory = getName(directory, "directory");
+
+        if (!directory) {
+          return;
+        }
+      }
+
+      if (currentDirectory !== undefined) {
+        directory = currentDirectory.attr("dire-name") + "/" + directory;
+      }
+
+      localStorage["directory:" + directory] = "";
+      addDirectory(directory).click();
+    }
+  }
+
+  var noChange, slashIndex, dir;
+  var current = null;
+
+  tree.on("click", ".directory", function(e) {
+    e.stopPropagation();
+    current = $(this);
+    noChange = false;
+
+    if (currentDirectory !== undefined) {
+
+      if (currentDirectory.hasClass("directory")) {
+
+        if (currentDirectory.find("ul").css('display') === "none") {
+          slashIndex = current.attr("dire-name").lastIndexOf("/");
+
+          if (slashIndex !== -1) {
+            dir = current.attr("dire-name").substring(0, slashIndex);
+          } else {
+            dir = current.attr("dire-name");
+          }
+
+          if (currentDirectory.attr("dire-name") === dir) {
+            noChange = true;
+          }
+        }
+      }
+    } 
+
+    if (!noChange) {
+      if (lastSelect !== undefined) {
+        lastSelect.css({'font-weight': '', 'color': ''});
+      }
+
+      current.children().css({'font-weight': 'bold', 'color': '#FF0000'});
+      current.children().find("*").css({'color': '#000000'});
+      current.children().find(".file").css({'font-weight': 'normal'});
+
+      currentDirectory = current;
+    }
+
+    if (current.find("ul").css('display') === "none") {
+      current.children().children("ul").css({'display': 'block'});
+      current.children(".icon").removeClass("close");
+      current.children(".icon").addClass("open");
+        
+    } else if (current.find("ul").css('display') === "block") {
+      current.children().children("ul").css({'display': 'none'});
+      current.children(".icon").removeClass("open");
+      current.children(".icon").addClass("close");
+    }
+
+    lastSelect = current.find("*");
   });
 
-  tree.on("click", ".file", function () {
-    var name = $(this).find(".file-name").text();
+  tree.on("click", ".file", function (e) {
+    e.stopPropagation();
+    var name = $(this).attr("data-name");
     openFile(name);
   });
 
@@ -360,3 +579,6 @@ exports.setup = function (tree) {
     isChanged: isChanged
   };
 };
+
+
+

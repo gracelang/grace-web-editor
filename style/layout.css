@@ -203,7 +203,26 @@ a {
   cursor: default;
 }
 
-.file-name, .file-name-input {
+.directory .icon:before{
+  font-size: 8pt;
+  color: #808080;
+  overflow-x: hidden;
+  float: left;
+}
+
+.directory .close:before{
+  content:'\25B6';
+}
+
+.directory .open:before{
+  content:'\25BC';
+}
+
+.directory-name {
+  margin-left: 12px;
+}
+
+.file-name, .file-name-input, .directory-name {
   font-size: 10pt;
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
   white-space: nowrap;
@@ -213,14 +232,18 @@ a {
   font-weight: bold;
 }
 
-.file {
+#file-tree .file {
+  font-weight: normal;
+}
+
+.file, .directory {
   position: relative;
-  padding: 0px 5px;
+  padding: 0px 8px;
   margin: 5px 0px;
   cursor: pointer;
 }
 
-.file .file-name {
+.file .file-name, .directory .directory-name {
   overflow-x: hidden;
 }
 
@@ -424,4 +447,5 @@ a {
 #frame-dump, #minigrace-dump {
   display: none;
 }
+
 
