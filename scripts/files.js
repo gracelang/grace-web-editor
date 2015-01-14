@@ -259,6 +259,13 @@ exports.setup = function (tree) {
       parent.append(li);
     }
 
+    li.draggable({
+      revert: "invalid",
+      scroll: false,
+      helper: "clone",
+      appendTo: "body"
+    });
+
     return li;
   }
 
@@ -310,7 +317,186 @@ exports.setup = function (tree) {
       parent.append(li);
     }
 
+    li.draggable({
+      revert: "invalid",
+      scroll: false,
+      helper: "clone",
+      appendTo: "body"
+    });
+
+    li.droppable({
+      greedy: true,
+      scroll: false,
+      tolerance: "pointer",
+
+      drop: function(event, ui) {
+        if (ui.draggable.hasClass("file")) {
+
+          if (!dropFile(ui.draggable, li)) {
+            ui.draggable.draggable("option", "revert", true);
+          }
+
+        } else if (ui.draggable.hasClass("directory")) {
+
+          if (!dropDirectory(ui.draggable, li)) {
+            ui.draggable.draggable("option", "revert", true);
+          }
+        }
+      }
+    });
+
     return li;
+  }
+
+  function dropFile(draggedFile, droppedDire) {
+    var droppedName, dir, content, storeCurrentDirectory;
+    var draggedName = draggedFile.attr("data-name");
+    var name = draggedName;
+    var slashIndex = draggedName.lastIndexOf("/");
+
+    if (droppedDire !== tree) {
+      droppedName = droppedDire.attr("dire-name");
+
+      if (slashIndex !== -1) {
+        dir = draggedName.substring(0, slashIndex);
+        name = draggedName.substring(slashIndex + 1);
+      }
+
+      if (droppedName === dir) {
+        return false;
+      }
+
+    } else {
+
+      if (slashIndex !== -1) {
+        name = draggedName.substring(slashIndex + 1);
+      } else {
+        return false;
+      }
+
+      droppedDire = undefined;
+    }
+
+    storeCurrentDirectory = currentDirectory;
+    currentDirectory = droppedDire;
+
+    if (!validateName(name, "file")) {
+      name = getName(name, "file");
+
+      if (!name) {
+        return false;
+      }
+    }
+
+    if (droppedDire !== undefined) {
+      name = droppedName + "/" + name;
+    }
+
+    addFile(name);
+    currentDirectory = storeCurrentDirectory;
+
+    if (lastSelect.attr("data-name") === draggedName) {
+      lastSelect.css({'font-weight': '', 'color': ''});
+      tree.find('[data-name="' + name + '"]').css({'font-weight': 'bold', 'color': '#FF0000'});
+      lastSelect = tree.find('[data-name="' + name + '"]');
+    }
+
+    content = localStorage["file:" + draggedName];
+    delete localStorage["file:" + draggedName];
+    tree.find('[data-name="' + draggedName + '"]').remove();
+    localStorage["file:" + name] = content;
+
+    return true;
+  }
+
+
+  function dropDirectory(draggedDire, droppedDire) {
+    var droppedName, dir, newDire, display, content, storeCurrentDirectory;
+    var draggedName = draggedDire.attr("dire-name");
+    var name = draggedName;
+    var slashIndex = draggedName.lastIndexOf("/");
+
+    if (droppedDire !== tree) {
+      droppedName = droppedDire.attr("dire-name");
+
+      if (slashIndex !== -1) {
+        dir = draggedName.substring(0, slashIndex);
+        name = draggedName.substring(slashIndex + 1);
+      }
+
+      if (droppedName === dir) {
+        return false;
+      }
+
+    } else {
+
+      if (slashIndex !== -1) {
+        name = draggedName.substring(slashIndex + 1);
+      } else {
+        return false;
+      }
+
+      droppedDire = undefined;
+    }
+
+    storeCurrentDirectory = currentDirectory;
+    currentDirectory = droppedDire;
+
+    if (!validateName(name, "directory")) {
+        name = getName(name, "directory");
+
+        if (!name) {
+          return false;
+        }
+    }
+
+    if (droppedDire !== undefined) {
+      name = droppedName + "/" + name;
+    }
+
+    newDire = addDirectory(name);
+    currentDirectory = storeCurrentDirectory;
+
+    display = draggedDire.find("ul").css('display');
+    newDire.children().children("ul").css({'display': display});
+
+    if (newDire.find("ul").css('display') === "block") {
+      newDire.children(".icon").removeClass("close");
+      newDire.children(".icon").addClass("open");
+    }
+
+    modifyChildren(draggedDire, newDire);
+
+    if (currentDirectory !== undefined) {
+      if (currentDirectory.attr("dire-name") === draggedName) {
+        lastSelect.css({'font-weight': '', 'color': ''});
+        newDire.children().css({'font-weight': 'bold', 'color': '#FF0000'});
+        newDire.children().find("*").css({'color': '#000000'});
+        newDire.children().find(".file").css({'font-weight': 'normal'});
+
+        currentDirectory = newDire;
+        lastSelect = newDire.find("*");
+      }
+    }
+
+    content = localStorage["directory:" + draggedName];
+    delete localStorage["directory:" + draggedName];
+    tree.find('[dire-name="' + draggedName + '"]').remove();
+    localStorage["directory:" + name] = content;
+
+    return true;
+  }
+
+  function modifyChildren(draggedDire, newDire) {
+    draggedDire.children().children().children().each(function () {
+
+      if ($(this).hasClass("file")) {
+        dropFile($(this), newDire);
+
+      } else if ($(this).hasClass("directory")) {
+        dropDirectory($(this), newDire);
+      }
+    });
   }
 
   upload.click(function () {
@@ -521,6 +707,7 @@ exports.setup = function (tree) {
       current.children().find(".file").css({'font-weight': 'normal'});
 
       currentDirectory = current;
+      lastSelect = current.find("*");
     }
 
     if (current.find("ul").css('display') === "none") {
@@ -533,14 +720,40 @@ exports.setup = function (tree) {
       current.children(".icon").removeClass("open");
       current.children(".icon").addClass("close");
     }
-
-    lastSelect = current.find("*");
   });
 
   tree.on("click", ".file", function (e) {
     e.stopPropagation();
     var name = $(this).attr("data-name");
     openFile(name);
+  });
+
+  tree.on("click", function (e) {
+    if (lastSelect !== undefined) {
+        lastSelect.css({'font-weight': '', 'color': ''});
+    }
+
+    currentDirectory = undefined;
+  });
+
+  tree.droppable({
+    greedy: true,
+    scroll: false,
+
+    drop: function(event, ui) {
+      if (ui.draggable.hasClass("file")) {
+
+        if (!dropFile(ui.draggable, tree)) {
+          ui.draggable.draggable("option", "revert", true);
+        }
+
+      } else if (ui.draggable.hasClass("directory")) {
+
+        if (!dropDirectory(ui.draggable, tree)) {
+          ui.draggable.draggable("option", "revert", true);
+        }
+      }
+    }
   });
 
   for (name in localStorage) {
