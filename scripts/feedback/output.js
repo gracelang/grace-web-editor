@@ -54,4 +54,3 @@ exports.setup = function (output) {
     }
   };
 };
-

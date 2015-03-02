@@ -85,4 +85,3 @@ exports.setup = function (compilation, output, onBuild, onRun) {
     }
   };
 };
-

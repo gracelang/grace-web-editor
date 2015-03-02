@@ -236,4 +236,3 @@ exports.setup = function (files, view, fdbk) {
 
   return editor;
 };
-

@@ -792,6 +792,3 @@ exports.setup = function (tree) {
     isChanged: isChanged
   };
 };
-
-
-

@@ -107,4 +107,3 @@ this.onmessage = function (event) {
     delete window["gracecode_" + command.name];
   }
 };
-

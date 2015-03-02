@@ -70,4 +70,3 @@ exports.setup = function (editor, sidebar, resize) {
     store();
   }
 };
-

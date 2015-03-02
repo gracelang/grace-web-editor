@@ -168,4 +168,3 @@ worker.onmessage = function (event) {
     pump(result.name, "onFailure", result.reason);
   }
 };
-
