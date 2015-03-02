@@ -30,4 +30,4 @@ build
 .settings
 scripts/setup.js
 scripts/jquery-*.min.js
-scripts/minigrace.min.js
+scripts/minigrace.js

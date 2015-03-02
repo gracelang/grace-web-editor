@@ -43,10 +43,14 @@ exports.setup = function (output) {
         return;
       }
 
-      location = '    in "' + error.module + '"';
+      if (error.stack !== undefined) {
+        location = error.stack;
+      } else {
+        location = '    in "' + error.module + '"';
 
-      if (error.line !== null) {
-        location += ' (line ' + error.line + ", column " + error.column + ")";
+        if (error.line !== null) {
+          location += ' (line ' + error.line + ", column " + error.column + ")";
+        }
       }
 
       output.append(newError(error.message)

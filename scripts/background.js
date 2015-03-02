@@ -5,8 +5,7 @@ var document, sources, window;
 window = this;
 document = {};
 
-this.importScripts("minigrace.min.js");
-this.importScripts("objectdrawdeux.js");
+this.importScripts("minigrace.js");
 
 sources = {};
 

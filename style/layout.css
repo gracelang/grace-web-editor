@@ -447,3 +447,15 @@ a {
 #frame-dump, #minigrace-dump {
   display: none;
 }
+
+#version {
+  text-align: center;
+  overflow-x: hidden;
+  margin: 0px 5px;
+}
+
+.height-calculator {
+  position: absolute;
+  top: -1000000px;
+  left: -1000000px;
+}
