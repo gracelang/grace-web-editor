@@ -3,7 +3,7 @@
 
 "use strict";
 
-var compiler, feedback, intervals, path, timers, windows;
+var audio, compiler, feedback, intervals, path, timers, windows;
 
 path = require("path");
 
@@ -15,6 +15,7 @@ feedback = require("./feedback");
 windows = [];
 timers = [];
 intervals = [];
+audio = [];
 
 exports.setup = function (files, view, fdbk) {
   var drop, download, editor, fileName, opening, rename, session;
@@ -32,12 +33,16 @@ exports.setup = function (files, view, fdbk) {
       clearInterval(ter);
     });
 
+    audio.forEach(function (aud) {
+      aud.pause();
+    });
+
     feedback.compilation.stop();
   }
 
   function checkStop() {
     if (windows.length === 0 &&
-        timers.length === 0 && intervals.length === 0) {
+        timers.length === 0 && intervals.length === 0 && audio.length === 0) {
       stop();
       return true;
     }
@@ -61,6 +66,10 @@ exports.setup = function (files, view, fdbk) {
 
   global.graceRegisterInterval = function (interval) {
     timers.push(interval);
+  };
+
+  global.graceRegisterAudio = function (element) {
+    audio.push(element);
   };
 
   download = view.find(".download");
