@@ -1,7 +1,5 @@
 // The logging and runtime error reporting system.
 
-/*globals $*/
-
 "use strict";
 
 exports.setup = function (output) {
@@ -26,16 +24,16 @@ exports.setup = function (output) {
   }
 
   return {
-    write: function (content) {
+    "write": function (content) {
       output.append(newChunk(content));
       scroll();
     },
 
-    clear: function () {
+    "clear": function () {
       output.children().remove();
     },
 
-    error: function (error) {
+    "error": function (error) {
       var location;
 
       if (typeof error === "string") {
@@ -49,7 +47,7 @@ exports.setup = function (output) {
         location = '    in "' + error.module + '"';
 
         if (error.line !== null) {
-          location += ' (line ' + error.line + ", column " + error.column + ")";
+          location += " (line " + error.line + ", column " + error.column + ")";
         }
       }
 

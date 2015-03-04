@@ -1,6 +1,3 @@
-/*jslint browser: true*/
-/*globals $, Blob, URL, ace, confirm, minigrace*/
-
 "use strict";
 
 var audio, compiler, feedback, intervals, path, timers, windows;
@@ -18,7 +15,7 @@ intervals = [];
 audio = [];
 
 exports.setup = function (files, view, fdbk) {
-  var drop, download, editor, fileName, opening, rename, session;
+  var download, drop, editor, fileName, opening, rename, session;
 
   function stop() {
     windows.forEach(function (win) {
@@ -79,8 +76,8 @@ exports.setup = function (files, view, fdbk) {
   rename = view.find(".file-name-input");
 
   function setDownload(name, text) {
-    download.attr("href", URL.createObjectURL(new Blob([text], {
-      type: "text/x-grace"
+    download.attr("href", URL.createObjectURL(new Blob([ text ], {
+      "type": "text/x-grace"
     }))).attr("download", name);
   }
 
@@ -92,11 +89,6 @@ exports.setup = function (files, view, fdbk) {
   session.setUseSoftTabs(true);
   session.setTabSize(2);
   session.setMode("ace/mode/grace");
-
-  //function gotoLine(line, column) {
-    //editor.gotoLine(line, column - 1, true);
-    //editor.focus();
-  //}
 
   session.on("change", function () {
     var name, value;
@@ -133,12 +125,12 @@ exports.setup = function (files, view, fdbk) {
         feedback.error(reason);
 
         if (reason.module === name && reason.line) {
-          session.setAnnotations([{
-            row: reason.line - 1,
-            column: reason.column && reason.column - 1,
-            type: "error",
-            text: reason.message
-          }]);
+          session.setAnnotations([ {
+            "row": reason.line - 1,
+            "column": reason.column && reason.column - 1,
+            "type": "error",
+            "text": reason.message
+          } ]);
         }
       } else {
         feedback.compilation.ready();
@@ -186,8 +178,8 @@ exports.setup = function (files, view, fdbk) {
 
     if (slashIndex !== -1) {
       name = name.substring(slashIndex + 1);
-    } 
-    
+    }
+
     fileName.text(name);
     setDownload(name, content);
 

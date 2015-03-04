@@ -1,6 +1,3 @@
-/*jslint browser: true*/
-/*globals $, confirm*/
-
 "use strict";
 
 $(function () {

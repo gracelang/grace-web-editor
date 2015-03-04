@@ -1,6 +1,3 @@
-/*jslint browser: true*/
-/*globals $, Blob, FileReader, URL, alert, atob, btoa, confirm, prompt*/
-
 "use strict";
 
 var path = require("path");
@@ -8,13 +5,44 @@ var path = require("path");
 require("setimmediate");
 
 exports.setup = function (tree) {
-  var input, onOpenCallbacks, name, newFile, upload, currentDirectory, lastSelect;
-  
+  var current, currentDirectory, dropDirectory, input,
+      lastSelect, newFile, onOpenCallbacks, upload;
+
+  current = null;
+
   input = $("#upload-input");
   upload = $("#upload");
   newFile = $("#new-file");
 
   onOpenCallbacks = [];
+
+  function isText(name) {
+    var ext = path.extname(name);
+
+    return ext === "" ||
+    ext === ".grace" || ext === ".txt" || ext === ".json" ||
+    ext === ".xml" || ext === ".js" || ext === ".html" || ext === ".xhtml";
+  }
+
+  function isImage(name) {
+    var ext = path.extname(name);
+
+    return ext === ".jpg" || ext === ".jpeg" ||
+           ext === ".bmp" || ext === ".gif" || ext === ".png";
+  }
+
+  function isAudio(name) {
+    var ext = path.extname(name);
+
+    return ext === ".mp3" || ext === ".ogg" || ext === ".wav";
+  }
+
+  function mediaType(name) {
+    var ext = path.extname(name);
+
+    return ext === ".mp3" ? "audio/mpeg" :
+           ext === ".ogg" ? "audio/ogg" : ext === ".wav" ? "audio/wav" : "";
+  }
 
   function validateName(givenName, category) {
     if (givenName[0] === ".") {
@@ -40,40 +68,40 @@ exports.setup = function (tree) {
   }
 
   function getName(lastName, category) {
-    var name = prompt("Name of " + category + ":");
+    var catName = prompt("Name of " + category + ":");
 
-    if (name !== null && name.length > 0) {
-      if (path.extname(name) === "") {
-        name += path.extname(lastName);
+    if (catName !== null && catName.length > 0) {
+      if (path.extname(catName) === "") {
+        catName += path.extname(lastName);
       }
 
-      if (!validateName(name, category)) {
-        return getName(name, category);
+      if (!validateName(catName, category)) {
+        return getName(catName, category);
       }
 
-      return name;
+      return catName;
     }
 
     return false;
   }
 
-  function contents(name) {
-    if (!localStorage.hasOwnProperty("file:" + name)) {
-      throw new Error("No such file " + name);
+  function contents(fileName) {
+    if (!localStorage.hasOwnProperty("file:" + fileName)) {
+      throw new Error("No such file " + fileName);
     }
 
-    return localStorage["file:" + name];
+    return localStorage["file:" + fileName];
   }
 
   function onOpen(callback) {
     onOpenCallbacks.push(callback);
   }
 
-  function openFile(name) {
-    var content, slashIndex, dir, noChange;
+  function openFile(fileName) {
+    var audioTag, content, directory, imageTag, noChange, slashIndex;
 
-    if (!localStorage.hasOwnProperty("file:" + name)) {
-      throw new Error("Open of unknown file " + name);
+    if (!localStorage.hasOwnProperty("file:" + fileName)) {
+      throw new Error("Open of unknown file " + fileName);
     }
 
     noChange = false;
@@ -82,72 +110,75 @@ exports.setup = function (tree) {
 
       if (currentDirectory.hasClass("directory")) {
 
-        if (currentDirectory.find("ul").css('display') === "none") {
-          slashIndex = name.lastIndexOf("/");
+        if (currentDirectory.find("ul").css("display") === "none") {
+          slashIndex = fileName.lastIndexOf("/");
 
           if (slashIndex !== -1) {
-            dir = name.substring(0, slashIndex);
-          } 
+            directory = fileName.substring(0, slashIndex);
+          }
 
-          if (currentDirectory.attr("dire-name") === dir) {
+          if (currentDirectory.attr("dire-name") === directory) {
             noChange = true;
           }
         }
       }
-    } 
+    }
 
     if (!noChange) {
-
       if (lastSelect !== undefined) {
-        lastSelect.css({'font-weight': '', 'color': ''});
+        lastSelect.css({ "font-weight": "", "color": "" });
       }
 
-      tree.find('[data-name="' + name + '"]').css({'font-weight': 'bold', 'color': '#FF0000'});
-      lastSelect = tree.find('[data-name="' + name + '"]');
+      tree.find('[data-name="' + fileName + '"]').css({
+        "font-weight": "bold",
+        "color": "#FF0000"
+      });
+
+      lastSelect = tree.find('[data-name="' + fileName + '"]');
     }
-    
-    slashIndex = name.lastIndexOf("/");
+
+    slashIndex = fileName.lastIndexOf("/");
 
     if (slashIndex !== -1) {
-      dir = name.substring(0, slashIndex);
-      currentDirectory = tree.find('[dire-name="' + dir + '"]');
+      directory = fileName.substring(0, slashIndex);
+      currentDirectory = tree.find('[dire-name="' + directory + '"]');
     } else {
       currentDirectory = undefined;
     }
-    
-    localStorage.currentFile = name;
-    content = localStorage["file:" + name];
 
-    if (isText(name)) {
+    localStorage.currentFile = fileName;
+    content = localStorage["file:" + fileName];
+
+    if (isText(fileName)) {
       $("#image-view").addClass("hidden");
       $("#audio-view").addClass("hidden");
 
-      var audioTag = document.querySelector('audio');
+      audioTag = document.querySelector("audio");
       audioTag.src = "";
       audioTag.type = "";
 
       onOpenCallbacks.forEach(function (callback) {
-        callback(name, content);
+        callback(fileName, content);
       });
-    } else if (isImage(name)) {
+    } else if (isImage(fileName)) {
       $("#grace-view").addClass("hidden");
       $("#audio-view").addClass("hidden");
       $("#image-view").removeClass("hidden");
 
-      var audioTag = document.querySelector('audio');
+      audioTag = document.querySelector("audio");
       audioTag.src = "";
       audioTag.type = "";
 
-      var imageTag = document.querySelector('img');
+      imageTag = document.querySelector("img");
       imageTag.src = content;
-    } else if (isAudio(name)) {
+    } else if (isAudio(fileName)) {
       $("#grace-view").addClass("hidden");
       $("#image-view").addClass("hidden");
       $("#audio-view").removeClass("hidden");
 
-      var audioTag = document.querySelector('audio');
+      audioTag = document.querySelector("audio");
       audioTag.src = content;
-      audioTag.type = mediaType(name);
+      audioTag.type = mediaType(fileName);
     }
   }
 
@@ -160,8 +191,7 @@ exports.setup = function (tree) {
   }
 
   function rename(to) {
-    var content, file;
-    var newDataName = to;
+    var content, file, newDataName = to;
 
     file = localStorage.currentFile;
 
@@ -230,7 +260,7 @@ exports.setup = function (tree) {
 
     if (slashIndex !== -1) {
       name = name.substring(slashIndex + 1);
-    } 
+    }
 
     div.text(name);
     li.append(div);
@@ -246,7 +276,7 @@ exports.setup = function (tree) {
     } else {
       parent = currentDirectory.children().children();
     }
-    
+
     parent.children().each(function () {
       if ($(this).text() > name && $(this).hasClass("file")) {
         $(this).before(li);
@@ -254,105 +284,28 @@ exports.setup = function (tree) {
         return false;
       }
     });
-  
+
     if (!inserted) {
       parent.append(li);
     }
 
     li.draggable({
-      revert: "invalid",
-      scroll: false,
-      helper: "clone",
-      appendTo: "body"
-    });
-
-    return li;
-  }
-
-  function addDirectory(name) {
-    var div, inserted, li, ul, parent, slashIndex;
-
-    li = $("<li>");
-    li.addClass("directory");
-    li.attr("dire-name", name);
-
-    div = $("<div>");
-    div.addClass("icon");
-    div.addClass("close");
-    li.append(div);
-
-    div = $("<div>");
-    div.addClass("directory-name");
-
-    slashIndex = name.lastIndexOf("/");
-
-    if (slashIndex !== -1) {
-      name = name.substring(slashIndex + 1);
-    } 
-
-    div.text(name);
-    ul = $("<ul>");
-    ul.css({'display': 'block'});
-
-    div.append(ul);
-    li.append(div);
-
-    if (currentDirectory === undefined) {
-      parent = tree;
-    } else {
-      parent = currentDirectory.children().children();
-    }
-
-    inserted = false;
-
-    parent.children().each(function () {
-      if ($(this).text() > name || $(this).hasClass("file")) {
-        $(this).before(li);
-        inserted = true;
-        return false;
-      }
-    });
-  
-    if (!inserted) {
-      parent.append(li);
-    }
-
-    li.draggable({
-      revert: "invalid",
-      scroll: false,
-      helper: "clone",
-      appendTo: "body"
-    });
-
-    li.droppable({
-      greedy: true,
-      scroll: false,
-      tolerance: "pointer",
-
-      drop: function(event, ui) {
-        if (ui.draggable.hasClass("file")) {
-
-          if (!dropFile(ui.draggable, li)) {
-            ui.draggable.draggable("option", "revert", true);
-          }
-
-        } else if (ui.draggable.hasClass("directory")) {
-
-          if (!dropDirectory(ui.draggable, li)) {
-            ui.draggable.draggable("option", "revert", true);
-          }
-        }
-      }
+      "revert": "invalid",
+      "scroll": false,
+      "helper": "clone",
+      "appendTo": "body"
     });
 
     return li;
   }
 
   function dropFile(draggedFile, droppedDire) {
-    var droppedName, dir, content, storeCurrentDirectory;
-    var draggedName = draggedFile.attr("data-name");
-    var name = draggedName;
-    var slashIndex = draggedName.lastIndexOf("/");
+    var content, dir, draggedName, droppedName,
+        name, slashIndex, storeCurrentDirectory;
+
+    draggedName = draggedFile.attr("data-name");
+    name = draggedName;
+    slashIndex = draggedName.lastIndexOf("/");
 
     if (droppedDire !== tree) {
       droppedName = droppedDire.attr("dire-name");
@@ -365,15 +318,12 @@ exports.setup = function (tree) {
       if (droppedName === dir) {
         return false;
       }
-
     } else {
-
-      if (slashIndex !== -1) {
-        name = draggedName.substring(slashIndex + 1);
-      } else {
+      if (slashIndex === -1) {
         return false;
       }
 
+      name = draggedName.substring(slashIndex + 1);
       droppedDire = undefined;
     }
 
@@ -396,8 +346,12 @@ exports.setup = function (tree) {
     currentDirectory = storeCurrentDirectory;
 
     if (lastSelect.attr("data-name") === draggedName) {
-      lastSelect.css({'font-weight': '', 'color': ''});
-      tree.find('[data-name="' + name + '"]').css({'font-weight': 'bold', 'color': '#FF0000'});
+      lastSelect.css({ "font-weight": "", "color": "" });
+      tree.find('[data-name="' + name + '"]').css({
+        "font-weight": "bold",
+        "color": "#FF0000"
+      });
+
       lastSelect = tree.find('[data-name="' + name + '"]');
     }
 
@@ -410,11 +364,101 @@ exports.setup = function (tree) {
   }
 
 
-  function dropDirectory(draggedDire, droppedDire) {
-    var droppedName, dir, newDire, display, content, storeCurrentDirectory;
-    var draggedName = draggedDire.attr("dire-name");
-    var name = draggedName;
-    var slashIndex = draggedName.lastIndexOf("/");
+  function addDirectory(name) {
+    var div, inserted, li, parent, slashIndex, ul;
+
+    li = $("<li>");
+    li.addClass("directory");
+    li.attr("dire-name", name);
+
+    div = $("<div>");
+    div.addClass("icon");
+    div.addClass("close");
+    li.append(div);
+
+    div = $("<div>");
+    div.addClass("directory-name");
+
+    slashIndex = name.lastIndexOf("/");
+
+    if (slashIndex !== -1) {
+      name = name.substring(slashIndex + 1);
+    }
+
+    div.text(name);
+    ul = $("<ul>");
+    ul.css({ "display": "block" });
+
+    div.append(ul);
+    li.append(div);
+
+    if (currentDirectory === undefined) {
+      parent = tree;
+    } else {
+      parent = currentDirectory.children().children();
+    }
+
+    inserted = false;
+
+    parent.children().each(function () {
+      if ($(this).text() > name || $(this).hasClass("file")) {
+        $(this).before(li);
+        inserted = true;
+        return false;
+      }
+    });
+
+    if (!inserted) {
+      parent.append(li);
+    }
+
+    li.draggable({
+      "revert": "invalid",
+      "scroll": false,
+      "helper": "clone",
+      "appendTo": "body"
+    });
+
+    li.droppable({
+      "greedy": true,
+      "scroll": false,
+      "tolerance": "pointer",
+
+      "drop": function (event, ui) {
+        if (ui.draggable.hasClass("file")) {
+          if (!dropFile(ui.draggable, li)) {
+            ui.draggable.draggable("option", "revert", true);
+          }
+        } else if (ui.draggable.hasClass("directory") &&
+                   !dropDirectory(ui.draggable, li)) {
+          ui.draggable.draggable("option", "revert", true);
+        }
+      }
+    });
+
+    return li;
+  }
+
+  function modifyChildren(draggedDire, newDire) {
+    draggedDire.children().children().children().each(function () {
+
+      if ($(this).hasClass("file")) {
+        dropFile($(this), newDire);
+
+      } else if ($(this).hasClass("directory")) {
+        dropDirectory($(this), newDire);
+      }
+    });
+  }
+
+  // Assigned, rather than declared, to make clear the circular use above.
+  dropDirectory = function (draggedDire, droppedDire) {
+    var content, dir, display, draggedName, droppedName,
+        name, newDire, slashIndex, storeCurrentDirectory;
+
+    draggedName = draggedDire.attr("dire-name");
+    name = draggedName;
+    slashIndex = draggedName.lastIndexOf("/");
 
     if (droppedDire !== tree) {
       droppedName = droppedDire.attr("dire-name");
@@ -443,11 +487,11 @@ exports.setup = function (tree) {
     currentDirectory = droppedDire;
 
     if (!validateName(name, "directory")) {
-        name = getName(name, "directory");
+      name = getName(name, "directory");
 
-        if (!name) {
-          return false;
-        }
+      if (!name) {
+        return false;
+      }
     }
 
     if (droppedDire !== undefined) {
@@ -457,10 +501,10 @@ exports.setup = function (tree) {
     newDire = addDirectory(name);
     currentDirectory = storeCurrentDirectory;
 
-    display = draggedDire.find("ul").css('display');
-    newDire.children().children("ul").css({'display': display});
+    display = draggedDire.find("ul").css("display");
+    newDire.children().children("ul").css({ "display": display });
 
-    if (newDire.find("ul").css('display') === "block") {
+    if (newDire.find("ul").css("display") === "block") {
       newDire.children(".icon").removeClass("close");
       newDire.children(".icon").addClass("open");
     }
@@ -469,10 +513,10 @@ exports.setup = function (tree) {
 
     if (currentDirectory !== undefined) {
       if (currentDirectory.attr("dire-name") === draggedName) {
-        lastSelect.css({'font-weight': '', 'color': ''});
-        newDire.children().css({'font-weight': 'bold', 'color': '#FF0000'});
-        newDire.children().find("*").css({'color': '#000000'});
-        newDire.children().find(".file").css({'font-weight': 'normal'});
+        lastSelect.css({ "font-weight": "", "color": "" });
+        newDire.children().css({ "font-weight": "bold", "color": "#FF0000" });
+        newDire.children().find("*").css({ "color": "#000000" });
+        newDire.children().find(".file").css({ "font-weight": "normal" });
 
         currentDirectory = newDire;
         lastSelect = newDire.find("*");
@@ -485,80 +529,28 @@ exports.setup = function (tree) {
     localStorage["directory:" + name] = content;
 
     return true;
-  }
-
-  function modifyChildren(draggedDire, newDire) {
-    draggedDire.children().children().children().each(function () {
-
-      if ($(this).hasClass("file")) {
-        dropFile($(this), newDire);
-
-      } else if ($(this).hasClass("directory")) {
-        dropDirectory($(this), newDire);
-      }
-    });
-  }
+  };
 
   upload.click(function () {
     input.click();
   });
 
-  function isText(name) {
-    var ext = path.extname(name);
-
-    return ext === "" ||
-    ext === ".grace" || ext === ".txt" || ext === ".json" ||
-    ext === ".xml" || ext === ".js" || ext === ".html" || ext === ".xhtml";
-  }
-
-  function isImage(name) {
-    var ext = path.extname(name);
-
-    return ext === ".jpg" || ext === ".jpeg" || ext === ".bmp" || ext === ".gif" || ext === ".png";
-  }
-
-  function isAudio(name) {
-    var ext = path.extname(name);
-
-    return ext === ".mp3" || ext === ".ogg" || ext === ".wav";
-  }
-
-  function mediaType(name) {
-    var ext = path.extname(name);
-    var type = "";
-
-    switch (ext) {
-      case ".mp3":
-        type = "audio/mpeg";
-        break;
-      case ".ogg":
-        type = "audio/ogg";
-        break;
-      case ".wav":
-        type = "audio/wav";
-        break;
-    }
-
-    return type;
-  }
-
   input.change(function () {
-    var i, l, file, fileName, fileNameList, lastValid;
+    var file, fileName, fileNameList, i, l, lastValid;
 
-    function readFileList(currentFileName, currentFile){
+    function readFileList(currentFileName, currentFile) {
       var reader = new FileReader();
 
       reader.onload = function (event) {
         var result = event.target.result;
-        
+
         try {
           localStorage["file:" + currentFileName] = result;
-        }
-        catch (err) {
+        } catch (err) {
           console.error(err.message);
           return;
         }
-        
+
         addFile(currentFileName);
 
 
@@ -569,7 +561,7 @@ exports.setup = function (tree) {
 
       if (isText(currentFileName)) {
         reader.readAsText(currentFile);
-      } else if (isImage(currentFileName) || isAudio(currentFileName)){
+      } else if (isImage(currentFileName) || isAudio(currentFileName)) {
         reader.readAsDataURL(currentFile);
       }
     }
@@ -580,17 +572,17 @@ exports.setup = function (tree) {
       file = this.files[i];
       fileName = file.name;
 
-        if (!validateName(fileName, "file")) {
-          if (!confirm("Rename the file on upload?")) {
-            continue;
-          }
-
-          fileName = getName(fileName, "file");
-
-          if (!fileName) {
-            continue;
-          }
+      if (!validateName(fileName, "file")) {
+        if (!confirm("Rename the file on upload?")) {
+          continue;
         }
+
+        fileName = getName(fileName, "file");
+
+        if (!fileName) {
+          continue;
+        }
+      }
 
       if (currentDirectory !== undefined) {
         fileName = currentDirectory.attr("dire-name") + "/" + fileName;
@@ -603,22 +595,6 @@ exports.setup = function (tree) {
       if (fileNameList[i] !== undefined) {
         readFileList(fileNameList[i], this.files[i]);
         lastValid = fileNameList[i];
-      }
-    }
-  });
-
-  newFile.click(function () {
-    var creation = prompt("New file or New directory?", "directory");
-
-    if (creation !== null && creation.length > 0) {
-      if (creation === "file") {
-        createFile();
-      } else if (creation === "directory") {
-        createDirectory();
-      } else {
-        if (confirm("Only file and directory acceptable") === true){
-          newFile.click();
-        }
       }
     }
   });
@@ -669,10 +645,23 @@ exports.setup = function (tree) {
     }
   }
 
-  var noChange, slashIndex, dir;
-  var current = null;
+  newFile.click(function () {
+    var creation = prompt("New file or New directory?", "directory");
 
-  tree.on("click", ".directory", function(e) {
+    if (creation !== null && creation.length > 0) {
+      if (creation === "file") {
+        createFile();
+      } else if (creation === "directory") {
+        createDirectory();
+      } else if (confirm("Only file and directory acceptable") === true) {
+        newFile.click();
+      }
+    }
+  });
+
+  tree.on("click", ".directory", function (e) {
+    var dir, noChange, slashIndex;
+
     e.stopPropagation();
     current = $(this);
     noChange = false;
@@ -681,7 +670,7 @@ exports.setup = function (tree) {
 
       if (currentDirectory.hasClass("directory")) {
 
-        if (currentDirectory.find("ul").css('display') === "none") {
+        if (currentDirectory.find("ul").css("display") === "none") {
           slashIndex = current.attr("dire-name").lastIndexOf("/");
 
           if (slashIndex !== -1) {
@@ -695,28 +684,28 @@ exports.setup = function (tree) {
           }
         }
       }
-    } 
+    }
 
     if (!noChange) {
       if (lastSelect !== undefined) {
-        lastSelect.css({'font-weight': '', 'color': ''});
+        lastSelect.css({ "font-weight": "", "color": "" });
       }
 
-      current.children().css({'font-weight': 'bold', 'color': '#FF0000'});
-      current.children().find("*").css({'color': '#000000'});
-      current.children().find(".file").css({'font-weight': 'normal'});
+      current.children().css({ "font-weight": "bold", "color": "#FF0000" });
+      current.children().find("*").css({ "color": "#000000" });
+      current.children().find(".file").css({ "font-weight": "normal" });
 
       currentDirectory = current;
       lastSelect = current.find("*");
     }
 
-    if (current.find("ul").css('display') === "none") {
-      current.children().children("ul").css({'display': 'block'});
+    if (current.find("ul").css("display") === "none") {
+      current.children().children("ul").css({ "display": "block" });
       current.children(".icon").removeClass("close");
       current.children(".icon").addClass("open");
-        
-    } else if (current.find("ul").css('display') === "block") {
-      current.children().children("ul").css({'display': 'none'});
+
+    } else if (current.find("ul").css("display") === "block") {
+      current.children().children("ul").css({ "display": "none" });
       current.children(".icon").removeClass("open");
       current.children(".icon").addClass("close");
     }
@@ -724,23 +713,22 @@ exports.setup = function (tree) {
 
   tree.on("click", ".file", function (e) {
     e.stopPropagation();
-    var name = $(this).attr("data-name");
-    openFile(name);
+    openFile($(this).attr("data-name"));
   });
 
-  tree.on("click", function (e) {
+  tree.on("click", function () {
     if (lastSelect !== undefined) {
-        lastSelect.css({'font-weight': '', 'color': ''});
+      lastSelect.css({ "font-weight": "", "color": "" });
     }
 
     currentDirectory = undefined;
   });
 
   tree.droppable({
-    greedy: true,
-    scroll: false,
+    "greedy": true,
+    "scroll": false,
 
-    drop: function(event, ui) {
+    "drop": function (event, ui) {
       if (ui.draggable.hasClass("file")) {
 
         if (!dropFile(ui.draggable, tree)) {
@@ -756,12 +744,16 @@ exports.setup = function (tree) {
     }
   });
 
-  for (name in localStorage) {
-    if (localStorage.hasOwnProperty(name) &&
-        name.substring(0, 5) === "file:") {
-      addFile(name.substring(5));
+  (function () {
+    var name;
+
+    for (name in localStorage) {
+      if (localStorage.hasOwnProperty(name) &&
+          name.substring(0, 5) === "file:") {
+        addFile(name.substring(5));
+      }
     }
-  }
+  }());
 
   if (localStorage.hasOwnProperty("currentFile")) {
     setImmediate(function () {
@@ -780,15 +772,15 @@ exports.setup = function (tree) {
       data = atob(data);
     }
 
-    return URL.createObjectURL(new Blob([data]));
+    return URL.createObjectURL(new Blob([ data ]));
   };
 
   return {
-    contents: contents,
-    save: save,
-    rename: rename,
-    remove: remove,
-    onOpen: onOpen,
-    isChanged: isChanged
+    "contents": contents,
+    "save": save,
+    "rename": rename,
+    "remove": remove,
+    "onOpen": onOpen,
+    "isChanged": isChanged
   };
 };

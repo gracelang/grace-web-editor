@@ -1,4 +1,4 @@
-/*globals Worker, localStorage, minigrace, var_done*/
+"use strict";
 
 var path, queue, worker;
 
@@ -36,8 +36,8 @@ exports.forget = function (name) {
   delete global["gracecode_" + name];
 
   worker.postMessage({
-    action: "forget",
-    name: name
+    "action": "forget",
+    "name": name
   });
 };
 
@@ -45,19 +45,18 @@ function compile(name, source, callback) {
   var callbacks = queue[name] || [];
 
   callbacks.push({
-    onSuccess: function (output) {
+    "onSuccess": function (output) {
       var escaped = "gracecode_" + name.replace("/", "$");
 
       try {
-        /*jslint evil: true*/
-        eval("var myframe;" + output + ";window." + escaped + "=" + escaped);
-        /*jslint evil: false*/
+        global["eval"]("var myframe;" + output +
+                       ";window." + escaped + "=" + escaped);
       } catch (error) {
         callback({
-          line: 1,
-          column: 1,
-          type: "error",
-          text: error.message || error
+          "line": 1,
+          "column": 1,
+          "type": "error",
+          "text": error.message || error
         });
         return;
       }
@@ -65,14 +64,14 @@ function compile(name, source, callback) {
       callback(null, output);
     },
 
-    onFailure: callback
+    "onFailure": callback
   });
 
   if (!queue.hasOwnProperty(name)) {
     worker.postMessage({
-      action: "compile",
-      name: name,
-      source: source
+      "action": "compile",
+      "name": name,
+      "source": source
     });
 
     queue[name] = callbacks;
@@ -116,7 +115,7 @@ worker.onmessage = function (event) {
         if (!isCompiled(match[1])) {
           if (!localStorage.hasOwnProperty("file:" + match[1] + ".grace")) {
             pump(result.name, "onFailure", {
-              message: 'Cannot find module "' + match[1] + '"'
+              "message": 'Cannot find module "' + match[1] + '"'
             });
 
             return;
@@ -143,8 +142,8 @@ worker.onmessage = function (event) {
   } else if (result.dependency) {
     if (queue[result.dependency]) {
       worker.postMessage({
-        action: "compile",
-        name: result.name,
+        "action": "compile",
+        "name": result.name
       });
     } else if (localStorage.hasOwnProperty("file:" +
         result.dependency + ".grace")) {
@@ -154,14 +153,14 @@ worker.onmessage = function (event) {
             pump(result.name, "onFailure", error);
           } else {
             worker.postMessage({
-              action: "compile",
-              name: result.name,
+              "action": "compile",
+              "name": result.name
             });
           }
         });
     } else {
       pump(result.name, "onFailure", {
-        message: 'Cannot find module "' + result.dependency + '"'
+        "message": 'Cannot find module "' + result.dependency + '"'
       });
     }
   } else {

@@ -1,7 +1,5 @@
 // Handles the feedback for the compilation reporting.
 
-/*globals $*/
-
 "use strict";
 
 exports.setup = function (compilation, output, onBuild, onRun) {
@@ -65,22 +63,22 @@ exports.setup = function (compilation, output, onBuild, onRun) {
   });
 
   return {
-    waiting: reset,
+    "waiting": reset,
 
-    error: reset,
+    "error": reset,
 
-    building: building,
+    "building": building,
 
-    running: function () {
+    "running": function () {
       header.addClass("running");
     },
 
-    ready: function () {
+    "ready": function () {
       reset();
       header.addClass("ready");
     },
 
-    stop: function () {
+    "stop": function () {
       stop.click();
     }
   };

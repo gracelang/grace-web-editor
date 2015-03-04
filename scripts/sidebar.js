@@ -1,6 +1,3 @@
-/*jslint browser: true*/
-/*globals $, localStorage, setImmediate*/
-
 "use strict";
 
 require("setimmediate");

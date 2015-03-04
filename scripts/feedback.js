@@ -1,7 +1,5 @@
 // Sets up the various parts of the feedback system.
 
-/*globals $*/
-
 "use strict";
 
 var compilation, output;
@@ -25,15 +23,15 @@ exports.setup = function (feedback, onBuild, onRun) {
   });
 
   return {
-    compilation: comp,
-    output: op,
+    "compilation": comp,
+    "output": op,
 
-    running: function () {
+    "running": function () {
       op.clear();
       comp.running();
     },
 
-    error: function (reason, gotoLine) {
+    "error": function (reason, gotoLine) {
       comp.waiting();
       op.error(reason, gotoLine);
     }
