@@ -2,6 +2,8 @@
 
 "use strict";
 
+var $ = require("jquery");
+
 exports.setup = function (output) {
   function scroll() {
     output.scrollTop(0).scrollTop(output.children().last().position().top);

@@ -6,7 +6,10 @@
   , "editor"
   ]
 , "dependencies":
-  { "setimmediate": "1.x"
+  { "brace": "0.5.x"
+  , "jquery": "2.1.x"
+  , "jquery-ui": "1.10.x"
+  , "setimmediate": "1.x"
   }
 , "devDependencies":
   { "browserify": "9.x"

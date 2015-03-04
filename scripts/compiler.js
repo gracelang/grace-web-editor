@@ -1,7 +1,8 @@
 "use strict";
 
-var path, queue, worker;
+var $, path, queue, worker;
 
+$ = require("jquery");
 path = require("path");
 
 queue = {};

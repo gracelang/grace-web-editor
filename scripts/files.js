@@ -1,7 +1,11 @@
 "use strict";
 
-var path = require("path");
+var $, path;
 
+$ = require("jquery");
+path = require("path");
+
+require("jquery-ui");
 require("setimmediate");
 
 exports.setup = function (tree) {

@@ -1,5 +1,7 @@
 "use strict";
 
+var $ = require("jquery");
+
 require("setimmediate");
 
 exports.setup = function (editor, sidebar, resize) {

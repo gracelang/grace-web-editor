@@ -3,9 +3,7 @@
   , "browser": true
   }
 , "globals":
-  { "$": false
-  , "ace": false
-  , "MiniGrace": false
+  { "MiniGrace": false
   , "minigrace": false
   }
 , "rules":

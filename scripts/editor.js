@@ -1,13 +1,17 @@
 "use strict";
 
-var audio, compiler, feedback, intervals, path, timers, windows;
+var ace, audio, compiler, feedback, intervals, path, timers, windows;
 
+ace = require("brace");
 path = require("path");
 
+require("brace/ext/searchbox");
 require("setimmediate");
 
 compiler = require("./compiler");
 feedback = require("./feedback");
+
+require("./ace/mode-grace");
 
 windows = [];
 timers = [];

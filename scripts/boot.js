@@ -1,5 +1,7 @@
 "use strict";
 
+var $ = require("jquery");
+
 $(function () {
   var editor, files;
 

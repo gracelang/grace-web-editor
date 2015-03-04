@@ -1,10 +1,10 @@
-ace.define('ace/mode/grace', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/javascript', 'ace/tokenizer', 'ace/mode/grace_highlight_rules'], function(require, exports, module) {
+ace.define('ace/mode/grace', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/javascript', 'ace/tokenizer', 'ace/mode/grace_highlight_rules'], function(acequire, exports, module) {
+"use strict";
 
-
-var oop = require("../lib/oop");
-var JavaScriptMode = require("./javascript").Mode;
-var Tokenizer = require("../tokenizer").Tokenizer;
-var GraceHighlightRules = require("./grace_highlight_rules").GraceHighlightRules;
+var oop = acequire("../lib/oop");
+var JavaScriptMode = acequire("./javascript").Mode;
+var Tokenizer = acequire("../tokenizer").Tokenizer;
+var GraceHighlightRules = acequire("./grace_highlight_rules").GraceHighlightRules;
 
 var Mode = function() {
     JavaScriptMode.call(this);
@@ -24,18 +24,18 @@ oop.inherits(Mode, JavaScriptMode);
 exports.Mode = Mode;
 });
 
-ace.define('ace/mode/javascript', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/javascript_highlight_rules', 'ace/mode/matching_brace_outdent', 'ace/range', 'ace/worker/worker_client', 'ace/mode/behaviour/cstyle', 'ace/mode/folding/cstyle'], function(require, exports, module) {
+ace.define('ace/mode/javascript', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text', 'ace/tokenizer', 'ace/mode/javascript_highlight_rules', 'ace/mode/matching_brace_outdent', 'ace/range', 'ace/worker/worker_client', 'ace/mode/behaviour/cstyle', 'ace/mode/folding/cstyle'], function(acequire, exports, module) {
 
 
-var oop = require("../lib/oop");
-var TextMode = require("./text").Mode;
-var Tokenizer = require("../tokenizer").Tokenizer;
-var JavaScriptHighlightRules = require("./javascript_highlight_rules").JavaScriptHighlightRules;
-var MatchingBraceOutdent = require("./matching_brace_outdent").MatchingBraceOutdent;
-var Range = require("../range").Range;
-var WorkerClient = require("../worker/worker_client").WorkerClient;
-var CstyleBehaviour = require("./behaviour/cstyle").CstyleBehaviour;
-var CStyleFoldMode = require("./folding/cstyle").FoldMode;
+var oop = acequire("../lib/oop");
+var TextMode = acequire("./text").Mode;
+var Tokenizer = acequire("../tokenizer").Tokenizer;
+var JavaScriptHighlightRules = acequire("./javascript_highlight_rules").JavaScriptHighlightRules;
+var MatchingBraceOutdent = acequire("./matching_brace_outdent").MatchingBraceOutdent;
+var Range = acequire("../range").Range;
+var WorkerClient = acequire("../worker/worker_client").WorkerClient;
+var CstyleBehaviour = acequire("./behaviour/cstyle").CstyleBehaviour;
+var CStyleFoldMode = acequire("./folding/cstyle").FoldMode;
 
 var Mode = function() {
     this.$tokenizer = new Tokenizer(new JavaScriptHighlightRules().getRules());
@@ -152,14 +152,14 @@ oop.inherits(Mode, TextMode);
 exports.Mode = Mode;
 });
 
-ace.define('ace/mode/javascript_highlight_rules', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/lang', 'ace/unicode', 'ace/mode/doc_comment_highlight_rules', 'ace/mode/text_highlight_rules'], function(require, exports, module) {
+ace.define('ace/mode/javascript_highlight_rules', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/lang', 'ace/unicode', 'ace/mode/doc_comment_highlight_rules', 'ace/mode/text_highlight_rules'], function(acequire, exports, module) {
 
 
-var oop = require("../lib/oop");
-var lang = require("../lib/lang");
-var unicode = require("../unicode");
-var DocCommentHighlightRules = require("./doc_comment_highlight_rules").DocCommentHighlightRules;
-var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
+var oop = acequire("../lib/oop");
+var lang = acequire("../lib/lang");
+var unicode = acequire("../unicode");
+var DocCommentHighlightRules = acequire("./doc_comment_highlight_rules").DocCommentHighlightRules;
+var TextHighlightRules = acequire("./text_highlight_rules").TextHighlightRules;
 
 var JavaScriptHighlightRules = function() {
 
@@ -580,11 +580,11 @@ oop.inherits(JavaScriptHighlightRules, TextHighlightRules);
 exports.JavaScriptHighlightRules = JavaScriptHighlightRules;
 });
 
-ace.define('ace/mode/doc_comment_highlight_rules', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text_highlight_rules'], function(require, exports, module) {
+ace.define('ace/mode/doc_comment_highlight_rules', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/text_highlight_rules'], function(acequire, exports, module) {
 
 
-var oop = require("../lib/oop");
-var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
+var oop = acequire("../lib/oop");
+var TextHighlightRules = acequire("./text_highlight_rules").TextHighlightRules;
 
 var DocCommentHighlightRules = function() {
 
@@ -637,10 +637,10 @@ exports.DocCommentHighlightRules = DocCommentHighlightRules;
 
 });
 
-ace.define('ace/mode/matching_brace_outdent', ['require', 'exports', 'module' , 'ace/range'], function(require, exports, module) {
+ace.define('ace/mode/matching_brace_outdent', ['acequire', 'exports', 'module' , 'ace/range'], function(acequire, exports, module) {
 
 
-var Range = require("../range").Range;
+var Range = acequire("../range").Range;
 
 var MatchingBraceOutdent = function() {};
 
@@ -682,11 +682,11 @@ var MatchingBraceOutdent = function() {};
 exports.MatchingBraceOutdent = MatchingBraceOutdent;
 });
 
-ace.define('ace/mode/behaviour/cstyle', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/behaviour'], function(require, exports, module) {
+ace.define('ace/mode/behaviour/cstyle', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/mode/behaviour'], function(acequire, exports, module) {
 
 
-var oop = require("../../lib/oop");
-var Behaviour = require("../behaviour").Behaviour;
+var oop = acequire("../../lib/oop");
+var Behaviour = acequire("../behaviour").Behaviour;
 
 var CstyleBehaviour = function () {
 
@@ -870,12 +870,12 @@ oop.inherits(CstyleBehaviour, Behaviour);
 exports.CstyleBehaviour = CstyleBehaviour;
 });
 
-ace.define('ace/mode/folding/cstyle', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/range', 'ace/mode/folding/fold_mode'], function(require, exports, module) {
+ace.define('ace/mode/folding/cstyle', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/range', 'ace/mode/folding/fold_mode'], function(acequire, exports, module) {
 
 
-var oop = require("../../lib/oop");
-var Range = require("../../range").Range;
-var BaseFoldMode = require("./fold_mode").FoldMode;
+var oop = acequire("../../lib/oop");
+var Range = acequire("../../range").Range;
+var BaseFoldMode = acequire("./fold_mode").FoldMode;
 
 var FoldMode = exports.FoldMode = function() {};
 oop.inherits(FoldMode, BaseFoldMode);
@@ -929,10 +929,10 @@ oop.inherits(FoldMode, BaseFoldMode);
 
 });
 
-ace.define('ace/mode/folding/fold_mode', ['require', 'exports', 'module' , 'ace/range'], function(require, exports, module) {
+ace.define('ace/mode/folding/fold_mode', ['acequire', 'exports', 'module' , 'ace/range'], function(acequire, exports, module) {
 
 
-var Range = require("../../range").Range;
+var Range = acequire("../../range").Range;
 
 var FoldMode = exports.FoldMode = function() {};
 
@@ -1005,13 +1005,13 @@ var FoldMode = exports.FoldMode = function() {};
 }).call(FoldMode.prototype);
 
 });
-ace.define('ace/mode/grace_highlight_rules', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/lang', 'ace/mode/doc_comment_highlight_rules', 'ace/mode/text_highlight_rules'], function(require, exports, module) {
+ace.define('ace/mode/grace_highlight_rules', ['acequire', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/lang', 'ace/mode/doc_comment_highlight_rules', 'ace/mode/text_highlight_rules'], function(acequire, exports, module) {
 
 
-var oop = require("../lib/oop");
-var lang = require("../lib/lang");
-var DocCommentHighlightRules = require("./doc_comment_highlight_rules").DocCommentHighlightRules;
-var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
+var oop = acequire("../lib/oop");
+var lang = acequire("../lib/lang");
+var DocCommentHighlightRules = acequire("./doc_comment_highlight_rules").DocCommentHighlightRules;
+var TextHighlightRules = acequire("./text_highlight_rules").TextHighlightRules;
 
 var GraceHighlightRules = function() {
 
