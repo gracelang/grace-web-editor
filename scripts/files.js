@@ -650,7 +650,7 @@ exports.setup = function (tree) {
   }
 
   newFile.click(function () {
-    var creation = prompt("New file or New directory?", "directory");
+    var creation = "file"; // prompt("New file or New directory?", "directory");
 
     if (creation !== null && creation.length > 0) {
       if (creation === "file") {
