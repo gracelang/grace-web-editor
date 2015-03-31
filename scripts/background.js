@@ -9,7 +9,35 @@ this.window = this;
 
   var sources;
 
-  window.importScripts("minigrace.js");
+  window.importScripts("../js/minigrace.js");
+  window.importScripts("../js/samples.js");
+  window.importScripts("../js/gracelib.js");
+  window.importScripts("../js/dom.js");
+  window.importScripts("../js/gtk.js");
+  window.importScripts("../js/debugger.js");
+  window.importScripts("../js/timer.js");
+  window.importScripts("../js/collectionsPrelude.js");
+  window.importScripts("../js/StandardPrelude.js");
+//  window.importScripts("../js/importStandardPrelude.js");
+  window.importScripts("../js/compiler.js");
+  window.importScripts("../js/lexer.js");
+  window.importScripts("../js/ast.js");
+  window.importScripts("../js/parser.js");
+  window.importScripts("../js/genc.js");
+  window.importScripts("../js/genjs.js");
+  window.importScripts("../js/buildinfo.js");
+  window.importScripts("../js/identifierresolution.js");
+  window.importScripts("../js/genjson.js");
+  window.importScripts("../js/collections.js");
+  window.importScripts("../js/mgcollections.js");
+  window.importScripts("../js/xmodule.js");
+  window.importScripts("../js/unicodedata.js");
+  window.importScripts("../js/errormessages.js");
+  window.importScripts("../js/gUnit.js");
+//  window.importScripts("../js/sample/dialects/requireTypes.js");
+//  window.importScripts("../js/sample/dialects/staticTypes.js");
+//  window.importScripts("../js/objectdraw.js");
+//  window.importScripts("../js/rtobjectdraw.js");
 
   sources = {};
 
