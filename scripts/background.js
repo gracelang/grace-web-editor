@@ -1,4 +1,4 @@
-// Minigrace generates code that relies on the window variable containing the
+// Minigrace generates code that relies on the window variable being the
 // global object. While the global object in this runtime doesn't have
 // many of the expected features of the standard window, assigning it to a
 // global window object suffices to allow the code to compile.
@@ -18,7 +18,7 @@ this.window = this;
   window.importScripts("../js/timer.js");
   window.importScripts("../js/collectionsPrelude.js");
   window.importScripts("../js/StandardPrelude.js");
-//  window.importScripts("../js/importStandardPrelude.js");
+  window.importScripts("../js/importStandardPrelude.js");
   window.importScripts("../js/compiler.js");
   window.importScripts("../js/lexer.js");
   window.importScripts("../js/ast.js");
@@ -34,10 +34,10 @@ this.window = this;
   window.importScripts("../js/unicodedata.js");
   window.importScripts("../js/errormessages.js");
   window.importScripts("../js/gUnit.js");
-//  window.importScripts("../js/sample/dialects/requireTypes.js");
-//  window.importScripts("../js/sample/dialects/staticTypes.js");
-//  window.importScripts("../js/objectdraw.js");
-//  window.importScripts("../js/rtobjectdraw.js");
+  window.importScripts("../js/requireTypes.js");
+  window.importScripts("../js/staticTypes.js");
+  window.importScripts("../js/objectdraw.js");
+  window.importScripts("../js/rtobjectdraw.js");
 
   sources = {};
 
