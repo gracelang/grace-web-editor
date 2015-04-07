@@ -1017,8 +1017,7 @@ var GraceHighlightRules = function() {
 
     var keywords = lang.arrayToMap(
         (
-            "object|method|class|factory|def|var|return|inherits|is|dialect" +
-            "|import|as|type|super"
+            "object|method|factory|self|outer|super|class|def|var|type|return|inherits|is|dialect|import|as"
         ).split("|")
     );
 
@@ -1046,7 +1045,7 @@ var GraceHighlightRules = function() {
             },
             {
                 token : "string",
-                regex : '"""',
+                regex : '‹',
                 next : "tstring"
             }, {
                 token : "string",
@@ -1084,10 +1083,10 @@ var GraceHighlightRules = function() {
                 regex : "\\.\\.|[~!@$%^&*+-=:<>/]+"
             }, {
                 token : "paren.lparen",
-                regex : "[[({]"
+                regex : "[[({‹]"
             }, {
                 token : "paren.rparen",
-                regex : "[\\])}]"
+                regex : "[\\])}›]"
             }, {
                 token : "text",
                 regex : "\\s+"
@@ -1114,11 +1113,11 @@ var GraceHighlightRules = function() {
         ],
         "tstring" : [
             {
-                token : "string", // closing comment
-                regex : '"{3,5}',
+                token : "string", // close of multi-line string
+                regex : '›',
                 next : "start"
             }, {
-                token : "string", // comment spanning whole line
+                token : "string", // multi-line string spanning whole line
                 merge : true,
                 regex : ".+?"
             }
