@@ -41,6 +41,7 @@ this.window = this;
   window.importScripts("../js/rtobjectdraw.js");
   window.importScripts("../js/timer.js");
   window.importScripts("../js/animation.js");
+  window.importScripts("../js/dialect.js");
 
   sources = {};
 
