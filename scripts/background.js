@@ -1,7 +1,10 @@
 // Minigrace generates code that relies on the window variable being the
-// global object. While the global object in this runtime doesn't have
-// many of the expected features of the standard window, assigning it to a
-// global window object suffices to allow the code to compile.
+// global object. Howebver, WebWorkers don't have access to the real `window`
+// object.  This code constructs a n object that has enough features for the
+// generated code to run, and binds it to the window field of this.
+// While this fake window doesn't have many of the expected features of
+// the standard window, it is sufficient to allow minigrace to run.
+
 this.window = this;
 
 (function (window) {
@@ -38,6 +41,8 @@ this.window = this;
   window.importScripts("../js/staticTypes.js");
   window.importScripts("../js/objectdraw.js");
   window.importScripts("../js/rtobjectdraw.js");
+  window.importScripts("../js/timer.js");
+  window.importScripts("../js/animation.js");
 
   sources = {};
 
