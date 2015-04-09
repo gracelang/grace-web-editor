@@ -13,12 +13,10 @@ this.window = this;
   var sources;
 
   window.importScripts("../js/minigrace.js");
-  window.importScripts("../js/samples.js");
   window.importScripts("../js/gracelib.js");
   window.importScripts("../js/dom.js");
   window.importScripts("../js/gtk.js");
   window.importScripts("../js/debugger.js");
-  window.importScripts("../js/timer.js");
   window.importScripts("../js/collectionsPrelude.js");
   window.importScripts("../js/StandardPrelude.js");
   window.importScripts("../js/importStandardPrelude.js");
