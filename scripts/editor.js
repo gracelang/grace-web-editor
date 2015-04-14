@@ -88,6 +88,7 @@ exports.setup = function (files, view, fdbk) {
   editor = ace.edit(view.find(".editor")[0]);
 
   editor.setFontSize(14);
+  editor.$blockScrolling = Infinity;
 
   session = editor.getSession();
   session.setUseSoftTabs(true);
