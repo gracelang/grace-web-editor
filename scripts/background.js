@@ -35,6 +35,7 @@ this.window = this;
   window.importScripts("../js/unicodedata.js");
   window.importScripts("../js/errormessages.js");
   window.importScripts("../js/gUnit.js");
+  window.importScripts("../js/minitest.js");
   window.importScripts("../js/requireTypes.js");
   window.importScripts("../js/staticTypes.js");
   window.importScripts("../js/objectdraw.js");
