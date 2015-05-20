@@ -119,6 +119,8 @@ exports.setup = function (files, view, fdbk) {
 
   editor.focus();
 
+  // This is where the feedback object is created.
+  // It is injected with an onBuild and onRun callback.
   feedback = feedback.setup(fdbk, function () {
     var modname, name;
 
@@ -141,6 +143,10 @@ exports.setup = function (files, view, fdbk) {
         feedback.compilation.ready();
       }
     });
+    // NOTE: This is where the OnRun call back method is injected into the 
+    // feedback object. All writes to the output preformatted text window
+    // when running a program are made in this callback.
+    // TODO: Interception and redirection of test results need to be made in here. 
   }, function () {
     var escaped, modname;
 

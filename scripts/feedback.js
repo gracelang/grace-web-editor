@@ -2,15 +2,18 @@
 
 "use strict";
 
-var compilation, output;
+var compilation, output, testoutput;
 
 compilation = require("./feedback/compilation");
 output = require("./feedback/output");
+testoutput = require("./feedback/testoutput");
 
 exports.setup = function (feedback, onBuild, onRun) {
-  var comp, op;
+  var comp, op, t_op;
 
+  // This is where the output object is instantiated.
   op = output.setup(feedback.find(".output"));
+  t_op = testoutput.setup(feedback.find(".testoutput"));
   comp = compilation.setup(feedback.find(".compilation"), op, function () {
     op.clear();
     onBuild();
@@ -24,7 +27,8 @@ exports.setup = function (feedback, onBuild, onRun) {
 
   return {
     "compilation": comp,
-    "output": op,
+    "output": t_op,
+    "testoutput": t_op,
 
     "running": function () {
       op.clear();
