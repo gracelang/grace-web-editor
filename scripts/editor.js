@@ -78,6 +78,43 @@ exports.setup = function (files, view, fdbk) {
   drop = view.find(".delete");
 
   rename = view.find(".file-name-input");
+  
+  function runProgram() {
+    var escaped, modname;
+
+    feedback.running();
+
+    modname = path.basename(fileName.text(), ".grace");
+    escaped = "gracecode_" + modname.replace("/", "$");
+
+    global.gracecode_main = global[escaped];
+    global.theModule = global[escaped];
+
+    minigrace.lastSourceCode = editor.getValue();
+    minigrace.lastModname = modname;
+    minigrace.lastMode = "js";
+    minigrace.lastDebugMode = true;
+
+    minigrace.stdout_write = function (value) {
+      feedback.output.write(value);
+    };
+
+    minigrace.stderr_write = function (value) {
+      feedback.output.error(value);
+      stop();
+    };
+
+    try {
+      minigrace.run();
+    } catch (error) {
+      feedback.output.error(error.toString());
+      stop();
+    }
+
+    if (!checkStop()) {
+      return stop;
+    }
+  }
 
   function setDownload(name, text) {
     download.attr("href", URL.createObjectURL(new Blob([ text ], {
@@ -140,42 +177,10 @@ exports.setup = function (files, view, fdbk) {
       } else {
         feedback.compilation.ready();
       }
+      runProgram();
     });
   }, function () {
-    var escaped, modname;
-
-    feedback.running();
-
-    modname = path.basename(fileName.text(), ".grace");
-    escaped = "gracecode_" + modname.replace("/", "$");
-
-    global.gracecode_main = global[escaped];
-    global.theModule = global[escaped];
-
-    minigrace.lastSourceCode = editor.getValue();
-    minigrace.lastModname = modname;
-    minigrace.lastMode = "js";
-    minigrace.lastDebugMode = true;
-
-    minigrace.stdout_write = function (value) {
-      feedback.output.write(value);
-    };
-
-    minigrace.stderr_write = function (value) {
-      feedback.output.error(value);
-      stop();
-    };
-
-    try {
-      minigrace.run();
-    } catch (error) {
-      feedback.output.error(error.toString());
-      stop();
-    }
-
-    if (!checkStop()) {
-      return stop;
-    }
+      runProgram();
   });
 
   files.onOpen(function (name, content) {
