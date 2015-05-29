@@ -176,8 +176,8 @@ exports.setup = function (files, view, fdbk) {
         }
       } else {
         feedback.compilation.ready();
+        runProgram();
       }
-      runProgram();
     });
   }, function () {
       runProgram();
