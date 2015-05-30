@@ -10,7 +10,7 @@ Phase One:
 
 Phase Two:
 - [ ] Get Stdin working
-- [ ] Renaming files
+- [ ] Renaming files - *John*
 - [ ] Group files into folders and download those folders
 - [ ] Simple refactoring like renaming variables
 - [ ] Re-indenting files
