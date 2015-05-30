@@ -54,7 +54,11 @@
       </header>
       <input id="upload-input" type="file" multiple>
       <ul id="file-tree" class="fill"></ul>
-      <div id="version"></div>
+
+      <div id="open-settings" class="button">
+        <span class="icon">&#x2699;</span>
+        <span class="label">Settings</span>
+      </div>
     </nav>
 
     <div id="left-sidebar-resize" class="no-select">
@@ -128,6 +132,18 @@
     <div id="minigrace-dump">
       <input id="debugtoggle" type="checkbox">
     </div>
+
+    <div id="settings-view" class="hidden">
+      <h2>Editor Settings</h2>
+      Grace Compiler Version
+      <div id="version"></div>
+      <div id="close-settings" class="button">
+        <span class="icon">&#8855;</span>
+        <span class="label">Close</span>
+      </div>
+    </div>
+
+    <div id="screen-overlay" class="hidden"></div>
 
   </body>
 

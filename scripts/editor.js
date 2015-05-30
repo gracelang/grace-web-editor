@@ -1,6 +1,8 @@
 "use strict";
 
-var ace, audio, compiler, feedback, intervals, path, timers, windows;
+var $, ace, audio, compiler, feedback, intervals, path, timers, windows;
+
+$ = require("jquery");
 
 ace = require("brace");
 path = require("path");
@@ -291,6 +293,29 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   // once the size settles.
   setImmediate(function () {
     editor.resize(true);
+  });
+
+  function toggleSettingView() {
+    var settingView = $("#settings-view");
+    var screenOverlay = $("#screen-overlay")
+
+    if (settingView.hasClass("hidden")) {
+      settingView.removeClass("hidden");
+      screenOverlay.removeClass("hidden");
+    } else {
+      settingView.addClass("hidden");
+      screenOverlay.addClass("hidden");
+    }
+  }
+
+  $("#open-settings, #close-settings").mouseup(function () {
+    toggleSettingView();
+  });
+
+  $("#screen-overlay").mouseup(function () {
+    if (!$("#settings-view").hasClass("hidden")) {
+      toggleSettingView();
+    }
   });
 
   return editor;
