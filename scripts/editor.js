@@ -18,7 +18,7 @@ timers = [];
 intervals = [];
 audio = [];
 
-exports.setup = function (files, view, fdbk) {
+exports.setup = function (files, view, fdbk, hideReveal) {
   var download, drop, editor, fileName, opening, rename, session;
 
   function stop() {
@@ -97,10 +97,12 @@ exports.setup = function (files, view, fdbk) {
 
     minigrace.stdout_write = function (value) {
       feedback.output.write(value);
+      openOutputViewIfHidden();
     };
 
     minigrace.stderr_write = function (value) {
       feedback.output.error(value);
+      openOutputViewIfHidden();
       stop();
     };
 
@@ -108,6 +110,7 @@ exports.setup = function (files, view, fdbk) {
       minigrace.run();
     } catch (error) {
       feedback.output.error(error.toString());
+      openOutputViewIfHidden();
       stop();
     }
 
@@ -165,6 +168,7 @@ exports.setup = function (files, view, fdbk) {
     compiler.compile(modname, session.getValue(), function (reason) {
       if (reason !== null) {
         feedback.error(reason);
+        openOutputViewIfHidden();
 
         if (reason.module === name && reason.line) {
           session.setAnnotations([ {
@@ -181,6 +185,50 @@ exports.setup = function (files, view, fdbk) {
     });
   }, function () {
       runProgram();
+  });
+
+  function openOutputViewIfHidden() {
+    if (view.find("#output-view").hasClass("hide")) {
+      toggleOutputView();
+    }
+  }
+
+  function toggleOutputView() {
+    var fileView = view.find(".open-file");
+    var outputView = view.find("#output-view");
+    var hideRevealIcon = view.find("#output-hide-reveal-icon");
+
+    if (outputView.hasClass("hide")) {
+      fileView.animate({
+        height: (view.height() - fdbk.height()) + "px",
+      }, 400);
+
+      outputView.animate({
+        flexGrow: "1",
+        padding: "8px",
+        borderBottomWidth: "1pt",
+      }, 400, function() {
+        outputView.removeClass("hide");
+        hideRevealIcon.html("<b>&#x276C;</b>");
+      });
+    } else {
+      fileView.animate({
+        height: (view.height() - view.find(".compilation").height()) + "px",
+      }, 400);
+
+      outputView.animate({
+        flexGrow: "0",
+        padding: "0px",
+        borderBottomWidth: "0px",
+      }, 400, function() {
+        outputView.addClass("hide");
+        hideRevealIcon.html("<b>&#x276D;</b>");
+      });
+    }
+  }
+
+  hideReveal.mouseup(function () {
+    toggleOutputView();
   });
 
   files.onOpen(function (name, content) {

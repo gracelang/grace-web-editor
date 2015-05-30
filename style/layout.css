@@ -202,10 +202,10 @@ a {
   font-size: 30px;
   cursor: pointer;
   margin-left: -4px;
-  text-shadow: -0.5px -0.5px 0px rgb(255, 255, 255), 
-               0.5px -0.5px 0px rgb(255, 255, 255), 
-               -0.5px 0.5px 0px rgb(255, 255, 255), 
-               0px 0.5px 0px rgb(255, 255, 255);
+  text-shadow: -0.5px -0.5px 0px #FFF, 
+               0.5px -0.5px 0px #FFF, 
+               -0.5px 0.5px 0px #FFF, 
+               0px 0.5px 0px #FFF;
 }
 
 #file-tree {
@@ -455,6 +455,33 @@ a {
 
 .output .trace {
   color: #A7A8A2;
+}
+
+#output-hide-reveal {
+  cursor: pointer;
+  height: 27px;
+  justify-content: center;
+  display: flex;
+  width: 30px;
+  font-size: 30px;
+  color: #586E75;
+  background-color: rgba(88, 110, 117, 0.1);
+  border-width: 0px 1px;
+  border-style: solid solid none;
+  border-color: rgba(88, 110, 117, 0.3);
+}
+
+#output-hide-reveal-icon {
+  transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -webkit-transform: rotate(-90deg);
+  height: 30px;
+  margin-left: -7.5px;
+  color: rgb(181, 137, 0);
+  text-shadow: -0.5px -0.5px 0px #839496, 
+               0.5px -0.5px 0px #839496, 
+               -0.5px 0.5px 0px #839496, 
+               0px 0.5px 0px #839496;
 }
 
 #frame-dump, #minigrace-dump {

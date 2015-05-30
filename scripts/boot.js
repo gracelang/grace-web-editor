@@ -6,7 +6,7 @@ $(function () {
   var editor, files;
 
   files = require("./files").setup($("#file-tree"));
-  editor = require("./editor").setup(files, $("#grace-view"), $(".feedback"));
+  editor = require("./editor").setup(files, $("#grace-view"), $(".feedback"), $("#output-hide-reveal"));
   require("./sidebar")
     .setup(editor, $("#left-sidebar"), $("#left-sidebar-resize"), $("#left-sidebar-hide-reveal"));
 
