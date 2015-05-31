@@ -10,9 +10,9 @@ Phase One:
 
 Phase Two:
 - [ ] Get Stdin working
-- [ ] Renaming files - *John*
+- [ ] ~~Renaming files~~ (already implemented)
 - [ ] Group files into folders and download those folders
-- [ ] Simple refactoring like renaming variables
+- [ ] Simple refactoring like renaming variables - *John*
 - [ ] Re-indenting files
 - [ ] Show inline documentation/standard library when using standard functions.
 
