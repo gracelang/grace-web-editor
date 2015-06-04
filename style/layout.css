@@ -190,6 +190,11 @@ a {
   color: #b58900;
 }
 
+#left-sidebar #rename-vars{
+  justify-content: center;
+  color: #b58900;
+}
+
 #left-sidebar .button .label {
   display: inline-block;
 }
@@ -531,5 +536,27 @@ a {
 }
 
 #settings-view #close-settings {
+  color: #b58900;
+}
+
+#refactor-view {
+  width: 350px;
+  height: 400px;
+  background-color: white;
+  height: 400px;
+  top: 50%;
+  left: 50%;
+  margin-left: -175px;
+  margin-top: -200px;
+  position: absolute;
+  z-index: 1000;
+  text-align: center;
+}
+
+#refactor-view #start-refactor {
+  color: #b58900;
+}
+
+#refactor-view #cancel-refactor {
   color: #b58900;
 }

@@ -311,6 +311,23 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   $("#open-settings, #close-settings").mouseup(function () {
     toggleSettingView();
   });
+  
+  function toggleRefactorView() {
+    var refactorView = $("#refactor-view");
+    var screenOverlay = $("#screen-overlay")
+
+    if (refactorView.hasClass("hidden")) {
+      refactorView.removeClass("hidden");
+      screenOverlay.removeClass("hidden");
+    } else {
+      refactorView.addClass("hidden");
+      screenOverlay.addClass("hidden");
+    }
+  }
+  
+  $("#rename-vars, #start-refactor, #cancel-refactor").mouseup(function () {
+    toggleRefactorView();
+  });
 
   $("#screen-overlay").mouseup(function () {
     if (!$("#settings-view").hasClass("hidden")) {
