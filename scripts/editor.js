@@ -14,6 +14,38 @@ compiler = require("./compiler");
 feedback = require("./feedback");
 
 require("./ace/mode-grace");
+require('brace/theme/ambiance');
+require('brace/theme/chaos');
+require('brace/theme/chrome');
+require('brace/theme/clouds_midnight');
+require('brace/theme/clouds');
+require('brace/theme/cobalt');
+require('brace/theme/crimson_editor');
+require('brace/theme/dawn');
+require('brace/theme/dreamweaver');
+require('brace/theme/eclipse');
+require('brace/theme/github');
+require('brace/theme/idle_fingers');
+require('brace/theme/katzenmilch');
+require('brace/theme/kr_theme');
+require('brace/theme/kuroir');
+require('brace/theme/merbivore_soft');
+require('brace/theme/merbivore');
+require('brace/theme/mono_industrial');
+require('brace/theme/monokai');
+require('brace/theme/pastel_on_dark');
+require('brace/theme/solarized_dark');
+require('brace/theme/solarized_light');
+require('brace/theme/terminal');
+require('brace/theme/textmate');
+require('brace/theme/tomorrow_night_blue');
+require('brace/theme/tomorrow_night_bright');
+require('brace/theme/tomorrow_night_eighties');
+require('brace/theme/tomorrow_night');
+require('brace/theme/tomorrow');
+require('brace/theme/twilight');
+require('brace/theme/vibrant_ink');
+require('brace/theme/xcode');
 
 windows = [];
 timers = [];
@@ -21,7 +53,6 @@ intervals = [];
 audio = [];
 
 exports.setup = function (files, view, fdbk, hideReveal) {
-  var download, drop, editor, fileName, opening, rename, session;
   var download, drop, search, editor, fileName, opening, rename, session;
 
   function stop() {
@@ -138,6 +169,42 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   session.setUseSoftTabs(true);
   session.setTabSize(2);
   session.setMode("ace/mode/grace");
+
+  $("#settings-view #theme").on('change', function() {
+    editor.setTheme( this.value );
+  });
+
+  $("#settings-view #fontsize").on('change', function() {
+    editor.setFontSize( this.value );
+  });
+
+  $("#settings-view #folding").on('change', function() {
+    session.setFoldStyle( this.value );
+  });
+
+  $("#settings-view #soft-wrap").on('change', function() {
+    editor.setOption("wrap", this.value);
+  });
+
+  $("#settings-view #highlight-active").on('change', function() {
+    editor.setHighlightActiveLine("wrap", this.checked);
+  });
+
+  $("#settings-view #show-hidden").on('change', function() {
+    editor.setShowInvisibles(this.checked);
+  });
+
+  $("#settings-view #display-indent-guides").on('change', function() {
+    editor.setDisplayIndentGuides(this.checked);
+  });
+
+  $("#settings-view #show-gutter").on('change', function() {
+    editor.renderer.setShowGutter(this.checked);
+  });
+
+  $("#settings-view #soft-tab").on('change', function() {
+    session.setUseSoftTabs(this.checked);
+  });
 
   session.on("change", function () {
     var name, value;

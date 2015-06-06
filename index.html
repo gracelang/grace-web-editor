@@ -91,7 +91,6 @@
             <span class="icon">&#8855;</span>
           </div>
         </header>
-
         <div class="editor fill fill-height"></div>
       </section>
 
@@ -222,66 +221,53 @@
           </tr>
           <tr>
             <td>
-              <label for="keybinding">Key Binding</label>
+              <label for="soft-wrap">Soft Wrap</label>
             </td>
             <td>
-              <select id="keybinding" size="1">
-                <option value="ace">Ace</option>
-                <option value="vim">Vim</option>
-                <option value="emacs">Emacs</option>
+              <select id="soft-wrap" size="1">
+                <option value="off" selected="selected">Off</option>
+                <option value="80">80</option>
+                <option value="free">Edge</option>
               </select>
             </td>
           </tr>
           <tr>
             <td>
-              <label for="soft_wrap">Soft Wrap</label>
+              <label for="highlight-active">Highlight Active Line</label>
             </td>
             <td>
-              <select id="soft_wrap" size="1">
-                <option value="off">Off</option>
-                <option value="40">40 Chars</option>
-                <option value="80">80 Chars</option>
-                <option value="free">Free</option>
-              </select>
+              <input type="checkbox" name="highlight-active" id="highlight-active" checked="">
             </td>
           </tr>
           <tr>
             <td>
-              <label for="highlight_active">Highlight Active Line</label>
+              <label for="show-hidden">Show Invisibles</label>
             </td>
             <td>
-              <input type="checkbox" name="highlight_active" id="highlight_active" checked="">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="show_hidden">Show Invisibles</label>
-            </td>
-            <td>
-              <input type="checkbox" name="show_hidden" id="show_hidden" checked="">
+              <input type="checkbox" name="show-hidden" id="show-hidden" checked="">
             </td>
           </tr>
           <tr>
             <td>
-              <label for="display_indent_guides">Show Indent Guides</label>
+              <label for="display-indent-guides">Show Indent Guides</label>
             </td><td>
-              <input type="checkbox" name="display_indent_guides" id="display_indent_guides" checked="">
+              <input type="checkbox" name="display-indent-guides" id="display-indent-guides" checked="">
             </td>
           </tr>
           <tr>
             <td>
-              <label for="show_gutter">Show Gutter</label>
+              <label for="show-gutter">Show Gutter</label>
             </td>
             <td>
-              <input type="checkbox" id="show_gutter" checked="">
+              <input type="checkbox" id="show-gutter" checked="">
             </td>
           </tr>
           <tr>
             <td>
-              <label for="soft_tab">Use Soft Tab</label>
+              <label for="soft-tab">Use Soft Tab</label>
             </td>
             <td>
-              <input type="checkbox" id="soft_tab" checked="">
+              <input type="checkbox" id="soft-tab" checked="">
             </td>
           </tr>
         </tbody>
