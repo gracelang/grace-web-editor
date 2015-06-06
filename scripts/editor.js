@@ -53,7 +53,7 @@ intervals = [];
 audio = [];
 
 exports.setup = function (files, view, fdbk, hideReveal) {
-  var download, drop, search, editor, fileName, opening, rename, session;
+  var download, drop, search, editor, fileName, opening, rename, session, defaultEditorSettings;
 
   function stop() {
     windows.forEach(function (win) {
@@ -161,50 +161,25 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   }
 
   editor = ace.edit(view.find(".editor")[0]);
-
-  editor.setFontSize(14);
   editor.$blockScrolling = Infinity;
 
   session = editor.getSession();
-  session.setUseSoftTabs(true);
   session.setTabSize(2);
   session.setMode("ace/mode/grace");
 
-  $("#settings-view #theme").on('change', function() {
-    editor.setTheme( this.value );
-  });
+  defaultEditorSettings = {
+    theme: 'ace/theme/chrome',
+    fontSize: 14,
+    foldStyle: 'markbegin',
+    wrap: 'off',
+    highlightActiveLine: true,
+    showInvisibles: false,
+    displayIndentGuides: true,
+    showGutter: true,
+    softTabs: true
+  }
 
-  $("#settings-view #fontsize").on('change', function() {
-    editor.setFontSize( this.value );
-  });
-
-  $("#settings-view #folding").on('change', function() {
-    session.setFoldStyle( this.value );
-  });
-
-  $("#settings-view #soft-wrap").on('change', function() {
-    editor.setOption("wrap", this.value);
-  });
-
-  $("#settings-view #highlight-active").on('change', function() {
-    editor.setHighlightActiveLine("wrap", this.checked);
-  });
-
-  $("#settings-view #show-hidden").on('change', function() {
-    editor.setShowInvisibles(this.checked);
-  });
-
-  $("#settings-view #display-indent-guides").on('change', function() {
-    editor.setDisplayIndentGuides(this.checked);
-  });
-
-  $("#settings-view #show-gutter").on('change', function() {
-    editor.renderer.setShowGutter(this.checked);
-  });
-
-  $("#settings-view #soft-tab").on('change', function() {
-    session.setUseSoftTabs(this.checked);
-  });
+  loadEditorSettings();
 
   session.on("change", function () {
     var name, value;
@@ -412,6 +387,123 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       editor.execCommand("replace");
       search.find(".label").html("Search");
     }
+  });
+
+  function loadEditorSettings() {
+    var theme, fontSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter, softTabs;
+
+    if (typeof localStorage.editorTheme === 'undefined') {
+      localStorage.editorTheme = defaultEditorSettings.theme;
+    }
+
+    if (typeof localStorage.editorFontSize === 'undefined') {
+      localStorage.editorFontSize = defaultEditorSettings.fontSize;
+    }
+
+    if (typeof localStorage.editorFoldStyle === 'undefined') {
+      localStorage.editorFoldStyle = defaultEditorSettings.foldStyle;
+    }
+
+    if (typeof localStorage.editorWrap === 'undefined') {
+      localStorage.editorWrap = defaultEditorSettings.wrap;
+    }
+
+    if (typeof localStorage.editorHighlightActiveLine === 'undefined') {
+      localStorage.editorHighlightActiveLine = defaultEditorSettings.highlightActiveLine;
+    }
+
+    if (typeof localStorage.editorShowInvisibles === 'undefined') {
+      localStorage.editorShowInvisibles = defaultEditorSettings.showInvisibles;
+    }
+
+    if (typeof localStorage.editorDisplayIndentGuides === 'undefined') {
+      localStorage.editorDisplayIndentGuides = defaultEditorSettings.displayIndentGuides;
+    }
+
+    if (typeof localStorage.editorShowGutter === 'undefined') {
+      localStorage.editorShowGutter = defaultEditorSettings.showGutter;
+    }
+
+    if (typeof localStorage.editorSoftTabs === 'undefined') {
+      localStorage.editorSoftTabs = defaultEditorSettings.softTabs;
+    }
+
+    theme = localStorage.editorTheme;
+    fontSize = localStorage.editorFontSize;
+    foldStyle = localStorage.editorFoldStyle;
+    wrap = localStorage.editorWrap;
+    highlightActiveLine = localStorage.editorHighlightActiveLine === 'true';
+    showInvisibles = localStorage.editorShowInvisibles === 'true';
+    displayIndentGuides = localStorage.editorDisplayIndentGuides === 'true';
+    showGutter = localStorage.editorShowGutter === 'true';
+    softTabs = localStorage.editorSoftTabs === 'true';
+
+    editor.setTheme(theme);
+    editor.setFontSize(fontSize);
+    document.getElementById('output-view').style.fontSize = fontSize;
+    session.setFoldStyle(foldStyle);
+    editor.setOption("wrap", wrap);
+    editor.setHighlightActiveLine(highlightActiveLine);
+    editor.setShowInvisibles(showInvisibles);
+    editor.setDisplayIndentGuides(displayIndentGuides);
+    editor.renderer.setShowGutter(showGutter);
+    session.setUseSoftTabs(softTabs);
+
+    $('#settings-view #theme option:eq(' + theme + ')').prop('selected', true);
+    $('#settings-view #fontsize option:eq(' + fontSize + ')').prop('selected', true);
+    $('#settings-view #folding option:eq(' + foldStyle + ')').prop('selected', true);
+    $('#settings-view #soft-wrap option:eq(' + wrap + ')').prop('selected', true);
+    $('#settings-view #highlight-active').prop('checked', highlightActiveLine);
+    $('#settings-view #show-hidden').prop('checked', showInvisibles);
+    $('#settings-view #display-indent-guides').prop('checked', displayIndentGuides);
+    $('#settings-view #show-gutter').prop('checked', showGutter);
+    $('#settings-view #soft-tab').prop('checked', softTabs);
+  }
+
+  $("#settings-view #theme").on('change', function() {
+    editor.setTheme(this.value);
+    localStorage.editorTheme = this.value;
+  });
+
+  $("#settings-view #fontsize").on('change', function() {
+    editor.setFontSize(this.value);
+    document.getElementById('output-view').style.fontSize = this.value;
+    localStorage.editorFontSize = this.value;
+  });
+
+  $("#settings-view #folding").on('change', function() {
+    session.setFoldStyle(this.value);
+    localStorage.editorFoldStyle = this.value;
+  });
+
+  $("#settings-view #soft-wrap").on('change', function() {
+    editor.setOption("wrap", this.value);
+    localStorage.editorWrap= this.value;
+  });
+
+  $("#settings-view #highlight-active").on('change', function() {
+    editor.setHighlightActiveLine(this.checked);
+    localStorage.editorHighlightActiveLine = this.checked;
+  });
+
+  $("#settings-view #show-hidden").on('change', function() {
+    editor.setShowInvisibles(this.checked);
+    localStorage.editorShowInvisibles = this.checked;
+  });
+
+  $("#settings-view #display-indent-guides").on('change', function() {
+    editor.setDisplayIndentGuides(this.checked);
+    localStorage.editorDisplayIndentGuides = this.checked;
+  });
+
+  $("#settings-view #show-gutter").on('change', function() {
+    editor.renderer.setShowGutter(this.checked);
+    localStorage.editorShowGutter = this.checked;
+  });
+
+  $("#settings-view #soft-tab").on('change', function() {
+    session.setUseSoftTabs(this.checked);
+    localStorage.editorSoftTabs = this.checked;
   });
 
   return editor;
