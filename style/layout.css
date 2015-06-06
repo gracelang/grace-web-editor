@@ -539,6 +539,15 @@ a {
   color: #b58900;
 }
 
+#settings-view #controls {
+  margin: 5%;
+  text-align: left;
+}
+
+#settings-view #controls tr td:first-child {
+  width: 50%;
+}
+
 #refactor-view {
   width: 350px;
   height: 400px;
