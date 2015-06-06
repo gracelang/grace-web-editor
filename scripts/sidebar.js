@@ -9,7 +9,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
 
   isClicked = false;
   orig = sidebar.width();
-  min = 60;
+  min = 88;
 
   function store() {
     localStorage.sidebarWidth = sidebar.width();
