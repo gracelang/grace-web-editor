@@ -22,6 +22,7 @@ audio = [];
 
 exports.setup = function (files, view, fdbk, hideReveal) {
   var download, drop, editor, fileName, opening, rename, session;
+  var download, drop, search, editor, fileName, opening, rename, session;
 
   function stop() {
     windows.forEach(function (win) {
@@ -77,6 +78,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
 
   download = view.find(".download");
   fileName = view.find(".file-name");
+  search = view.find(".search");
   drop = view.find(".delete");
 
   rename = view.find(".file-name-input");
@@ -332,6 +334,16 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   $("#screen-overlay").mouseup(function () {
     if (!$("#settings-view").hasClass("hidden")) {
       toggleSettingView();
+    }
+  });
+
+  search.mouseup(function () {
+    if (search.find(".label").html() == "Search") {
+      editor.execCommand("find");
+      search.find(".label").html("Replace");
+    } else {
+      editor.execCommand("replace");
+      search.find(".label").html("Search");
     }
   });
 

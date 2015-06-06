@@ -383,6 +383,20 @@ a {
   color: #dc322f;
 }
 
+.search {
+  color: #b58900;
+}
+
+.search.button {
+  margin-right: 5px;
+}
+
+.search .icon {
+  -webkit-transform: rotate(-45deg); 
+  -moz-transform: rotate(-45deg); 
+  -o-transform: rotate(-45deg);
+}
+
 .editor, .output {
   font-size: 10pt;
   border: 1px solid #586e75;
