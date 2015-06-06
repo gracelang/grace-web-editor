@@ -364,45 +364,45 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     editor.resize(true);
   });
 
-  function toggleSettingView() {
-    var settingView = $("#settings-view");
-    var screenOverlay = $("#screen-overlay")
-
-    if (settingView.hasClass("hidden")) {
-      settingView.removeClass("hidden");
-      screenOverlay.removeClass("hidden");
-    } else {
-      settingView.addClass("hidden");
-      screenOverlay.addClass("hidden");
-    }
-  }
-
-  $("#open-settings, #close-settings").mouseup(function () {
-    toggleSettingView();
+  $(".sidebar-buttons").on('mouseup', '*', function () {
+    showSidebarView($(this).attr('value'));
   });
-  
-  function toggleRefactorView() {
+
+  function showSidebarView(view) {
     var refactorView = $("#refactor-view");
-    var screenOverlay = $("#screen-overlay")
+    var settingsView = $("#settings-view");
+    var filesView = $("#files-view");
 
-    if (refactorView.hasClass("hidden")) {
+    var refactorButton = $("#show-refactor");
+    var settingsButton = $("#show-settings");
+    var filesButton = $("#show-files");
+
+    if (view == "refactor") {
       refactorView.removeClass("hidden");
-      screenOverlay.removeClass("hidden");
-    } else {
+      settingsView.addClass("hidden");
+      filesView.addClass("hidden");
+
+      refactorButton.addClass("hidden");
+      settingsButton.removeClass("hidden");
+      filesButton.removeClass("hidden");
+    } else if (view == "settings") {
       refactorView.addClass("hidden");
-      screenOverlay.addClass("hidden");
+      settingsView.removeClass("hidden");
+      filesView.addClass("hidden");
+
+      refactorButton.removeClass("hidden");
+      settingsButton.addClass("hidden");
+      filesButton.removeClass("hidden");
+    } else if (view == "files") {
+      refactorView.addClass("hidden");
+      settingsView.addClass("hidden");
+      filesView.removeClass("hidden");
+
+      refactorButton.removeClass("hidden");
+      settingsButton.removeClass("hidden");
+      filesButton.addClass("hidden");
     }
   }
-  
-  $("#rename-vars, #start-refactor, #cancel-refactor").mouseup(function () {
-    toggleRefactorView();
-  });
-
-  $("#screen-overlay").mouseup(function () {
-    if (!$("#settings-view").hasClass("hidden")) {
-      toggleSettingView();
-    }
-  });
 
   search.mouseup(function () {
     if (search.find(".label").html() == "Search") {

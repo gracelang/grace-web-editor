@@ -185,12 +185,35 @@ a {
   flex-wrap: wrap;
 }
 
-#left-sidebar #open-settings{
+#left-sidebar .sidebar-view {
+  max-height: 87.5%;
+  min-height: 87.5%;
+}
+
+#left-sidebar .sidebar-view .body {
+  margin: 5px;
+  padding: 5px 0px;
+  border-top: 1px solid #586e75;
+  cursor: default;
+  overflow-y: scroll;
+  max-height: 85%;
+}
+
+#left-sidebar .sidebar-buttons .button{
+  display: flex;
+}
+
+#left-sidebar #show-files {
   justify-content: center;
   color: #b58900;
 }
 
-#left-sidebar #rename-vars{
+#left-sidebar #show-settings {
+  justify-content: center;
+  color: #b58900;
+}
+
+#left-sidebar #show-refactor {
   justify-content: center;
   color: #b58900;
 }
@@ -216,14 +239,6 @@ a {
                0.5px -0.5px 0px #FFF, 
                -0.5px 0.5px 0px #FFF, 
                0px 0.5px 0px #FFF;
-}
-
-#file-tree {
-  margin: 5px;
-  padding: 5px 0px;
-  border-top: 1px solid #586e75;
-
-  cursor: default;
 }
 
 .directory .icon:before{
@@ -325,7 +340,7 @@ a {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .open-file {
@@ -524,62 +539,18 @@ a {
   left: -1000000px;
 }
 
-#screen-overlay {
-  width: 100%;
-  height: 100%;
-  background-color: black;
-  opacity: 0.7;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  z-index: 999;
-}
-
-#settings-view {
-  width: 350px;
-  height: 400px;
-  background-color: white;
-  height: 400px;
-  top: 50%;
-  left: 50%;
-  margin-left: -175px;
-  margin-top: -200px;
-  position: absolute;
-  z-index: 1000;
-  text-align: center;
-}
-
-#settings-view #close-settings {
-  color: #b58900;
-}
-
-#settings-view #controls {
-  margin: 5%;
-  text-align: left;
-}
-
-#settings-view #controls tr td:first-child {
-  width: 50%;
-}
-
-#refactor-view {
-  width: 350px;
-  height: 400px;
-  background-color: white;
-  height: 400px;
-  top: 50%;
-  left: 50%;
-  margin-left: -175px;
-  margin-top: -200px;
-  position: absolute;
-  z-index: 1000;
-  text-align: center;
-}
-
 #refactor-view #start-refactor {
   color: #b58900;
 }
 
 #refactor-view #cancel-refactor {
   color: #b58900;
+}
+
+/* This is terribile :( */
+#controls  {display: block; }
+#controls  td {display: inline-block; }
+
+#left-sidebar .version {
+  text-align: center;
 }

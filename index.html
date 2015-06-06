@@ -41,27 +41,197 @@
   <body class="horizontal">
 
     <nav id="left-sidebar" class="vertical no-select fill-height">
-      <header class="header horizontal">
-        <div id="upload" class="button">
-          <div class="icon">&#8623;</div>
-          <div class="label">Upload</div>
-        </div>
-        <div class="fill"></div>
-        <div id="new-file" class="button">
-          <div class="icon">&#8853;</div>
-          <div class="label">New</div>
-        </div>
-      </header>
-      <input id="upload-input" type="file" multiple>
-      <ul id="file-tree" class="fill"></ul>
-
-      <div id="open-settings" class="button">
-        <span class="icon">&#x2699;</span>
-        <span class="label">Settings</span>
+      <div id="files-view" class="fill sidebar-view">
+        <header class="header horizontal">
+          <div id="upload" class="button">
+            <div class="icon">&#8623;</div>
+            <div class="label">Upload</div>
+          </div>
+          <div class="fill"></div>
+          <div id="new-file" class="button">
+            <div class="icon">&#8853;</div>
+            <div class="label">New</div>
+          </div>
+        </header>
+        <input id="upload-input" type="file" multiple>
+        <ul id="file-tree" class="fill body"></ul>
       </div>
-      <div id="rename-vars" class="button">
-        <span class="icon">&#8596;</span>
-        <span class="label">Refactor</span>
+
+      <div id="settings-view" class="hidden fill sidebar-view">
+        <header class="header horizontal">
+          <div class="fill">Settings</div>
+        </header>
+        <div class="body">
+          <table id="controls">
+            <tbody>
+              <tr>
+                <td>
+                  <label for="theme">Theme</label>
+                </td>
+                <td>
+                  <select id="theme" size="1">
+                    <optgroup label="Bright">
+                      <option value="ace/theme/chrome">Chrome</option>
+                      <option value="ace/theme/clouds">Clouds</option>
+                      <option value="ace/theme/crimson_editor">Crimson Editor</option>
+                      <option value="ace/theme/dawn">Dawn</option>
+                      <option value="ace/theme/dreamweaver">Dreamweaver</option>
+                      <option value="ace/theme/eclipse">Eclipse</option>
+                      <option value="ace/theme/github">GitHub</option>
+                      <option value="ace/theme/solarized_light">Solarized Light</option>
+                      <option value="ace/theme/textmate">TextMate</option>
+                      <option value="ace/theme/tomorrow">Tomorrow</option>
+                      <option value="ace/theme/xcode">XCode</option>
+                      <option value="ace/theme/kuroir">Kuroir</option>
+                      <option value="ace/theme/katzenmilch">KatzenMilch</option>
+                    </optgroup>
+                    <optgroup label="Dark">
+                      <option value="ace/theme/ambiance">Ambiance</option>
+                      <option value="ace/theme/chaos">Chaos</option>
+                      <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
+                      <option value="ace/theme/cobalt">Cobalt</option>
+                      <option value="ace/theme/idle_fingers">idle Fingers</option>
+                      <option value="ace/theme/kr_theme">krTheme</option>
+                      <option value="ace/theme/merbivore">Merbivore</option>
+                      <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
+                      <option value="ace/theme/mono_industrial">Mono Industrial</option>
+                      <option value="ace/theme/monokai">Monokai</option>
+                      <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
+                      <option value="ace/theme/solarized_dark">Solarized Dark</option>
+                      <option value="ace/theme/terminal">Terminal</option>
+                      <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
+                      <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
+                      <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
+                      <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
+                      <option value="ace/theme/twilight">Twilight</option>
+                      <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
+                    </optgroup>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="fontsize">Font Size</label>
+                </td>
+                <td>
+                  <select id="fontsize" size="1">
+                    <option value="10px">10px</option>
+                    <option value="11px">11px</option>
+                    <option value="12px" selected="selected">12px</option>
+                    <option value="13px">13px</option>
+                    <option value="14px">14px</option>
+                    <option value="16px">16px</option>
+                    <option value="18px">18px</option>
+                    <option value="20px">20px</option>
+                    <option value="24px">24px</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="folding">Code Folding</label>
+                </td>
+                <td>
+                  <select id="folding" size="1">
+                    <option value="manual">Off</option>
+                    <option value="markbegin" selected="selected">On</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="soft-wrap">Soft Wrap</label>
+                </td>
+                <td>
+                  <select id="soft-wrap" size="1">
+                    <option value="off" selected="selected">Off</option>
+                    <option value="80">80</option>
+                    <option value="free">Edge</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="highlight-active">Highlight Active Line</label>
+                </td>
+                <td>
+                  <input type="checkbox" name="highlight-active" id="highlight-active" checked="">
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="show-hidden">Show Invisibles</label>
+                </td>
+                <td>
+                  <input type="checkbox" name="show-hidden" id="show-hidden" checked="">
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="display-indent-guides">Show Indent Guides</label>
+                </td><td>
+                  <input type="checkbox" name="display-indent-guides" id="display-indent-guides" checked="">
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="show-gutter">Show Gutter</label>
+                </td>
+                <td>
+                  <input type="checkbox" id="show-gutter" checked="">
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="soft-tab">Use Soft Tab</label>
+                </td>
+                <td>
+                  <input type="checkbox" id="soft-tab" checked="">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="version">
+            Grace Compiler Version
+            <div id="version"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="refactor-view" class="hidden fill sidebar-view">
+        <header class="header horizontal">
+          <div class="fill">Refactor</div>
+        </header>
+        <div class="body">
+          <form>
+            Name to Replace<br>
+            <input type="text" name="firstname">
+            <br>
+            New Name<br>
+            <input type="text" name="lastname">
+          </form>
+          <div id="start-refactor" class="button">
+            <span class="label">Begin</span>
+          </div>
+          <div id="cancel-refactor" class="button">
+            <span class="label">Cancel</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="fill sidebar-buttons">
+        <div id="show-files" class="button hidden" value="files">
+          <span class="icon">&#8801;</span>
+          <span class="label">Files</span>
+        </div>
+        <div id="show-settings" class="button" value="settings">
+          <span class="icon">&#x2699;</span>
+          <span class="label">Settings</span>
+        </div>
+        <div id="show-refactor" class="button" value="refactor">
+          <span class="icon">&#8596;</span>
+          <span class="label">Refactor</span>
+        </div>
       </div>
     </nav>
 
@@ -139,165 +309,6 @@
     <div id="minigrace-dump">
       <input id="debugtoggle" type="checkbox">
     </div>
-
-    <div id="settings-view" class="hidden">
-      <h2>Editor Settings</h2>
-
-      <table id="controls">
-        <tbody>
-          <tr>
-            <td>
-              <label for="theme">Theme</label>
-            </td>
-            <td>
-              <select id="theme" size="1">
-                <optgroup label="Bright">
-                  <option value="ace/theme/chrome">Chrome</option>
-                  <option value="ace/theme/clouds">Clouds</option>
-                  <option value="ace/theme/crimson_editor">Crimson Editor</option>
-                  <option value="ace/theme/dawn">Dawn</option>
-                  <option value="ace/theme/dreamweaver">Dreamweaver</option>
-                  <option value="ace/theme/eclipse">Eclipse</option>
-                  <option value="ace/theme/github">GitHub</option>
-                  <option value="ace/theme/solarized_light">Solarized Light</option>
-                  <option value="ace/theme/textmate">TextMate</option>
-                  <option value="ace/theme/tomorrow">Tomorrow</option>
-                  <option value="ace/theme/xcode">XCode</option>
-                  <option value="ace/theme/kuroir">Kuroir</option>
-                  <option value="ace/theme/katzenmilch">KatzenMilch</option>
-                </optgroup>
-                <optgroup label="Dark">
-                  <option value="ace/theme/ambiance">Ambiance</option>
-                  <option value="ace/theme/chaos">Chaos</option>
-                  <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
-                  <option value="ace/theme/cobalt">Cobalt</option>
-                  <option value="ace/theme/idle_fingers">idle Fingers</option>
-                  <option value="ace/theme/kr_theme">krTheme</option>
-                  <option value="ace/theme/merbivore">Merbivore</option>
-                  <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
-                  <option value="ace/theme/mono_industrial">Mono Industrial</option>
-                  <option value="ace/theme/monokai">Monokai</option>
-                  <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
-                  <option value="ace/theme/solarized_dark">Solarized Dark</option>
-                  <option value="ace/theme/terminal">Terminal</option>
-                  <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
-                  <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
-                  <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
-                  <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
-                  <option value="ace/theme/twilight">Twilight</option>
-                  <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
-                </optgroup>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="fontsize">Font Size</label>
-            </td>
-            <td>
-              <select id="fontsize" size="1">
-                <option value="10px">10px</option>
-                <option value="11px">11px</option>
-                <option value="12px" selected="selected">12px</option>
-                <option value="13px">13px</option>
-                <option value="14px">14px</option>
-                <option value="16px">16px</option>
-                <option value="18px">18px</option>
-                <option value="20px">20px</option>
-                <option value="24px">24px</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="folding">Code Folding</label>
-            </td>
-            <td>
-              <select id="folding" size="1">
-                <option value="manual">Off</option>
-                <option value="markbegin" selected="selected">On</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="soft-wrap">Soft Wrap</label>
-            </td>
-            <td>
-              <select id="soft-wrap" size="1">
-                <option value="off" selected="selected">Off</option>
-                <option value="80">80</option>
-                <option value="free">Edge</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="highlight-active">Highlight Active Line</label>
-            </td>
-            <td>
-              <input type="checkbox" name="highlight-active" id="highlight-active" checked="">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="show-hidden">Show Invisibles</label>
-            </td>
-            <td>
-              <input type="checkbox" name="show-hidden" id="show-hidden" checked="">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="display-indent-guides">Show Indent Guides</label>
-            </td><td>
-              <input type="checkbox" name="display-indent-guides" id="display-indent-guides" checked="">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="show-gutter">Show Gutter</label>
-            </td>
-            <td>
-              <input type="checkbox" id="show-gutter" checked="">
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label for="soft-tab">Use Soft Tab</label>
-            </td>
-            <td>
-              <input type="checkbox" id="soft-tab" checked="">
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      Grace Compiler Version
-      <div id="version"></div>
-      <div id="close-settings" class="button">
-        <span class="icon">&#8855;</span>
-        <span class="label">Close</span>
-      </div>
-    </div>
-    
-    <div id="refactor-view" class="hidden">
-      <form>
-        Name to Replace<br>
-        <input type="text" name="firstname">
-        <br>
-        New Name<br>
-        <input type="text" name="lastname">
-      </form>
-      <div id="start-refactor" class="button">
-        <span class="label">Begin</span>
-      </div>
-      <div id="cancel-refactor" class="button">
-        <span class="label">Cancel</span>
-      </div>
-    </div>
-
-    <div id="screen-overlay" class="hidden"></div>
 
   </body>
 
