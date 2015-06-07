@@ -1,7 +1,10 @@
-// Minigrace generates code that relies on the window variable containing the
-// global object. While the global object in this runtime doesn't have
-// many of the expected features of the standard window, assigning it to a
-// global window object suffices to allow the code to compile.
+// Minigrace generates code that relies on the window variable being the
+// global object. Howebver, WebWorkers don't have access to the real `window`
+// object.  This code constructs a n object that has enough features for the
+// generated code to run, and binds it to the window field of this.
+// While this fake window doesn't have many of the expected features of
+// the standard window, it is sufficient to allow minigrace to run.
+
 this.window = this;
 
 (function (window) {
@@ -9,7 +12,36 @@ this.window = this;
 
   var sources;
 
-  window.importScripts("minigrace.js");
+  window.importScripts("../js/minigrace.js");
+  window.importScripts("../js/gracelib.js");
+  window.importScripts("../js/dom.js");
+  window.importScripts("../js/gtk.js");
+  window.importScripts("../js/debugger.js");
+  window.importScripts("../js/collectionsPrelude.js");
+  window.importScripts("../js/StandardPrelude.js");
+  window.importScripts("../js/importStandardPrelude.js");
+  window.importScripts("../js/compiler.js");
+  window.importScripts("../js/lexer.js");
+  window.importScripts("../js/ast.js");
+  window.importScripts("../js/parser.js");
+  window.importScripts("../js/genc.js");
+  window.importScripts("../js/genjs.js");
+  window.importScripts("../js/buildinfo.js");
+  window.importScripts("../js/identifierresolution.js");
+  window.importScripts("../js/genjson.js");
+  window.importScripts("../js/mgcollections.js");
+  window.importScripts("../js/xmodule.js");
+  window.importScripts("../js/unicodedata.js");
+  window.importScripts("../js/errormessages.js");
+  window.importScripts("../js/gUnit.js");
+  window.importScripts("../js/minitest.js");
+  window.importScripts("../js/requireTypes.js");
+  window.importScripts("../js/staticTypes.js");
+  window.importScripts("../js/objectdraw.js");
+  window.importScripts("../js/rtobjectdraw.js");
+  window.importScripts("../js/timer.js");
+  window.importScripts("../js/animation.js");
+  window.importScripts("../js/dialect.js");
 
   sources = {};
 

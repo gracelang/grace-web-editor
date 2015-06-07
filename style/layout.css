@@ -459,3 +459,55 @@ a {
   top: -1000000px;
   left: -1000000px;
 }
+
+/* craptastic copy paste of the output styles. */
+.testoutput {
+  /*-webkit-flex: 1 1 100%;*/
+  /*-o-flex: 1;*/
+  /*-moz-flex: 1;*/
+  /*-ms-flex: 1;*/
+  /*flex: 1;*/
+
+  padding: 8px 0px;
+
+  white-space: -moz-pre-wrap; /* Firefox */
+  white-space: -pre-wrap; /* ancient Opera */
+  white-space: -o-pre-wrap; /* newer Opera */
+  white-space: pre-wrap; /* Chrome; W3C standard */
+  word-wrap: break-word; /* IE */
+
+  overflow-y: auto;
+
+  max-height: 100%;
+
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+}
+
+.testoutput ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.testoutput ul li {
+  padding-left: 1em;
+  text-indent: -.7em;
+}
+
+.testoutput li:before {
+  content: "• ";
+  color: red;
+}
+
+.testoutput p {
+  padding: 2px 10px 0px 10px;
+  margin: 0px;
+}
+
+.testoutput .error {
+  color: #dc322f;
+}
+
+.testoutput .trace {
+  color: #A7A8A2;
+}
