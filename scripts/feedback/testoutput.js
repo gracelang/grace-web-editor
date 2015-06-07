@@ -35,8 +35,18 @@ exports.setup = function (output) {
   }
 
   return {
-    "write": function (content) {      
-      $('#list').append($('<li>').text(content));
+    "addTestMethod": function (content) {
+         $('#methodList').append($('<option>', { value : content }).text(content));
+      scroll();
+    },
+
+    "removeTestMethod": function (content) {
+         $("#methodList option[value=content]").remove();
+      scroll();
+    },
+
+    "write": function (content) {
+      $('#list').append($('<option>').text(content));
       scroll();
     },
 
