@@ -7,9 +7,9 @@ $(function () {
 
   files = require("./files").setup($("#file-tree"));
   editor = require("./editor").setup(files, $("#grace-view"), $(".feedback"), $("#output-hide-reveal"));
-  require("./sidebar")
-    .setup(editor, $("#left-sidebar"), $("#left-sidebar-resize"), $("#left-sidebar-hide-reveal"));
+  require("./sidebar").setup(editor, $("#left-sidebar"), $("#left-sidebar-resize"), $("#left-sidebar-hide-reveal"));
   require("./refactor").setup(editor, $("#refactor-view"));
+  require("./settings").setup(editor, $("#settings-view"));
 
   $(document).keyup(function (event) {
     if (event.which === 49 && event.ctrlKey && event.shiftKey &&

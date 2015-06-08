@@ -90,4 +90,44 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
   } else {
     store();
   }
+
+  $(".sidebar-buttons").on('mouseup', '*', function () {
+    showSidebarView($(this).attr('value'));
+  });
+
+  function showSidebarView(view) {
+    var refactorView = $("#refactor-view");
+    var settingsView = $("#settings-view");
+    var filesView = $("#files-view");
+
+    var refactorButton = $("#show-refactor");
+    var settingsButton = $("#show-settings");
+    var filesButton = $("#show-files");
+
+    if (view == "refactor") {
+      refactorView.removeClass("hidden");
+      settingsView.addClass("hidden");
+      filesView.addClass("hidden");
+
+      refactorButton.addClass("hidden");
+      settingsButton.removeClass("hidden");
+      filesButton.removeClass("hidden");
+    } else if (view == "settings") {
+      refactorView.addClass("hidden");
+      settingsView.removeClass("hidden");
+      filesView.addClass("hidden");
+
+      refactorButton.removeClass("hidden");
+      settingsButton.addClass("hidden");
+      filesButton.removeClass("hidden");
+    } else if (view == "files") {
+      refactorView.addClass("hidden");
+      settingsView.addClass("hidden");
+      filesView.removeClass("hidden");
+
+      refactorButton.removeClass("hidden");
+      settingsButton.removeClass("hidden");
+      filesButton.addClass("hidden");
+    }
+  }
 };
