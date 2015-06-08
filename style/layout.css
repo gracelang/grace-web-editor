@@ -186,8 +186,8 @@ a {
 }
 
 #left-sidebar .sidebar-view {
-  max-height: 87.5%;
-  min-height: 87.5%;
+  max-height: calc(100% - 55px);
+  min-height: calc(100% - 55px);
 }
 
 #left-sidebar .sidebar-view .body {
@@ -215,6 +215,10 @@ a {
 
 #left-sidebar #show-refactor {
   justify-content: center;
+  color: #b58900;
+}
+
+#left-sidebar #refactor-reindent {
   color: #b58900;
 }
 
