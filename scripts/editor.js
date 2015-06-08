@@ -165,6 +165,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
 
   session = editor.getSession();
   session.setTabSize(2);
+  session.setUseSoftTabs(true);
   session.setMode("ace/mode/grace");
 
   session.on("change", function () {

@@ -3,7 +3,7 @@
 var $ = require("jquery");
 
 exports.setup = function (editor, view) {
-  var themeOption, fontsizeOption, foldingOption, softwrapOption, highlightActiveOption, showHiddenOption, displayIndentGuidesOption, showGutterOption, softTabOption, outputView, defaultEditorSettings;
+  var themeOption, fontsizeOption, foldingOption, softwrapOption, highlightActiveOption, showHiddenOption, displayIndentGuidesOption, showGutterOption, outputView, defaultEditorSettings;
 
   themeOption = view.find("#theme");
   fontsizeOption = view.find("#fontsize");
@@ -13,7 +13,6 @@ exports.setup = function (editor, view) {
   showHiddenOption = view.find("#show-hidden");
   displayIndentGuidesOption = view.find("#display-indent-guides");
   showGutterOption = view.find("#show-gutter");
-  softTabOption = view.find("#soft-tab");
 
   outputView = document.getElementById('output-view');
 
@@ -25,14 +24,13 @@ exports.setup = function (editor, view) {
     highlightActiveLine: true,
     showInvisibles: false,
     displayIndentGuides: true,
-    showGutter: true,
-    softTabs: true
+    showGutter: true
   };
 
   // Load settings
   // Clojure because it only needs to be run once
   (function() {
-    var theme, fontSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter, softTabs;
+    var theme, fontSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter;
 
     if (typeof localStorage.editorTheme === 'undefined') {
       localStorage.editorTheme = defaultEditorSettings.theme;
@@ -66,10 +64,6 @@ exports.setup = function (editor, view) {
       localStorage.editorShowGutter = defaultEditorSettings.showGutter;
     }
 
-    if (typeof localStorage.editorSoftTabs === 'undefined') {
-      localStorage.editorSoftTabs = defaultEditorSettings.softTabs;
-    }
-
     theme = localStorage.editorTheme;
     fontSize = localStorage.editorFontSize;
     foldStyle = localStorage.editorFoldStyle;
@@ -78,7 +72,6 @@ exports.setup = function (editor, view) {
     showInvisibles = localStorage.editorShowInvisibles === 'true';
     displayIndentGuides = localStorage.editorDisplayIndentGuides === 'true';
     showGutter = localStorage.editorShowGutter === 'true';
-    softTabs = localStorage.editorSoftTabs === 'true';
 
     editor.setTheme(theme);
     editor.setFontSize(fontSize);
@@ -89,7 +82,6 @@ exports.setup = function (editor, view) {
     editor.setShowInvisibles(showInvisibles);
     editor.setDisplayIndentGuides(displayIndentGuides);
     editor.renderer.setShowGutter(showGutter);
-    editor.getSession().setUseSoftTabs(softTabs);
 
     themeOption.find('option:eq(' + theme + ')').prop('selected', true);
     fontsizeOption.find('option:eq(' + fontSize + ')').prop('selected', true);
@@ -99,7 +91,6 @@ exports.setup = function (editor, view) {
     showHiddenOption.prop('checked', showInvisibles);
     displayIndentGuidesOption.prop('checked', displayIndentGuides);
     showGutterOption.prop('checked', showGutter);
-    softTabOption.prop('checked', softTabs);
   })();
 
   themeOption.change(function() {
@@ -141,10 +132,5 @@ exports.setup = function (editor, view) {
   showGutterOption.change(function() {
     editor.renderer.setShowGutter(this.checked);
     localStorage.editorShowGutter = this.checked;
-  });
-
-  softTabOption.change(function() {
-    editor.getSession().setUseSoftTabs(this.checked);
-    localStorage.editorSoftTabs = this.checked;
   });
 }
