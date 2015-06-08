@@ -164,7 +164,6 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   editor.$blockScrolling = Infinity;
 
   session = editor.getSession();
-  session.setTabSize(2);
   session.setUseSoftTabs(true);
   session.setMode("ace/mode/grace");
 

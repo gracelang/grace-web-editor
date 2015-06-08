@@ -3,10 +3,11 @@
 var $ = require("jquery");
 
 exports.setup = function (editor, view) {
-  var themeOption, fontsizeOption, foldingOption, softwrapOption, highlightActiveOption, showHiddenOption, displayIndentGuidesOption, showGutterOption, outputView, defaultEditorSettings;
+  var themeOption, fontsizeOption, tabsizeOption, foldingOption, softwrapOption, highlightActiveOption, showHiddenOption, displayIndentGuidesOption, showGutterOption, outputView, defaultEditorSettings;
 
   themeOption = view.find("#theme");
   fontsizeOption = view.find("#fontsize");
+  tabsizeOption = view.find("#tabsize");
   foldingOption = view.find("#folding");
   softwrapOption = view.find("#soft-wrap");
   highlightActiveOption = view.find("#highlight-active");
@@ -19,6 +20,7 @@ exports.setup = function (editor, view) {
   defaultEditorSettings = {
     theme: 'ace/theme/chrome',
     fontSize: 14,
+    tabSize: 2,
     foldStyle: 'markbegin',
     wrap: 'off',
     highlightActiveLine: true,
@@ -30,7 +32,7 @@ exports.setup = function (editor, view) {
   // Load settings
   // Clojure because it only needs to be run once
   (function() {
-    var theme, fontSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter;
+    var theme, fontSize, tabSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter;
 
     if (typeof localStorage.editorTheme === 'undefined') {
       localStorage.editorTheme = defaultEditorSettings.theme;
@@ -38,6 +40,10 @@ exports.setup = function (editor, view) {
 
     if (typeof localStorage.editorFontSize === 'undefined') {
       localStorage.editorFontSize = defaultEditorSettings.fontSize;
+    }
+
+    if (typeof localStorage.editorTabSize === 'undefined') {
+      localStorage.editorTabSize = defaultEditorSettings.tabSize;
     }
 
     if (typeof localStorage.editorFoldStyle === 'undefined') {
@@ -66,6 +72,7 @@ exports.setup = function (editor, view) {
 
     theme = localStorage.editorTheme;
     fontSize = localStorage.editorFontSize;
+    tabSize = localStorage.editorTabSize;
     foldStyle = localStorage.editorFoldStyle;
     wrap = localStorage.editorWrap;
     highlightActiveLine = localStorage.editorHighlightActiveLine === 'true';
@@ -75,6 +82,7 @@ exports.setup = function (editor, view) {
 
     editor.setTheme(theme);
     editor.setFontSize(fontSize);
+    editor.getSession().setTabSize(tabSize);
     outputView.style.fontSize = fontSize;
     editor.getSession().setFoldStyle(foldStyle);
     editor.setOption("wrap", wrap);
@@ -85,6 +93,7 @@ exports.setup = function (editor, view) {
 
     themeOption.find('option:eq(' + theme + ')').prop('selected', true);
     fontsizeOption.find('option:eq(' + fontSize + ')').prop('selected', true);
+    tabsizeOption.find('option:eq(' + tabSize + ')').prop('selected', true);
     foldingOption.find('option:eq(' + foldStyle + ')').prop('selected', true);
     softwrapOption.find('option:eq(' + wrap + ')').prop('selected', true);
     highlightActiveOption.prop('checked', highlightActiveLine);
@@ -102,6 +111,11 @@ exports.setup = function (editor, view) {
     editor.setFontSize(this.value);
     outputView.style.fontSize = this.value;
     localStorage.editorFontSize = this.value;
+  });
+
+  tabsizeOption.change(function() {
+    editor.getSession().setTabSize(this.value);
+    localStorage.editorTabSize = this.value;
   });
 
   foldingOption.change(function() {
