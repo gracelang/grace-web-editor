@@ -241,6 +241,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         padding: "8px",
         borderBottomWidth: "1pt",
       }, 400, function() {
+        editor.resize();
         outputView.removeClass("hide");
         hideRevealIcon.html("<b>&#x276C;</b>");
       });
@@ -254,6 +255,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         padding: "0px",
         borderBottomWidth: "0px",
       }, 400, function() {
+        editor.resize();
         outputView.addClass("hide");
         hideRevealIcon.html("<b>&#x276D;</b>");
       });

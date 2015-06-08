@@ -45,6 +45,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
       sidebar.animate({
         width: localStorage.sidebarWidth + "px",
       }, 400, function() {
+        editor.resize();
         sidebar.removeClass("hide");
         hideReveal.html("<b>&#x276c;</b>");
       });
@@ -52,6 +53,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
       sidebar.animate({
         width: "0px",
       }, 400, function() {
+        editor.resize();
         sidebar.addClass("hide");
         hideReveal.html("<b>&#x276D;</b>");
       });
