@@ -232,8 +232,10 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     var hideRevealIcon = view.find("#output-hide-reveal-icon");
 
     if (outputView.hasClass("hide")) {
+      fdbk.css('min-height', '150px');
+
       fileView.animate({
-        height: (view.height() - fdbk.height()) + "px",
+        height: (view.height() - 150) + "px",
       }, 400);
 
       outputView.animate({
@@ -246,8 +248,10 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         hideRevealIcon.html("<b>&#x276C;</b>");
       });
     } else {
+      fdbk.css('min-height', '27px');
+
       fileView.animate({
-        height: (view.height() - view.find(".compilation").height()) + "px",
+        height: (view.height() - 27) + "px",
       }, 400);
 
       outputView.animate({
