@@ -506,56 +506,5 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     localStorage.editorSoftTabs = this.checked;
   });
 
-  function stringRepeat(pattern, count) {
-    if (count < 1) return '';
-    var result = '';
-    while (count > 1) {
-        if (count & 1) result += pattern;
-        count >>= 1, pattern += pattern;
-    }
-    return result + pattern;
-  }
-
-  function formatGrace(code) {
-    var indentLevel = 0;
-    var formattedCode = '';
-    var lines = code.split("\n");
-
-    for (var i = 0; i < lines.length; i++) { 
-      var line = lines[i].trim();
-
-      if (line != "\n") {
-        var padding = '';
-
-        if (line.indexOf("}") > -1) {
-          indentLevel--;
-        }
-
-        for (var j = 0; j < indentLevel; j++) {
-          padding += stringRepeat(' ', session.getTabSize());
-        }
-
-        line = padding + line;
-
-        if (line.indexOf("{") > -1) {
-          indentLevel++;
-        }
-      }
-
-      if (i + 1 != lines.length) {
-        line += '\n';
-      }
-
-      formattedCode += line;
-    }
-
-    return formattedCode;
-  }
-
-  $("#refactor-view #refactor-reindent").mouseup(function () {
-    var code = editor.getSession().getValue();
-    editor.getSession().setValue(formatGrace(code));
-  });
-
   return editor;
 };
