@@ -230,12 +230,14 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     var fileView = view.find(".open-file");
     var outputView = view.find("#output-view");
     var hideRevealIcon = view.find("#output-hide-reveal-icon");
+    var shownFeedbackSize = 150;
+    var hiddenFeedbackSize = 27;
 
     if (outputView.hasClass("hide")) {
-      fdbk.css('min-height', '150px');
+      fdbk.css('min-height', shownFeedbackSize + 'px');
 
       fileView.animate({
-        height: (view.height() - 150) + "px",
+        height: (view.height() - shownFeedbackSize) + "px",
       }, 400);
 
       outputView.animate({
@@ -248,10 +250,10 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         hideRevealIcon.html("<b>&#x276C;</b>");
       });
     } else {
-      fdbk.css('min-height', '27px');
+      fdbk.css('min-height', hiddenFeedbackSize + 'px');
 
       fileView.animate({
-        height: (view.height() - 27) + "px",
+        height: (view.height() - hiddenFeedbackSize) + "px",
       }, 400);
 
       outputView.animate({
