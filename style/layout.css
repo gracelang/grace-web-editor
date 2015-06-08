@@ -556,5 +556,6 @@ a {
 #controls  td {display: inline-block; }
 
 #left-sidebar .version {
+  margin-top: 5px;
   text-align: center;
 }
