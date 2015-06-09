@@ -354,7 +354,7 @@ a {
   -ms-flex: 1 0 750px;
   flex: 1 0 750px;
 
-  min-height: 50%;
+  min-height: calc(100% - 150px);
   max-height: 100%;
 }
 
@@ -369,7 +369,8 @@ a {
 
   min-height: 150px;
   min-width: 500px;
-  max-height: 100%;
+  max-height: 150px;
+  overflow-y: hidden; 
 }
 
 @media all and (min-height: 600px) {
@@ -480,9 +481,7 @@ a {
   white-space: pre-wrap; /* Chrome; W3C standard */
   word-wrap: break-word; /* IE */
 
-  overflow-y: auto;
-
-  max-height: 100%;
+  overflow-y: scroll;
 
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
 }

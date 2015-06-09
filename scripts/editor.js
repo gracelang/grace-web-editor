@@ -250,6 +250,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       });
     } else {
       fdbk.css('min-height', hiddenFeedbackSize + 'px');
+      fdbk.css('max-height', hiddenFeedbackSize + 'px');
 
       fileView.animate({
         height: (view.height() - hiddenFeedbackSize) + "px",
