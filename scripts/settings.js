@@ -20,12 +20,12 @@ exports.setup = function (editor, view) {
   defaultEditorSettings = {
     theme: 'ace/theme/chrome',
     fontSize: 14,
-    tabSize: 2,
+    tabSize: 4,
     foldStyle: 'markbegin',
     wrap: 'off',
     highlightActiveLine: true,
     showInvisibles: false,
-    displayIndentGuides: true,
+    displayIndentGuides: false,
     showGutter: true
   };
 
