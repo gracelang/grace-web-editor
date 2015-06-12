@@ -29,7 +29,7 @@ exports.setup = function (editor, view) {
       if (line != "\n") {
         var padding = '';
 
-        if (line.indexOf("}") > -1) {
+        if ((line.indexOf("}") > -1) && (line.indexOf("{") == -1)) {
           indentLevel--;
         }
 
@@ -39,7 +39,7 @@ exports.setup = function (editor, view) {
 
         line = padding + line;
 
-        if (line.indexOf("{") > -1) {
+        if ((line.indexOf("{") > -1) && (line.indexOf("}") == -1)) {
           indentLevel++;
         }
       }
