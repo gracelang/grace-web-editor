@@ -33,6 +33,7 @@ this.window = this;
   window.importScripts("../js/xmodule.js");
   window.importScripts("../js/unicodedata.js");
   window.importScripts("../js/errormessages.js");
+  window.importScripts("../js/math.js");
   window.importScripts("../js/gUnit.js");
   window.importScripts("../js/minitest.js");
   window.importScripts("../js/requireTypes.js");
