@@ -38,6 +38,26 @@
     <script src="js/animation.js" type="text/javascript"></script>
     <script src="js/dialect.js" type="text/javascript"></script>
     <script src="scripts/setup.js"></script>
+    <script src="js/createjs-2014.12.12.min.js" type="text/javascript"></script>
+    <script src="js/CanvasInput.min.js" type="text/javascript"></script>
+    <script>
+      createjs.Sound.registerSounds(
+        [
+          {id:"note1", src:"note1.mp3"},
+          {id:"note2", src:"note2.mp3"},
+          {id:"note3", src:"note3.mp3"},
+          {id:"note4", src:"note4.mp3"},
+          {id:"note5", src:"note5.mp3"},
+          {id:"note6", src:"note6.mp3"},
+          {id:"note7", src:"note7.mp3"},
+          {id:"note8", src:"note8.mp3"},
+          {id:"bicycle_bell", src:"bicycle_bell.wav"},
+          {id:"shutter", src:"shutter.wav"},
+          {id:"snap", src:"snap.wav"},
+          {id:"whoosh", src:"whoosh.wav"}
+        ],
+        "res/");
+    </script>
   </head>
 
   <body class="horizontal">
@@ -289,6 +309,12 @@
         <pre id="output-view" class="output fill"></pre>
       </section>
 
+    </div>
+
+    <div id="graphics-view" class="no-select">
+      <section>
+        <canvas id="graphics" width="300" height="500"></canvas>
+      </section>
     </div>
 
     <div id="image-view" class="view horizontal fill fill-height hidden">
