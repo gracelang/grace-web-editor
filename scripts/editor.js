@@ -1,6 +1,8 @@
 "use strict";
 
-var ace, audio, compiler, feedback, intervals, path, timers, windows;
+var $, ace, audio, compiler, feedback, intervals, path, timers, windows;
+
+$ = require("jquery");
 
 ace = require("brace");
 path = require("path");
@@ -12,14 +14,46 @@ compiler = require("./compiler");
 feedback = require("./feedback");
 
 require("./ace/mode-grace");
+require('brace/theme/ambiance');
+require('brace/theme/chaos');
+require('brace/theme/chrome');
+require('brace/theme/clouds_midnight');
+require('brace/theme/clouds');
+require('brace/theme/cobalt');
+require('brace/theme/crimson_editor');
+require('brace/theme/dawn');
+require('brace/theme/dreamweaver');
+require('brace/theme/eclipse');
+require('brace/theme/github');
+require('brace/theme/idle_fingers');
+require('brace/theme/katzenmilch');
+require('brace/theme/kr_theme');
+require('brace/theme/kuroir');
+require('brace/theme/merbivore_soft');
+require('brace/theme/merbivore');
+require('brace/theme/mono_industrial');
+require('brace/theme/monokai');
+require('brace/theme/pastel_on_dark');
+require('brace/theme/solarized_dark');
+require('brace/theme/solarized_light');
+require('brace/theme/terminal');
+require('brace/theme/textmate');
+require('brace/theme/tomorrow_night_blue');
+require('brace/theme/tomorrow_night_bright');
+require('brace/theme/tomorrow_night_eighties');
+require('brace/theme/tomorrow_night');
+require('brace/theme/tomorrow');
+require('brace/theme/twilight');
+require('brace/theme/vibrant_ink');
+require('brace/theme/xcode');
 
 windows = [];
 timers = [];
 intervals = [];
 audio = [];
 
-exports.setup = function (files, view, fdbk) {
-  var download, drop, editor, fileName, opening, rename, session;
+exports.setup = function (files, view, fdbk, hideReveal) {
+  var download, drop, search, editor, fileName, opening, rename, session;
 
   function stop() {
     windows.forEach(function (win) {
@@ -75,9 +109,50 @@ exports.setup = function (files, view, fdbk) {
 
   download = view.find(".download");
   fileName = view.find(".file-name");
+  search = view.find(".search");
   drop = view.find(".delete");
 
   rename = view.find(".file-name-input");
+  
+  function runProgram() {
+    var escaped, modname;
+
+    feedback.running();
+
+    modname = path.basename(fileName.text(), ".grace");
+    escaped = "gracecode_" + modname.replace("/", "$");
+
+    global.gracecode_main = global[escaped];
+    global.theModule = global[escaped];
+
+    minigrace.lastSourceCode = editor.getValue();
+    minigrace.lastModname = modname;
+    minigrace.lastMode = "js";
+    minigrace.lastDebugMode = true;
+
+    minigrace.stdout_write = function (value) {
+      feedback.output.write(value);
+      openOutputViewIfHidden();
+    };
+
+    minigrace.stderr_write = function (value) {
+      feedback.output.error(value);
+      openOutputViewIfHidden();
+      stop();
+    };
+
+    try {
+      minigrace.run();
+    } catch (error) {
+      feedback.output.error(error.toString());
+      openOutputViewIfHidden();
+      stop();
+    }
+
+    if (!checkStop()) {
+      return stop;
+    }
+  }
 
   function setDownload(name, text) {
     download.attr("href", URL.createObjectURL(new Blob([ text ], {
@@ -86,12 +161,10 @@ exports.setup = function (files, view, fdbk) {
   }
 
   editor = ace.edit(view.find(".editor")[0]);
-
-  editor.setFontSize(14);
+  editor.$blockScrolling = Infinity;
 
   session = editor.getSession();
   session.setUseSoftTabs(true);
-  session.setTabSize(2);
   session.setMode("ace/mode/grace");
 
   session.on("change", function () {
@@ -127,6 +200,7 @@ exports.setup = function (files, view, fdbk) {
     compiler.compile(modname, session.getValue(), function (reason) {
       if (reason !== null) {
         feedback.error(reason);
+        openOutputViewIfHidden();
 
         if (reason.module === name && reason.line) {
           session.setAnnotations([ {
@@ -138,43 +212,64 @@ exports.setup = function (files, view, fdbk) {
         }
       } else {
         feedback.compilation.ready();
+        runProgram();
       }
     });
   }, function () {
-    var escaped, modname;
+      runProgram();
+  });
 
-    feedback.running();
-
-    modname = path.basename(fileName.text(), ".grace");
-    escaped = "gracecode_" + modname.replace("/", "$");
-
-    global.gracecode_main = global[escaped];
-    global.theModule = global[escaped];
-
-    minigrace.lastSourceCode = editor.getValue();
-    minigrace.lastModname = modname;
-    minigrace.lastMode = "js";
-    minigrace.lastDebugMode = true;
-
-    minigrace.stdout_write = function (value) {
-      feedback.output.write(value);
-    };
-
-    minigrace.stderr_write = function (value) {
-      feedback.output.error(value);
-      stop();
-    };
-
-    try {
-      minigrace.run();
-    } catch (error) {
-      feedback.output.error(error.toString());
-      stop();
+  function openOutputViewIfHidden() {
+    if (view.find("#output-view").hasClass("hide")) {
+      toggleOutputView();
     }
+  }
 
-    if (!checkStop()) {
-      return stop;
+  function toggleOutputView() {
+    var fileView = view.find(".open-file");
+    var outputView = view.find("#output-view");
+    var hideRevealIcon = view.find("#output-hide-reveal-icon");
+    var shownFeedbackSize = 150;
+    var hiddenFeedbackSize = 27;
+
+    if (outputView.hasClass("hide")) {
+      fdbk.css('min-height', shownFeedbackSize + 'px');
+
+      fileView.animate({
+        height: (view.height() - shownFeedbackSize) + "px",
+      }, 400);
+
+      outputView.animate({
+        flexGrow: "1",
+        padding: "8px",
+        borderBottomWidth: "1pt",
+      }, 400, function() {
+        editor.resize();
+        outputView.removeClass("hide");
+        hideRevealIcon.html("<b>&#x276C;</b>");
+      });
+    } else {
+      fdbk.css('min-height', hiddenFeedbackSize + 'px');
+      fdbk.css('max-height', hiddenFeedbackSize + 'px');
+
+      fileView.animate({
+        height: (view.height() - hiddenFeedbackSize) + "px",
+      }, 400);
+
+      outputView.animate({
+        flexGrow: "0",
+        padding: "0px",
+        borderBottomWidth: "0px",
+      }, 400, function() {
+        editor.resize();
+        outputView.addClass("hide");
+        hideRevealIcon.html("<b>&#x276D;</b>");
+      });
     }
+  }
+
+  hideReveal.mouseup(function () {
+    toggleOutputView();
   });
 
   files.onOpen(function (name, content) {
@@ -237,6 +332,16 @@ exports.setup = function (files, view, fdbk) {
   // once the size settles.
   setImmediate(function () {
     editor.resize(true);
+  });
+
+  search.mouseup(function () {
+    if (search.find(".label").html() == "Search") {
+      editor.execCommand("find");
+      search.find(".label").html("Replace");
+    } else {
+      editor.execCommand("replace");
+      search.find(".label").html("Search");
+    }
   });
 
   return editor;
