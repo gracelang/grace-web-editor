@@ -26,3 +26,6 @@ node_modules
 
 scripts/minigrace.js
 scripts/setup.js
+
+# Grace js files
+js/
