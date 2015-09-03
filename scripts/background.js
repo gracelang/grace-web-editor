@@ -41,6 +41,7 @@ this.window = this;
   window.importScripts("../js/staticTypes.js");
   window.importScripts("../js/objectdraw.js");
   window.importScripts("../js/rtobjectdraw.js");
+  window.importScripts("../js/stobjectdraw.js");
   window.importScripts("../js/timer.js");
   window.importScripts("../js/animation.js");
   window.importScripts("../js/dialect.js");
