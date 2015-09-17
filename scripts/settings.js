@@ -18,7 +18,7 @@ exports.setup = function (editor, view) {
   outputView = document.getElementById('output-view');
 
   defaultEditorSettings = {
-    theme: 'ace/theme/chrome',
+    theme: 'ace/theme/github',
     fontSize: 14,
     tabSize: 4,
     foldStyle: 'markbegin',
@@ -90,6 +90,7 @@ exports.setup = function (editor, view) {
     editor.setShowInvisibles(showInvisibles);
     editor.setDisplayIndentGuides(displayIndentGuides);
     editor.renderer.setShowGutter(showGutter);
+    editor.setBehavioursEnabled(false);
 
     themeOption.find('option:eq(' + theme + ')').prop('selected', true);
     fontsizeOption.find('option:eq(' + fontSize + ')').prop('selected', true);
