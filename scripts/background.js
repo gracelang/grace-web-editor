@@ -29,7 +29,7 @@ this.window = this;
   window.importScripts("../js/buildinfo.js");
   window.importScripts("../js/identifierresolution.js");
   window.importScripts("../js/genjson.js");
-  window.importScripts("../js/mgcollections.js");
+  window.importScripts("../js/stringMap.js");
   window.importScripts("../js/unixFilePath.js");
   window.importScripts("../js/xmodule.js");
   window.importScripts("../js/unicodedata.js");
