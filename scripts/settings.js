@@ -3,7 +3,7 @@
 var $ = require("jquery");
 
 exports.setup = function (editor, view) {
-  var themeOption, fontsizeOption, tabsizeOption, foldingOption, softwrapOption, highlightActiveOption, showHiddenOption, displayIndentGuidesOption, showGutterOption, outputView, defaultEditorSettings;
+  var themeOption, fontsizeOption, tabsizeOption, foldingOption, softwrapOption, highlightActiveOption, showHiddenOption, displayIndentGuidesOption, showGutterOption, outputView, defaultEditorSettings, autoPairOption;
 
   themeOption = view.find("#theme");
   fontsizeOption = view.find("#fontsize");
@@ -14,6 +14,7 @@ exports.setup = function (editor, view) {
   showHiddenOption = view.find("#show-hidden");
   displayIndentGuidesOption = view.find("#display-indent-guides");
   showGutterOption = view.find("#show-gutter");
+  autoPairOption = view.find("#auto-pair");
 
   outputView = document.getElementById('output-view');
 
@@ -26,13 +27,14 @@ exports.setup = function (editor, view) {
     highlightActiveLine: true,
     showInvisibles: false,
     displayIndentGuides: false,
-    showGutter: true
+    showGutter: true,
+    autoPair: true
   };
 
   // Load settings
   // Clojure because it only needs to be run once
   (function() {
-    var theme, fontSize, tabSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter;
+    var theme, fontSize, tabSize, foldStyle, wrap, highlightActiveLine, showInvisibles, displayIndentGuides, showGutter, autoPair;
 
     if (typeof localStorage.editorTheme === 'undefined') {
       localStorage.editorTheme = defaultEditorSettings.theme;
@@ -79,6 +81,7 @@ exports.setup = function (editor, view) {
     showInvisibles = localStorage.editorShowInvisibles === 'true';
     displayIndentGuides = localStorage.editorDisplayIndentGuides === 'true';
     showGutter = localStorage.editorShowGutter === 'true';
+    autoPair = localStorage.editorAutoPair === 'true';
 
     editor.setTheme(theme);
     editor.setFontSize(fontSize);
@@ -90,7 +93,7 @@ exports.setup = function (editor, view) {
     editor.setShowInvisibles(showInvisibles);
     editor.setDisplayIndentGuides(displayIndentGuides);
     editor.renderer.setShowGutter(showGutter);
-    editor.setBehavioursEnabled(false);
+    editor.setBehavioursEnabled(autoPair);
 
     themeOption.find('option:eq(' + theme + ')').prop('selected', true);
     fontsizeOption.find('option:eq(' + fontSize + ')').prop('selected', true);
@@ -101,6 +104,7 @@ exports.setup = function (editor, view) {
     showHiddenOption.prop('checked', showInvisibles);
     displayIndentGuidesOption.prop('checked', displayIndentGuides);
     showGutterOption.prop('checked', showGutter);
+    autoPairOption.prop('checked', autoPair);
   })();
 
   themeOption.change(function() {
@@ -147,5 +151,10 @@ exports.setup = function (editor, view) {
   showGutterOption.change(function() {
     editor.renderer.setShowGutter(this.checked);
     localStorage.editorShowGutter = this.checked;
+  });
+
+  autoPairOption.change(function() {
+    editor.setBehavioursEnabled(this.checked);
+    localStorage.editorAutoPair = this.checked;
   });
 }
