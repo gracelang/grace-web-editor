@@ -3,59 +3,91 @@
 var $ = require("jquery");
 
 exports.setup = function (editor, view) {
-  var reindentButton;
+    var reindentButton;
 
-  reindentButton = view.find("#refactor-reindent");
+    reindentButton = view.find("#refactor-reindent");
 
-  function stringRepeat(pattern, count) {
-    if (count < 1) return '';
-    var result = '';
-    while (count > 1) {
-        if (count & 1) result += pattern;
-        count >>= 1, pattern += pattern;
-    }
-    return result + pattern;
-  }
-
-  function formatGrace(code) {
-    // This needs more work, lots of edges cases are not covered
-    var indentLevel = 0;
-    var formattedCode = '';
-    var lines = code.split("\n");
-
-    for (var i = 0; i < lines.length; i++) { 
-      var line = lines[i].trim();
-
-      if (line != "\n") {
-        var padding = '';
-
-        if ((line.indexOf("}") > -1) && (line.indexOf("{") == -1)) {
-          indentLevel--;
+    function stringRepeat(pattern, count) {
+        if (count < 1) return '';
+        var result = '';
+        while (count > 1) {
+            if (count & 1) result += pattern;
+            count >>= 1, pattern += pattern;
         }
-
-        for (var j = 0; j < indentLevel; j++) {
-          padding += stringRepeat(' ', editor.session.getTabSize());
-        }
-
-        line = padding + line;
-
-        if ((line.indexOf("{") > -1) && (line.indexOf("}") == -1)) {
-          indentLevel++;
-        }
-      }
-
-      if (i + 1 != lines.length) {
-        line += '\n';
-      }
-
-      formattedCode += line;
+        return result + pattern;
     }
 
-    return formattedCode;
-  }
+    function charCount(text, char) {
+        return text.split(char).length - 1
+    }
 
-  reindentButton.mouseup(function () {
-    var code = editor.getSession().getValue();
-    editor.getSession().setValue(formatGrace(code));
-  });
+    function indentOf(text) {
+        var length = text.length;
+        for (var ix = 0; ix < length;  ix++) {
+            if (text.charCodeAt(ix) != 32) return ix;
+        }
+        return 0;  // text is nothing but spaces
+    }
+
+    var tabSize = Number(editor.session.getTabSize());
+
+    function formatGrace(code) {
+        // Continuation lines cause headaches.  We can ignore all of the
+        // original formatting *except* for the formatting that indicates
+        // continuation lines.  This code assumes that any increase in
+        // indentation not due to a change in brace level indicates a
+        // continuation line.  It formats continuation lines in the output
+        // using a continuaiton indent that is 2 spaces greater than tabSize.
+        var braceDepth = 0;
+        var continuationIndent = tabSize + 2;
+        var formattedCode = '';
+        var inContinuation = false;
+        var prevIndent = 0;
+        var prevBraceChange = 0;
+        var lines = code.split("\n");
+        var length = lines.length;
+
+        for (var i = 0; i < length; i++) {
+            var line = lines[i];
+            var trimmedLine = line.trim();
+            if (trimmedLine === "") {
+                // blank lines are a special case because they don't change
+                // prevIndent or prevBraceChange, but do end continuations.
+                inContinuation = false;
+                formattedCode = formattedCode + '\n';
+            } else {
+                var currentIndent = indentOf(line);
+                var openBraces = charCount(trimmedLine, "{");
+                var closeBraces = charCount(trimmedLine, "}");
+                var currentBraceChange = openBraces - closeBraces;
+                var startsWithClose = trimmedLine[0] === "}";
+
+                var indentSize = tabSize * braceDepth;
+                if (startsWithClose) indentSize = indentSize - tabSize;
+                
+                if (inContinuation) {
+                    if (currentIndent < prevIndent) inContinuation = false;
+                } else {
+                    if ((currentIndent > prevIndent) && (prevBraceChange <= 0))
+                        inContinuation = true;
+                }
+                if (inContinuation) {
+                    indentSize = indentSize + continuationIndent;
+                }
+
+                braceDepth = braceDepth + currentBraceChange;
+                var indentedLine = stringRepeat(' ', indentSize) + trimmedLine
+                formattedCode = formattedCode + indentedLine + '\n';
+                prevIndent = currentIndent;
+                prevBraceChange = startsWithClose ? 1 : currentBraceChange;
+            }
+        }
+        return formattedCode;
+    }
+
+    reindentButton.mouseup(function () {
+        var code = editor.getSession().getValue();
+        tabSize = Number(editor.session.getTabSize());
+        editor.getSession().setValue(formatGrace(code));
+    });
 }
