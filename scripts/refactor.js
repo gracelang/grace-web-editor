@@ -45,6 +45,8 @@ exports.setup = function (editor, view) {
         var prevIndent = 0;
         var prevBraceChange = 0;
         var lines = code.split("\n");
+            // if there is a newline at the end of the code, there will
+            // be a final blank line in the array lines.
         var length = lines.length;
 
         for (var i = 0; i < length; i++) {
@@ -54,7 +56,7 @@ exports.setup = function (editor, view) {
                 // blank lines are a special case because they don't change
                 // prevIndent or prevBraceChange, but do end continuations.
                 inContinuation = false;
-                formattedCode = formattedCode + '\n';
+                if (i < (length - 1)) formattedCode = formattedCode + '\n';
             } else {
                 var currentIndent = indentOf(line);
                 var openBraces = charCount(trimmedLine, "{");
