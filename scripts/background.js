@@ -22,6 +22,7 @@ this.window = this;
   window.importScripts("../js/importStandardPrelude.js");
   window.importScripts("../js/compiler.js");
   window.importScripts("../js/lexer.js");
+  window.importScripts("../js/identifierKinds.js");
   window.importScripts("../js/ast.js");
   window.importScripts("../js/parser.js");
   window.importScripts("../js/genc.js");
