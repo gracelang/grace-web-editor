@@ -1,5 +1,5 @@
 { "name": "grace-web-editor"
-, "version": "0.1.0-pre"
+, "version": "0.1.1-psu"
 , "description": "A web editor for Minigrace"
 , "keywords":
   [ "grace"
@@ -34,8 +34,17 @@
   , "email": "tim@zmthy.io"
   , "url": "http://zmthy.io"
   }
-, "license":
-  { "type": "GPL-3.0+"
-  , "url": "https://www.gnu.org/licenses/gpl-3.0.html"
-  }
+, "contributors":
+  [ { "name": "Andrew P. Black"
+    , "email": "black@cs.pdx.edu"
+    , "url": "http://www.cs.pdx.edu/~black"
+    }
+  , "Ruben Niculcea"
+  , "Claire Sun"
+  , "Kris Frye"
+  , "John Donahue"
+  , "Ryan Niebur"
+  , "Cameron Brandon White"
+  ]
+, "license": "GPL-3.0"
 }
