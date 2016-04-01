@@ -120,7 +120,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     feedback.running();
 
     modname = path.basename(fileName.text(), ".grace");
-    escaped = "gracecode_" + modname.replace("/", "$");
+    escaped = graceModuleName(modname);
 
     global.gracecode_main = global[escaped];
     global.theModule = global[escaped];

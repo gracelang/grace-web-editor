@@ -21,7 +21,7 @@ function pump(name, key, value) {
 }
 
 function isCompiled(name) {
-  return global.hasOwnProperty("gracecode_" + path.basename(name, ".grace"));
+  return global.hasOwnProperty(graceModuleName(name));
 }
 
 exports.isCompiled = isCompiled;
@@ -34,7 +34,7 @@ exports.isCompiling = function (name) {
 
 exports.forget = function (name) {
   name = path.basename(name, ".grace");
-  delete global["gracecode_" + name];
+  delete global[graceModuleName(name)];
 
   worker.postMessage({
     "action": "forget",
@@ -47,7 +47,7 @@ function compile(name, source, callback) {
 
   callbacks.push({
     "onSuccess": function (output) {
-      var escaped = "gracecode_" + name.replace("/", "$");
+      var escaped = graceModuleName(name);
 
       try {
         global["eval"]("var myframe;" + output +

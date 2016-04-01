@@ -41,6 +41,9 @@ exports.setup = function (output) {
       if (typeof error === "string") {
         output.append(newError(error));
         return;
+      } else if (error.text) {
+        output.append(newError(error.text));
+        return;
       }
 
       if (error.stack !== undefined) {
