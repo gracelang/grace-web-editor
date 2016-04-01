@@ -120,10 +120,10 @@ this.window = this;
     }
 
     if (!window.minigrace.compileError) {
-      escaped = "gracecode_" + name.replace("/", "$");
+      escaped = graceModuleName(name);
       output = window.minigrace.generated_output;
 
-      window["eval"]("var myframe;" + output +
+      window.eval("var myframe;" + output +
                      ";window." + escaped + "=" + escaped);
 
       window.postMessage({
