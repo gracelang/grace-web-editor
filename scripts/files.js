@@ -54,11 +54,6 @@ exports.setup = function (tree) {
       return false;
     }
 
-    if (!/^[\w.]+$/.test(givenName)) {
-      alert("Only letters, dots, numbers, and underscores are allowed.");
-      return false;
-    }
-
     if (currentDirectory !== undefined) {
       givenName = currentDirectory.attr("dire-name") + "/" + givenName;
     }
