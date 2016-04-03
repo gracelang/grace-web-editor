@@ -47,6 +47,8 @@ this.window = this;
   window.importScripts("../js/dialect.js");
   window.importScripts("../js/createJsGraphicsWrapper.js");
   window.importScripts("../js/graphix.js");
+  window.importScripts("../js/random.js");
+  window.importScripts("../js/option.js");
 
   sources = {};
 
