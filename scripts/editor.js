@@ -202,7 +202,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         feedback.error(reason);
         openOutputViewIfHidden();
 
-        if (reason.module === name && reason.line) {
+        if (reason.module === modname && reason.line) {
           session.setAnnotations([ {
             "row": reason.line - 1,
             "column": reason.column && reason.column - 1,
