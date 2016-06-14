@@ -52,6 +52,10 @@ timers = [];
 intervals = [];
 audio = [];
 
+window._currentEditor = undefined;
+
+exports.currentEditor = function() { _currentEditor };
+
 exports.setup = function (files, view, fdbk, hideReveal) {
   var download, drop, search, editor, fileName, opening, rename, session;
 
@@ -343,6 +347,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       search.find(".label").html("Search");
     }
   });
-
+    
+  window._currentEditor = editor;
   return editor;
 };
