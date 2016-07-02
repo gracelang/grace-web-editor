@@ -113,7 +113,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   drop = view.find(".delete");
 
   rename = view.find(".file-name-input");
-  
+
   function runProgram() {
     var escaped, modname;
 
@@ -130,6 +130,9 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     minigrace.lastMode = "js";
     minigrace.lastDebugMode = true;
 
+    minigrace.stdin_read = function () {
+        return window.prompt("Input");
+    };
     minigrace.stdout_write = function (value) {
       feedback.output.write(value);
       openOutputViewIfHidden();
