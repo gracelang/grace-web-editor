@@ -10,13 +10,16 @@ require("setimmediate");
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
-      lastSelect, newFile, onOpenCallbacks, upload;
+      lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir;
 
   current = null;
 
   input = $("#upload-input");
   upload = $("#upload");
   newFile = $("#new-file");
+  newDir = $("#new-dir");
+  deleteDir = $("#deleteSelected");
+
 
   onOpenCallbacks = [];
 
@@ -123,6 +126,9 @@ exports.setup = function (tree) {
       }
     }
 
+    //Store real filename for editor error checking process
+    localStorage.setItem("filePathName", fileName);
+
     if (!noChange) {
       if (lastSelect !== undefined) {
         lastSelect.css({ "font-weight": "", "color": "" });
@@ -138,6 +144,7 @@ exports.setup = function (tree) {
 
     slashIndex = fileName.lastIndexOf("/");
 
+    //Check if there is a directory -- otherwise set to undefined.
     if (slashIndex !== -1) {
       directory = fileName.substring(0, slashIndex);
       currentDirectory = tree.find('[dire-name="' + directory + '"]');
@@ -193,7 +200,7 @@ exports.setup = function (tree) {
     var content, file, newDataName = to;
 
     file = localStorage.currentFile;
-
+    
     if (!file) {
       throw new Error("Rename when no file is open");
     }
@@ -237,16 +244,78 @@ exports.setup = function (tree) {
     delete localStorage.currentFile;
   }
 
+  function removeDir(name)
+  {
+    if (name == undefined) {
+      alert("Oops! Can't delete this directory!");
+      return;
+    }
+
+    delete localStorage["directory:" + name];
+    tree.find('[data-name="' + name + '"]').remove();
+  }
+
+  (function () {
+    "use strict";
+
+    var menu = document.querySelector(".context-menu");
+    var active = "context-menu--active";
+
+    // var listItems = document.querySelectorAll(".ui-draggable");
+    // var fileItems = document.querySelectorAll(".file");
+    // var dirItems = document.querySelectorAll(".directory");
+
+    // for( var i=0, len = listItems.length; i<len; ++i)
+    // {
+    //     var listItem = listItems[i];
+    //     contextMenuListener(listItem);
+    // }
+    //
+    // function contextMenuListener(eventList){
+    //     eventList.addEventListener("contextmenu", function(event){
+    //         event.preventDefault();
+    //         console.log(event);
+    //     });
+    // }
+
+    $(".ui-draggable").mousedown(function(e){
+      e.preventDefault();
+      
+      if(e.which == 3) {
+        menu.classList.add(active);
+
+        $(menu).show();
+        $(menu).offset({left: e.pageX, top: e.pageY});
+
+        //Store the item that was clicked on
+        $(".directory").data('toDelete', this);
+
+      }
+    });
+
+    $("*").click(function(e){
+      $(menu).hide();
+    });
+    
+    $("#deleteSelected").click(function (event) {
+      //removeDir();
+      var toDelete = $(".directory").data('toDelete');
+      //alert('delete was clicked by ' + toDelete.id );
+    });
+
+  })();
+
+
   function isChanged(name, value) {
     if (!localStorage.hasOwnProperty("file:" + name)) {
-      throw new Error("Cannot compare change non-existent file " + name);
+     throw new Error("Cannot compare change non-existent file " + name);
     }
 
     return localStorage["file:" + name] !== value;
   }
 
   function addFile(name) {
-    var div, inserted, li, parent, slashIndex;
+    var div, inserted, li, parent, slashIndex, parentDir;
 
     li = $("<li>");
     li.addClass("file");
@@ -257,8 +326,14 @@ exports.setup = function (tree) {
 
     slashIndex = name.lastIndexOf("/");
 
-    if (slashIndex !== -1) {
+    if (slashIndex != -1){
+      parentDir = name.substring(0, slashIndex);
       name = name.substring(slashIndex + 1);
+
+      currentDirectory = tree.find('[dire-name="' + parentDir + '"]');
+    }
+    else{
+      currentDirectory = undefined;
     }
 
     div.text(name);
@@ -270,6 +345,7 @@ exports.setup = function (tree) {
 
     inserted = false;
 
+    //Set to correct parent for data structure
     if (currentDirectory === undefined) {
       parent = tree;
     } else {
@@ -300,7 +376,7 @@ exports.setup = function (tree) {
 
   function dropFile(draggedFile, droppedDire) {
     var content, dir, draggedName, droppedName,
-        name, slashIndex, storeCurrentDirectory;
+        name, slashIndex, storeCurrentDirectory, oldLocal;
 
     draggedName = draggedFile.attr("data-name");
     name = draggedName;
@@ -344,7 +420,7 @@ exports.setup = function (tree) {
     addFile(name);
     currentDirectory = storeCurrentDirectory;
 
-    if (lastSelect.attr("data-name") === draggedName) {
+    if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
       lastSelect.css({ "font-weight": "", "color": "" });
       tree.find('[data-name="' + name + '"]').css({
         "font-weight": "bold",
@@ -353,6 +429,19 @@ exports.setup = function (tree) {
 
       lastSelect = tree.find('[data-name="' + name + '"]');
     }
+
+    //Check if the current file is being moved ...
+    //if so, update currentFile in localStorage
+    if (localStorage.hasOwnProperty("currentFile")) {
+      oldLocal = localStorage.getItem("currentFile");
+      if(oldLocal === draggedName)
+      {
+        localStorage.setItem("currentFile",name);
+      }
+    }
+
+    //Store real filename for editor error checking process
+    localStorage.setItem("filePathName", name);
 
     content = localStorage["file:" + draggedName];
     delete localStorage["file:" + draggedName];
@@ -650,13 +739,29 @@ exports.setup = function (tree) {
     if (creation !== null && creation.length > 0) {
       if (creation === "file") {
         createFile();
-      } else if (creation === "directory") {
-        createDirectory();
-      } else if (confirm("Only file and directory acceptable") === true) {
-        newFile.click();
       }
     }
   });
+
+  newDir.click(function(){
+    var creation = "directory";
+    if (creation !== null && creation.length > 0)
+    {
+      createDirectory();
+    }
+  });
+
+  deleteDir.click(function () {
+    //Get the name of the directory to delete
+    var toDelete = $("body").data('toDelete');
+
+    //Confirm the deletion!
+    if(confirm("Are you sure you want to delete the directory: "+toDelete+"?"))
+    {
+      removeDir(toDelete);
+    }
+  });
+
 
   tree.on("click", ".directory", function (e) {
     var dir, noChange, slashIndex;
@@ -751,6 +856,10 @@ exports.setup = function (tree) {
           name.substring(0, 5) === "file:") {
         addFile(name.substring(5));
       }
+      if (localStorage.hasOwnProperty(name) &&
+          name.substring(0, 10) === "directory:") {
+        addDirectory(name.substring(10));
+      }
     }
   }());
 
@@ -779,6 +888,7 @@ exports.setup = function (tree) {
     "save": save,
     "rename": rename,
     "remove": remove,
+    "deleteDir": deleteDir,
     "onOpen": onOpen,
     "isChanged": isChanged
   };
