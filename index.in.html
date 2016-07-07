@@ -67,11 +67,15 @@ JAVASCRIPT_SRC_FILES
           <div class="fill">Files</div>
           <div id="new-file" class="button">
             <div class="icon">&#8853;</div>
-            <div class="label">New</div>
+            <div class="label">File</div>
+          </div>
+          <div id="new-dir" class="button">
+            <div class="icon">&#128193;</div>
+            <div class="label">Folder</div>
           </div>
         </header>
         <input id="upload-input" type="file" multiple>
-        <ul id="file-tree" class="fill body"></ul>
+        <ul id="file-tree" class="fill body"  oncontextmenu="return false;"></ul>
       </div>
 
       <div id="settings-view" class="hidden fill sidebar-view">
@@ -333,7 +337,19 @@ JAVASCRIPT_SRC_FILES
     <div id="minigrace-dump">
       <input id="debugtoggle" type="checkbox">
     </div>
-
+    <nav class="context-menu" oncontextmenu="return false;">
+      <ul class="menu-items" oncontextmenu="return false;">
+        <li class="menu-item">
+          <a href="#" id="blank" class="menu-link">
+          </a>
+        </li>
+        <li class="menu-item">
+          <a href="#" id="deleteSelected" class="menu-link">
+            <i class="item-delete"></i> Delete
+          </a>
+        </li>
+      </ul>
+    </nav>
   </body>
 
 </html>

@@ -9,7 +9,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
 
   isClicked = false;
   orig = sidebar.width();
-  min = 88;
+  min = 110;
 
   function store() {
     localStorage.sidebarWidth = sidebar.width();
@@ -39,6 +39,58 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
 
     update();
   }
+
+  //Event binding to hide right-click menu
+  $("*").click(function(e){
+    var menu = document.querySelector(".context-menu");
+    $(menu).hide();
+  });
+
+  //Delegate functions
+  //Stop the menu from appearing when user right-clicks on files
+  $("#file-tree").delegate(".file", "mousedown", function(e) {
+    "use strict";
+    var menu = document.querySelector(".context-menu");
+
+    if (e.which == 3) {
+
+      //Hide the right-click menu
+      $(menu).hide();
+
+      //Stop any parent function from being called by event
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  });
+
+  //Detect a right-click on a directory
+  $("#file-tree").delegate(".directory-name", "mousedown", function(e){
+    "use strict";
+    var menu = document.querySelector(".context-menu");
+
+    // If it's a right-click
+    if(e.which == 3) {
+      //Show the right-click menu at mouse coordinates
+      $(menu).show();
+      $(menu).offset({left: e.pageX, top: e.pageY});
+
+      //Get the attribute of the parent list element, which has
+      //the full directory name
+      var directoryName = $(this).parent().attr("dire-name");
+
+      //Look for a matching directory in localStorage
+      for (var i in localStorage) {
+        if (i.startsWith("directory:") && ("directory:" + directoryName) === i) {
+
+          //Store the item that was clicked on for possible deletion
+          $("body").data('toDelete', directoryName);
+        }
+      }
+    }
+
+    return false;
+  });
+
 
   hideReveal.mouseup(function () {
     if (sidebar.hasClass("hide")) {
