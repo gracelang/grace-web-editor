@@ -56,7 +56,6 @@ exports.setup = function (tree) {
       alert("Names must not begin with a dot.");
       return false;
     }
-
     if (currentDirectory !== undefined) {
       givenName = currentDirectory.attr("dire-name") + "/" + givenName;
     }
@@ -65,7 +64,6 @@ exports.setup = function (tree) {
       alert("That name is already taken.");
       return false;
     }
-
     return true;
   }
 
@@ -246,64 +244,96 @@ exports.setup = function (tree) {
 
   function removeDir(name)
   {
+    //Check if deleting something valid...
     if (name == undefined) {
       alert("Oops! Can't delete this directory!");
       return;
     }
 
+    //Reset currentDirectory to undefined -- since some
+    //storing errors (in localStorage) can occur when new
+    //directories are created after nested directories are deleted
+    currentDirectory = undefined;
+
+    //Remove from localStorage and from html tree
     delete localStorage["directory:" + name];
-    tree.find('[data-name="' + name + '"]').remove();
+    tree.find('[dire-name="' + name + '"]').remove();
   }
 
-  (function () {
-    "use strict";
+  //Removes everything in localStorgae that begins with this directory ID
+  function removeAllinDirectory(name)
+  {
+    var toCheckFile = "file:"+name+"/";
+    var toCheckDir = "directory:"+name+"/";
+    var editorFile = localStorage.getItem("currentFile");
 
-    var menu = document.querySelector(".context-menu");
-    var active = "context-menu--active";
+    //Delete all files in directory -- look in localStorage
+    for (var i in localStorage) {
+      if (i.startsWith(toCheckFile)){
 
-    // var listItems = document.querySelectorAll(".ui-draggable");
-    // var fileItems = document.querySelectorAll(".file");
-    // var dirItems = document.querySelectorAll(".directory");
+        //Get the filename for comparison...
+        var fileName = i.substring(i.indexOf(":")+1);
 
-    // for( var i=0, len = listItems.length; i<len; ++i)
-    // {
-    //     var listItem = listItems[i];
-    //     contextMenuListener(listItem);
-    // }
-    //
-    // function contextMenuListener(eventList){
-    //     eventList.addEventListener("contextmenu", function(event){
-    //         event.preventDefault();
-    //         console.log(event);
-    //     });
-    // }
+        //Check if the current file is in the directory being deleted
+        if(editorFile === fileName)
+        {
+          //Delete the current editor file
+          delete localStorage.currentFile;
 
-    $(".ui-draggable").mousedown(function(e){
-      e.preventDefault();
-      
-      if(e.which == 3) {
-        menu.classList.add(active);
+          //Hide the editor and reset currentDir, since we have deleted it...
+          $(document).trigger("hideEditor");
+        }
 
-        $(menu).show();
-        $(menu).offset({left: e.pageX, top: e.pageY});
-
-        //Store the item that was clicked on
-        $(".directory").data('toDelete', this);
-
+        //Delete the localStorage file
+        delete localStorage[i];
       }
-    });
+    }
 
-    $("*").click(function(e){
-      $(menu).hide();
-    });
-    
-    $("#deleteSelected").click(function (event) {
-      //removeDir();
-      var toDelete = $(".directory").data('toDelete');
-      //alert('delete was clicked by ' + toDelete.id );
-    });
+    //Delete all directories in directory being deleted
+    for (var i in localStorage) {
+      if (i.startsWith(toCheckDir)) {
+        //Delete the directory
+        delete localStorage[i];
+      }
+    }
+  }
 
-  })();
+  //Function to check if the directory is empty
+  //Returns 1 if contains files, 2 if directories, 3 if both, 0 if empty
+  function checkIfEmpty(name)
+  {
+    var hasFiles = false;
+    var hasDirs = false;
+    var toCheckFile = "file:"+name+"/";
+    var toCheckDir = "directory:"+name+"/";
+
+    //Check if it still contains files -- look in localStorage
+    for (var i in localStorage) {
+      if (i.startsWith(toCheckFile)){
+          hasFiles = true;
+          break; //since we know there is at least 1 file
+      }
+    }
+
+    //Check if it still contains directories
+    for (var i in localStorage) {
+      if (i.startsWith(toCheckDir)) {
+        hasDirs = true;
+        break; //since we know there is at least 1 directory
+      }
+    }
+
+    //Return 1,2, or 3 depending on situation
+    if(hasFiles && hasDirs) {
+      return 3;
+    }else if(hasDirs) {
+      return 2;
+    }else if(hasFiles){
+      return 1;
+    }else {
+      return 0;
+    }
+  }
 
 
   function isChanged(name, value) {
@@ -452,8 +482,8 @@ exports.setup = function (tree) {
   }
 
 
-  function addDirectory(name) {
-    var div, inserted, li, parent, slashIndex, ul;
+  function addDirectory(name, isNew) {
+    var div, inserted, li, parent, slashIndex, ul, parentDir;
 
     li = $("<li>");
     li.addClass("directory");
@@ -470,7 +500,14 @@ exports.setup = function (tree) {
     slashIndex = name.lastIndexOf("/");
 
     if (slashIndex !== -1) {
+      parentDir =  name.substring(0, slashIndex);
       name = name.substring(slashIndex + 1);
+
+      //Look for parent Dir...
+      currentDirectory = tree.find('[dire-name="' + parentDir + '"]');
+    }
+    else {
+      currentDirectory = undefined;
     }
 
     div.text(name);
@@ -479,6 +516,12 @@ exports.setup = function (tree) {
 
     div.append(ul);
     li.append(div);
+
+
+    //Note: might want to always add to main directory for new folders.
+    //Adding folder-in-folder can make it seem like new directories aren't being created!
+    //Hence, the isNew variable, but implementing this across all functions can be hard...
+    // - since this validateName is also used for nesting directories...
 
     if (currentDirectory === undefined) {
       parent = tree;
@@ -586,7 +629,7 @@ exports.setup = function (tree) {
       name = droppedName + "/" + name;
     }
 
-    newDire = addDirectory(name);
+    newDire = addDirectory(name, false);
     currentDirectory = storeCurrentDirectory;
 
     display = draggedDire.find("ul").css("display");
@@ -723,42 +766,54 @@ exports.setup = function (tree) {
           return;
         }
       }
-
       if (currentDirectory !== undefined) {
         directory = currentDirectory.attr("dire-name") + "/" + directory;
       }
 
       localStorage["directory:" + directory] = "";
-      addDirectory(directory).click();
+      addDirectory(directory, true).click();
     }
   }
 
+  //Detect clicks for new files
   newFile.click(function () {
-    var creation = "file"; // prompt("New file or New directory?", "directory");
-
-    if (creation !== null && creation.length > 0) {
-      if (creation === "file") {
         createFile();
-      }
-    }
   });
 
+  //Detect clicks for new directory
   newDir.click(function(){
-    var creation = "directory";
-    if (creation !== null && creation.length > 0)
-    {
       createDirectory();
-    }
   });
 
   deleteDir.click(function () {
     //Get the name of the directory to delete
     var toDelete = $("body").data('toDelete');
+    var isEmpty = checkIfEmpty(toDelete);
 
-    //Confirm the deletion!
-    if(confirm("Are you sure you want to delete the directory: "+toDelete+"?"))
+    //Confirm the deletion if not empty!
+    if(isEmpty === 0)
     {
+      //Remove the dir -- don't need to clean containing files
       removeDir(toDelete);
+    }
+    else if(isEmpty === 1 &&
+        confirm("\""+toDelete+"\" still has files in it which will also be deleted. Are you sure you want to continue?"))
+    {
+      //Delete and clean up all containing files
+      removeDir(toDelete);
+      removeAllinDirectory(toDelete);
+    }else if(isEmpty === 2 &&
+        confirm("\""+toDelete+"\" contains other empty directories in it. Are you sure you want to continue?"))
+    {
+      //Delete and clean up all containing files
+      removeDir(toDelete);
+      removeAllinDirectory(toDelete);
+    }else if(isEmpty === 3 &&
+        confirm("\""+toDelete+"\" still has files and sub-directories in it, all of which will be deleted. Are you sure you want to continue?"))
+    {
+      //Delete and clean up all containing files
+      removeDir(toDelete);
+      removeAllinDirectory(toDelete);
     }
   });
 
@@ -858,7 +913,7 @@ exports.setup = function (tree) {
       }
       if (localStorage.hasOwnProperty(name) &&
           name.substring(0, 10) === "directory:") {
-        addDirectory(name.substring(10));
+        addDirectory(name.substring(10), false);
       }
     }
   }());

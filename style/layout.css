@@ -168,7 +168,7 @@ a {
 
 #left-sidebar {
   position: relative;
-  width: 200px;
+  width: 237px;
   padding: 9px 0px 10px;
   overflow: hidden;
 }
@@ -303,6 +303,18 @@ a {
 
   right: 0px;
   color: #5f8700;
+  text-align: right;
+}
+
+#new-dir {
+  -webkit-flex-direction: row-reverse;
+  -o-flex-direction: row-reverse;
+  -moz-flex-direction: row-reverse;
+  -ms-flex-direction: row-reverse;
+  flex-direction: row-reverse;
+
+  right: 0px;
+  color: rgba(136, 140, 138, 0.96);
   text-align: right;
 }
 
@@ -558,3 +570,49 @@ a {
   margin-top: 5px;
   text-align: center;
 }
+
+/* CSS for the right-click menu */
+.context-menu {
+  display: none;
+  position: absolute;
+  z-index: 15;
+  padding: 5px 0;
+  width: 200px;
+  background-color: #fff;
+  border: solid 1px #dfdfdf;
+  box-shadow: 1px 1px 2px #cfcfcf;
+}
+
+.context-menu--active{
+  display: block;
+}
+
+.menu-item{
+  display: block;
+  padding: 0 5px;
+  margin-bottom: 1px;
+}
+
+/* Makes the first element disappear - for some reason it
+ is being automatically selected */
+.menu-item:first-child{
+  display: block;
+  margin-bottom: 0;
+}
+.menu-link:first-child{
+  display: block;
+  padding: 0.1%;
+}
+
+.menu-link{
+  display: block;
+  padding: 7px 15px;
+  color: #0066aa;
+}
+
+.menu-link:hover{
+  color: #fffdfc;
+  background-color: #ff3452;
+}
+
+

@@ -170,17 +170,23 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   session.setUseSoftTabs(true);
   session.setMode("ace/mode/grace");
 
+  //Event to trigger hiding of view if current file is deleted
+  $(document).on("hideEditor", function () {
+    view.addClass("hidden");
+  });
+
   session.on("change", function () {
-    var name, value;
+    var name, value, toCheck;
 
     if (opening) {
       return;
     }
 
     name = fileName.text();
+    toCheck = localStorage.getItem("filePathName");
     value = session.getValue();
 
-    if (files.isChanged(name, value)) {
+    if (files.isChanged(toCheck, value)) {
       compiler.forget(name);
       stop();
       feedback.compilation.waiting();
@@ -283,6 +289,8 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     }
 
     fileName.text(name);
+    fileName.show();
+    rename.hide();
     setDownload(name, content);
 
     opening = true;
