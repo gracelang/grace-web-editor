@@ -99,6 +99,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
       }, 400, function() {
         editor.resize();
         sidebar.removeClass("hide");
+        sidebar.css("display", "flex");
         hideReveal.html("<b>&#x276c;</b>");
       });
     } else {
@@ -107,6 +108,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
       }, 400, function() {
         editor.resize();
         sidebar.addClass("hide");
+        sidebar.css("display", "none");
         hideReveal.html("<b>&#x276D;</b>");
       });
     }
