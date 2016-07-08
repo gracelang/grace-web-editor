@@ -797,7 +797,7 @@ exports.setup = function (tree) {
       removeDir(toDelete);
     }
     else if(isEmpty === 1 &&
-        confirm("\""+toDelete+"\" still has files in it which will also be deleted. Are you sure you want to continue?"))
+        confirm("\""+toDelete+"\" contains files, which will also be deleted. Are you sure you want to continue?"))
     {
       //Delete and clean up all containing files
       removeDir(toDelete);
@@ -809,7 +809,7 @@ exports.setup = function (tree) {
       removeDir(toDelete);
       removeAllinDirectory(toDelete);
     }else if(isEmpty === 3 &&
-        confirm("\""+toDelete+"\" still has files and sub-directories in it, all of which will be deleted. Are you sure you want to continue?"))
+        confirm("\""+toDelete+"\" contains files and sub-directories, all of which will be deleted. Are you sure you want to continue?"))
     {
       //Delete and clean up all containing files
       removeDir(toDelete);
