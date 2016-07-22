@@ -56,6 +56,13 @@ exports.setup = function (tree) {
       alert("Names must not begin with a dot.");
       return false;
     }
+
+    //Check for invalid charachters
+    if (!/^[\w.]+$/.test(givenName)) {
+      alert("Only letters, dots, numbers, and underscores are allowed.");
+      return false;
+    }
+
     if (currentDirectory !== undefined) {
       givenName = currentDirectory.attr("dire-name") + "/" + givenName;
     }
@@ -198,7 +205,7 @@ exports.setup = function (tree) {
     var content, file, newDataName = to;
 
     file = localStorage.currentFile;
-    
+
     if (!file) {
       throw new Error("Rename when no file is open");
     }
