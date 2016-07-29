@@ -6,7 +6,7 @@
   , "editor"
   ]
 , "dependencies":
-  { "brace": "0.5.x"
+  { "brace": "./brace"
   , "jquery": "2.1.x"
   , "jquery-ui": "1.10.x"
   , "setimmediate": "1.x"
