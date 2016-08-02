@@ -51,26 +51,44 @@ exports.setup = function (tree) {
            ext === ".ogg" ? "audio/ogg" : ext === ".wav" ? "audio/wav" : "";
   }
 
-  function validateName(givenName, category) {
+  function validateName(givenName, category, checkBuiltIn) {
+
+    //Name that is used in local storage
+    var fileStorageName = givenName; //Default with no directory
+
+    //Generate the fileStorage name
+    if (currentDirectory !== undefined) {
+      fileStorageName = currentDirectory.attr("dire-name") + "/" + givenName;
+    }
+
+    //***** Name Error Checks Begin Here ********
+    //Check if name begins with a dot
     if (givenName[0] === ".") {
       alert("Names must not begin with a dot.");
       return false;
     }
 
-    //Check for invalid charachters
-    if (!/^[\w.]+$/.test(givenName)) {
-      alert("Only letters, dots, numbers, and underscores are allowed.");
-      return false;
-    }
-
-    if (currentDirectory !== undefined) {
-      givenName = currentDirectory.attr("dire-name") + "/" + givenName;
-    }
-
-    if (localStorage.hasOwnProperty(category + ":" + givenName)) {
+    //Check if this name already exists in localstorage
+    if (localStorage.hasOwnProperty(category + ":" + fileStorageName)) {
       alert("That name is already taken.");
       return false;
     }
+
+    //Change given name to check for the global variable
+    givenName = path.basename(givenName, ".grace");
+
+    //Check if this name is one of the built-in modules
+    if (checkBuiltIn && typeof global[graceModuleName(givenName)] !== "undefined")
+    {
+      var result = confirm("\""+givenName + "\" is a built-in module. Are you sure you want to overwrite it?" +
+          " Doing so could cause unpredictable behavior!");
+
+      //If they don't want to overwrite the file, don't allow it to be created
+      if(!result) { return false; }
+    }
+    //***** Name Error Checks End Here ********
+
+    //If all checks pass, return true
     return true;
   }
 
@@ -82,7 +100,7 @@ exports.setup = function (tree) {
         catName += path.extname(lastName);
       }
 
-      if (!validateName(catName, category)) {
+      if (!validateName(catName, category, true)) {
         return getName(catName, category);
       }
 
@@ -218,7 +236,7 @@ exports.setup = function (tree) {
       to += ".grace";
     }
 
-    if (!validateName(to, "file")) {
+    if (!validateName(to, "file", true)) {
       return;
     }
 
@@ -442,7 +460,7 @@ exports.setup = function (tree) {
     storeCurrentDirectory = currentDirectory;
     currentDirectory = droppedDire;
 
-    if (!validateName(name, "file")) {
+    if (!validateName(name, "file", false)) {
       name = getName(name, "file");
 
       if (!name) {
@@ -624,7 +642,7 @@ exports.setup = function (tree) {
     storeCurrentDirectory = currentDirectory;
     currentDirectory = droppedDire;
 
-    if (!validateName(name, "directory")) {
+    if (!validateName(name, "directory", false)) {
       name = getName(name, "directory");
 
       if (!name) {
@@ -710,7 +728,7 @@ exports.setup = function (tree) {
       file = this.files[i];
       fileName = file.name;
 
-      if (!validateName(fileName, "file")) {
+      if (!validateName(fileName, "file", true)) {
         if (!confirm("Rename the file on upload?")) {
           continue;
         }
@@ -745,7 +763,7 @@ exports.setup = function (tree) {
         file += ".grace";
       }
 
-      if (!validateName(file, "file")) {
+      if (!validateName(file, "file", true)) {
         file = getName(file, "file");
 
         if (!file) {
@@ -766,7 +784,7 @@ exports.setup = function (tree) {
     var directory = prompt("Name of new directory:");
 
     if (directory !== null && directory.length > 0) {
-      if (!validateName(directory, "directory")) {
+      if (!validateName(directory, "directory", false)) {
         directory = getName(directory, "directory");
 
         if (!directory) {
