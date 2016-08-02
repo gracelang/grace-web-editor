@@ -20,8 +20,10 @@ function pump(name, key, value) {
   delete queue[name];
 }
 
+//Check to see if the module is already compiled and stored 
+//in the window object 
 function isCompiled(name) {
-  return global.hasOwnProperty(graceModuleName(name));
+  return (typeof global[graceModuleName(name)] !== "undefined");
 }
 
 exports.isCompiled = isCompiled;
@@ -34,7 +36,9 @@ exports.isCompiling = function (name) {
 
 exports.forget = function (name) {
   name = path.basename(name, ".grace");
-  delete global[graceModuleName(name)];
+  //Set to undefined, rather than deleting, as system modules
+  //cannot be deleted from the window object.
+  global[graceModuleName(name)] = undefined;
 
   worker.postMessage({
     "action": "forget",

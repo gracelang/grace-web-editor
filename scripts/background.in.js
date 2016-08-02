@@ -132,7 +132,9 @@ JAVASCRIPT_SRC_FILES
 
       compile(command.name, sources[command.name]);
     } else if (command.action === "forget") {
-      delete window["gracecode_" + command.name];
+      //Set to undefined, rather than deleting, as system modules
+      //cannot be deleted from the window object.
+      window[graceModuleName(command.name)] = undefined;
     }
   };
 
