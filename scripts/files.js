@@ -10,7 +10,7 @@ require("setimmediate");
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
-      lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir;
+      lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir, renameDir;
 
   current = null;
 
@@ -19,6 +19,7 @@ exports.setup = function (tree) {
   newFile = $("#new-file");
   newDir = $("#new-dir");
   deleteDir = $("#deleteSelected");
+  renameDir = $("#renameSelected");
 
 
   onOpenCallbacks = [];
@@ -68,6 +69,13 @@ exports.setup = function (tree) {
       return false;
     }
 
+    //Check for slashes in the name -- not allowed
+    if (givenName.indexOf("/") !== -1)
+    {
+      alert("Names cannot contain slashes.");
+      return false;
+    }
+
     //Check if this name already exists in localstorage
     if (localStorage.hasOwnProperty(category + ":" + fileStorageName)) {
       alert("That name is already taken.");
@@ -90,6 +98,23 @@ exports.setup = function (tree) {
 
     //If all checks pass, return true
     return true;
+  }
+
+  //Takes a full localStorage directory identifier, ex. (thisDir/thatDir)
+  //and returns just the actual name ex. (thatDir)
+  function parseDirName(toParse)
+  {
+    var name = toParse;
+    var lastSlash = name.lastIndexOf("/");
+
+    //Check for a slash in the name (-1 means not found)
+    if(lastSlash !== -1)
+    {
+      //Remove everything before the slash
+      name = name.substring(lastSlash+1);
+    }
+
+    return name;
   }
 
   function getName(lastName, category) {
@@ -219,11 +244,15 @@ exports.setup = function (tree) {
     localStorage["file:" + localStorage.currentFile] = content;
   }
 
+
+
   function rename(to) {
     var content, file, newDataName = to;
 
+    //Load name of current file
     file = localStorage.currentFile;
 
+    //If no file, throw an error
     if (!file) {
       throw new Error("Rename when no file is open");
     }
@@ -232,26 +261,36 @@ exports.setup = function (tree) {
       return;
     }
 
+    //Add a .grace extension if needed
     if (path.extname(to) === "") {
       to += ".grace";
     }
 
+    //Validate the name
     if (!validateName(to, "file", true)) {
       return;
     }
 
+    //Pull the "old name" file's content from localStorage
     content = localStorage["file:" + file];
     delete localStorage["file:" + file];
 
+    //If there is a directory currently selected, put the file into that directory
     if (currentDirectory !== undefined) {
       newDataName = currentDirectory.attr("dire-name") + "/" + newDataName;
     }
 
+    //Write the new file to local storage and add it's old content to it
     localStorage["file:" + newDataName] = content;
+
+    //Replace the name in the file-tree on the webpage
     tree.find('[data-name="' + file + '"]').attr("data-name", newDataName);
     tree.find('[data-name="' + newDataName + '"]').find(".file-name").text(to);
+
+    //Update the current file variable in local storage
     localStorage.currentFile = newDataName;
 
+    //Open the new file in the ace editor
     openFile(newDataName);
   }
 
@@ -485,8 +524,8 @@ exports.setup = function (tree) {
       lastSelect = tree.find('[data-name="' + name + '"]');
     }
 
-    //Check if the current file is being moved ...
-    //if so, update currentFile in localStorage
+    //Check if the file being moved is also the one being edited
+    //-- update currentFile in localStorage
     if (localStorage.hasOwnProperty("currentFile")) {
       oldLocal = localStorage.getItem("currentFile");
       if(oldLocal === draggedName)
@@ -812,7 +851,7 @@ exports.setup = function (tree) {
 
   deleteDir.click(function () {
     //Get the name of the directory to delete
-    var toDelete = $("body").data('toDelete');
+    var toDelete = $("body").data('clickedDirectory');
     var isEmpty = checkIfEmpty(toDelete);
 
     //Confirm the deletion if not empty!
@@ -969,6 +1008,7 @@ exports.setup = function (tree) {
     "rename": rename,
     "remove": remove,
     "deleteDir": deleteDir,
+    "renameDir": renameDir,
     "onOpen": onOpen,
     "isChanged": isChanged
   };

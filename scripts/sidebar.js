@@ -53,13 +53,12 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
     var menu = document.querySelector(".context-menu");
 
     if (e.which == 3) {
+      //Stop any parent function from being called by event
+      e.preventDefault();
+      e.stopPropagation();
 
       //Hide the right-click menu
       $(menu).hide();
-
-      //Stop any parent function from being called by event
-      e.stopPropagation();
-      e.preventDefault();
     }
   });
 
@@ -70,6 +69,10 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
 
     // If it's a right-click
     if(e.which == 3) {
+      //Stop any parent function from being called by event
+      e.preventDefault();
+      e.stopPropagation();
+
       //Show the right-click menu at mouse coordinates
       $(menu).show();
       $(menu).offset({left: e.pageX, top: e.pageY});
@@ -83,7 +86,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
         if (i.startsWith("directory:") && ("directory:" + directoryName) === i) {
 
           //Store the item that was clicked on for possible deletion
-          $("body").data('toDelete', directoryName);
+          $("body").data('clickedDirectory', directoryName);
         }
       }
     }
