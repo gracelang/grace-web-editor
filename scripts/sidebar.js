@@ -80,6 +80,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
       //Get the attribute of the parent list element, which has
       //the full directory name
       var directoryName = $(this).parent().attr("dire-name");
+      var directoryObj = $(this).parent();
 
       //Look for a matching directory in localStorage
       for (var i in localStorage) {
@@ -87,6 +88,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
 
           //Store the item that was clicked on for possible deletion
           $("body").data('clickedDirectory', directoryName);
+          $("body").data('directoryObj', directoryObj);
         }
       }
     }

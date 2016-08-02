@@ -294,6 +294,39 @@ exports.setup = function (tree) {
     openFile(newDataName);
   }
 
+  //Allows the renaming of directories
+  //Old name needed to find the directory being renamed
+  //** "newName" is expected to have the full path to the directory**
+  function renameDirectory(oldName, newName)
+  {
+    //var isEmpty = checkIfEmpty(oldName);
+    var oldDir;
+    oldDir = $("body").data("directoryObj");
+    //Note: Check if the currently open file is in the directory being renamed!
+    // if so, update the ace editor and localStorage.current file to make sure that everything
+    //works ok
+
+    //Check to make sure the
+    if (!newName) {
+      return;
+    }
+
+    //Validate the name
+    if (!validateName(newName, "file", true)) {
+      return;
+    }
+
+    //Add the new directory
+    localStorage["directory:" + newName] = "";
+    var newDir = addDirectory(newName, true).click();
+
+    modifyChildren(oldDir, newDir);
+
+    delete localStorage["directory:" + oldDir.attr("dire-name")];
+    tree.find('[dire-name="' + oldDir.attr("dire-name") + '"]').remove();
+
+  }
+
   function remove() {
     var file = localStorage.currentFile;
 
@@ -408,6 +441,9 @@ exports.setup = function (tree) {
     return localStorage["file:" + name] !== value;
   }
 
+
+  //Function to add a file to the user interface
+  //file tree. Does NOT effect localStorage.
   function addFile(name) {
     var div, inserted, li, parent, slashIndex, parentDir;
 
@@ -546,7 +582,9 @@ exports.setup = function (tree) {
   }
 
 
-  function addDirectory(name, isNew) {
+  //Function to add a directory to the user interface
+  //file tree. Does NOT effect localStorage.
+  function addDirectory(name) {
     var div, inserted, li, parent, slashIndex, ul, parentDir;
 
     li = $("<li>");
@@ -634,6 +672,9 @@ exports.setup = function (tree) {
     return li;
   }
 
+
+  //This takes all sub-directories and files, transfering
+  //them from one directory to another
   function modifyChildren(draggedDire, newDire) {
     draggedDire.children().children().children().each(function () {
 
@@ -663,6 +704,7 @@ exports.setup = function (tree) {
         name = draggedName.substring(slashIndex + 1);
       }
 
+      //Don't do anything if dropped onto self
       if (droppedName === dir) {
         return false;
       }
@@ -879,6 +921,26 @@ exports.setup = function (tree) {
       removeDir(toDelete);
       removeAllinDirectory(toDelete);
     }
+  });
+
+  renameDir.click(function () {
+    //Get the name of the directory to rename
+    var fullName = $("body").data('clickedDirectory');
+    var simpleName = parseDirName(fullName);
+    var newName = prompt("Enter the new directory name:", simpleName);
+
+    //Validate the name
+    if (newName !== null && newName.length > 0) {
+      if (!validateName(newName, "directory", false)) {
+        newName = getName(newName, "directory");
+
+        if (!newName) {
+          return;
+        }
+      }
+    }
+
+    renameDirectory(fullName, newName);
   });
 
 

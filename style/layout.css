@@ -588,7 +588,7 @@ a {
 
 .menu-item{
   display: block;
-  padding: 0 5px;
+  padding: 2px 10px;
   margin-bottom: 1px;
 }
 
@@ -605,13 +605,22 @@ a {
 
 .menu-link{
   display: block;
-  padding: 7px 15px;
+  padding: 2px 20px;
+  margin: 2px;
   color: #0066aa;
 }
 
 .menu-link:hover{
   color: #fffdfc;
-  background-color: #ff3452;
+  margin: 2px;
+  background-color: #0066aa;
 }
+
+/*Makes the delete button highlight red, instead of the standard */
+#deleteSelected:hover{
+   color: #fffdfc;
+   margin: 2px;
+   background-color: #ff002b;
+ }
 
 
