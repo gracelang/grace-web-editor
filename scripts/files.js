@@ -299,15 +299,16 @@ exports.setup = function (tree) {
   //** "newName" is expected to have the full path to the directory**
   function renameDirectory(oldName, newName)
   {
-    //var isEmpty = checkIfEmpty(oldName);
     var oldDir;
     oldDir = $("body").data("directoryObj");
-    //Note: Check if the currently open file is in the directory being renamed!
-    // if so, update the ace editor and localStorage.current file to make sure that everything
-    //works ok
 
-    //Check to make sure the
+    //Check to make sure the name is there
     if (!newName) {
+      return;
+    }
+
+    //Check to make sure the name is different
+    if(newName === oldName) {
       return;
     }
 
@@ -315,11 +316,12 @@ exports.setup = function (tree) {
     localStorage["directory:" + newName] = "";
     var newDir = addDirectory(newName, true).click();
 
+    //In the future -- make this be a localstorage only function
+    //that just uses addFile, and addDirectory to rebuild the UI file-tree
     modifyChildren(oldDir, newDir);
 
     delete localStorage["directory:" + oldDir.attr("dire-name")];
     tree.find('[dire-name="' + oldDir.attr("dire-name") + '"]').remove();
-
   }
 
   function remove() {
@@ -439,6 +441,7 @@ exports.setup = function (tree) {
 
   //Function to add a file to the user interface
   //file tree. Does NOT effect localStorage.
+  // ** NEEDS directory path in name **
   function addFile(name) {
     var div, inserted, li, parent, slashIndex, parentDir;
 
@@ -499,37 +502,52 @@ exports.setup = function (tree) {
     return li;
   }
 
+  //Dropped dir - directory to move file to
+  //DraggedName - full
   function dropFile(draggedFile, droppedDire) {
-    var content, dir, draggedName, droppedName,
-        name, slashIndex, storeCurrentDirectory, oldLocal;
+    var content, dir, draggedName, droppedName, stableName,
+        name, slashIndex, storeCurrentDirectory, nameWithPath;
 
+    //Full dragged name - can have dir path
     draggedName = draggedFile.attr("data-name");
+
+    //Set file name - Name without a directory path
     name = draggedName;
     slashIndex = draggedName.lastIndexOf("/");
 
+    //Check where file was dropped, and modify paths accordingly
     if (droppedDire !== tree) {
       droppedName = droppedDire.attr("dire-name");
 
       if (slashIndex !== -1) {
-        dir = draggedName.substring(0, slashIndex);
-        name = draggedName.substring(slashIndex + 1);
+        dir = draggedName.substring(0, slashIndex);  //File's  directory
+        name = draggedName.substring(slashIndex + 1); //File name
+        stableName = name;
       }
 
+      //If dragged in own directory
       if (droppedName === dir) {
         return false;
       }
-    } else {
+    }
+    else //If dropped onto base tree
+    {
+      //If not on tree, but no branch also
       if (slashIndex === -1) {
         return false;
       }
 
+      //Reset name to basename -- no path!
       name = draggedName.substring(slashIndex + 1);
+      stableName = name;
       droppedDire = undefined;
     }
 
+    //Modify current directory -- needed for validateName
     storeCurrentDirectory = currentDirectory;
     currentDirectory = droppedDire;
 
+    //Check for a duplicate name in this directory
     if (!validateName(name, "file", false)) {
       name = getName(name, "file");
 
@@ -538,13 +556,25 @@ exports.setup = function (tree) {
       }
     }
 
-    if (droppedDire !== undefined) {
-      name = droppedName + "/" + name;
-    }
-
-    addFile(name);
+    //Restore actual current directory
     currentDirectory = storeCurrentDirectory;
 
+    if (droppedDire !== undefined) {
+      nameWithPath = droppedName + "/" + name;
+    } else {
+      nameWithPath = name;
+    }
+
+    //Add file to UI file tree
+    addFile(nameWithPath);
+
+    //Modify the file's position in localStorage
+    locStoreTransferFile(droppedName, dir, name, stableName);
+
+    //Remove old file position from UI file tree
+    tree.find('[data-name="' + draggedName + '"]').remove();
+
+    //Add CSS and UI elements
     if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
       lastSelect.css({ "font-weight": "", "color": "" });
       tree.find('[data-name="' + name + '"]').css({
@@ -555,25 +585,51 @@ exports.setup = function (tree) {
       lastSelect = tree.find('[data-name="' + name + '"]');
     }
 
+    return true;
+  }
+
+
+  //Function to transfer a single file from one directory to another
+  //in the localStorage file system
+  //Directory arguments MUST have a FULL path in them
+  //Just the name for the fileName args -- filenames can be same
+  //OldFileName is optional
+  function locStoreTransferFile(newDir, oldDir, newFileName, oldFileName)
+  {
+    var currentFile, fileNameWithPath, content;
+
+    //Check for optional argument "oldFileName"
+    if(oldFileName === undefined) {
+      oldFileName = newFileName;
+    }
+
+    //This adds the new directory path to the filename
+    if (newDir !== undefined) {
+      fileNameWithPath = newDir + "/" + newFileName;
+    }
+
+    //Create the filename with the old path, if needed
+    if(oldDir !== undefined) {
+      oldFileName = oldDir + "/" + oldFileName;
+    }
+
     //Check if the file being moved is also the one being edited
     //-- update currentFile in localStorage
     if (localStorage.hasOwnProperty("currentFile")) {
-      oldLocal = localStorage.getItem("currentFile");
-      if(oldLocal === draggedName)
-      {
-        localStorage.setItem("currentFile",name);
+      currentFile = localStorage.getItem("currentFile");
+      if (currentFile === oldFileName) {
+        //Set the current file in the editor
+        localStorage.setItem("currentFile", fileNameWithPath);
+
+        //Store real filename for editor error checking process
+        localStorage.setItem("filePathName", fileNameWithPath);
       }
     }
 
-    //Store real filename for editor error checking process
-    localStorage.setItem("filePathName", name);
-
-    content = localStorage["file:" + draggedName];
-    delete localStorage["file:" + draggedName];
-    tree.find('[data-name="' + draggedName + '"]').remove();
-    localStorage["file:" + name] = content;
-
-    return true;
+    //Move the actual content of the file
+    content = localStorage["file:" + oldFileName];
+    delete localStorage["file:" + oldFileName];
+    localStorage["file:" + fileNameWithPath] = content;
   }
 
 
@@ -755,13 +811,20 @@ exports.setup = function (tree) {
       }
     }
 
-    content = localStorage["directory:" + draggedName];
-    delete localStorage["directory:" + draggedName];
     tree.find('[dire-name="' + draggedName + '"]').remove();
-    localStorage["directory:" + name] = content;
+    locStoreDirectoryTransfer(draggedName, name);
 
     return true;
   };
+
+  //Function to transfer directory contents in localStorage
+  //** Expects FULL directory path **
+  function locStoreDirectoryTransfer(oldName, newName)
+  {
+    var content = localStorage["directory:" + oldName];
+    delete localStorage["directory:" + oldName];
+    localStorage["directory:" + newName] = content;
+  }
 
   upload.click(function () {
     input.click();
@@ -931,6 +994,12 @@ exports.setup = function (tree) {
       if (!validateName(newName, "directory", false)) {
         newName = getName(newName, "directory");
 
+        //If same name as now -- return
+        if(newName === simpleName) {
+          return;
+        }
+
+        //If no new name entered
         if (!newName) {
           return;
         }
