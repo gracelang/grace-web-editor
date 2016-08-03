@@ -934,8 +934,11 @@ exports.setup = function (tree) {
         if (!newName) {
           return;
         }
-      }
-    }
+      } //If newName is null or length = 0
+    } else {
+    //User opted to cancel rename prompt
+    return;
+  }
 
     //Check for the last slash
     lastSlash = fullName.lastIndexOf("/");
