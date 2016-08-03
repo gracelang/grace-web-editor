@@ -311,11 +311,6 @@ exports.setup = function (tree) {
       return;
     }
 
-    //Validate the name
-    if (!validateName(newName, "file", true)) {
-      return;
-    }
-
     //Add the new directory
     localStorage["directory:" + newName] = "";
     var newDir = addDirectory(newName, true).click();
@@ -927,6 +922,8 @@ exports.setup = function (tree) {
     //Get the name of the directory to rename
     var fullName = $("body").data('clickedDirectory');
     var simpleName = parseDirName(fullName);
+    var path = "";
+    var lastSlash = -1;
     var newName = prompt("Enter the new directory name:", simpleName);
 
     //Validate the name
@@ -938,6 +935,15 @@ exports.setup = function (tree) {
           return;
         }
       }
+    }
+
+    //Check for the last slash
+    lastSlash = fullName.lastIndexOf("/");
+
+    //Add the directory structure to new name
+    if (lastSlash !== -1) {
+      path = fullName.substring(0, lastSlash+1);
+      newName = path + newName;
     }
 
     renameDirectory(fullName, newName);
