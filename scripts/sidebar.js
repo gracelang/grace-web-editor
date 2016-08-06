@@ -82,13 +82,17 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
       var directoryName = $(this).parent().attr("dire-name");
       var directoryObj = $(this).parent();
 
+      //Store the parent Directory of the one the click event occured on
+      var containingDir =  $(this).parent().parent().parent().parent();
+
       //Look for a matching directory in localStorage
       for (var i in localStorage) {
         if (i.startsWith("directory:") && ("directory:" + directoryName) === i) {
 
-          //Store the item that was clicked on for possible deletion
+          //Store info the item that was clicked on for menu actions
           $("body").data('clickedDirectory', directoryName);
           $("body").data('directoryObj', directoryObj);
+          $("body").data('containingDir', containingDir);
         }
       }
     }

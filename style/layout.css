@@ -592,6 +592,13 @@ a {
   margin-bottom: 1px;
 }
 
+.menu-link{
+  display: block;
+  padding: 2px 20px;
+  margin: 2px;
+  color: #0066aa;
+}
+
 /* Makes the first element disappear - for some reason it
  is being automatically selected */
 .menu-item:first-child{
@@ -601,13 +608,6 @@ a {
 .menu-link:first-child{
   display: block;
   padding: 0.1%;
-}
-
-.menu-link{
-  display: block;
-  padding: 2px 20px;
-  margin: 2px;
-  color: #0066aa;
 }
 
 .menu-link:hover{
@@ -623,4 +623,7 @@ a {
    background-color: #ff002b;
  }
 
+#blank:hover {
+  color: #ffffff;
+}
 

@@ -7,11 +7,12 @@ path = require("path");
 
 require("jquery-ui");
 require("setimmediate");
+require("sweetalert");
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
       lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir, renameDir;
-
+  var lastError; //Global for last error message sent
   current = null;
 
   input = $("#upload-input");
@@ -52,10 +53,14 @@ exports.setup = function (tree) {
            ext === ".ogg" ? "audio/ogg" : ext === ".wav" ? "audio/wav" : "";
   }
 
-  function validateName(givenName, category, checkBuiltIn) {
+  function validateName(givenName, category, checkBuiltIn, shouldAlert) {
 
     //Name that is used in local storage
     var fileStorageName = givenName; //Default with no directory
+
+    //Optional argument alert -- if not provided, shouldAlert=true
+    if(shouldAlert === undefined)
+      shouldAlert = true;
 
     //Generate the fileStorage name
     if (currentDirectory !== undefined) {
@@ -65,20 +70,26 @@ exports.setup = function (tree) {
     //***** Name Error Checks Begin Here ********
     //Check if name begins with a dot
     if (givenName[0] === ".") {
-      alert("Names must not begin with a dot.");
+      if(shouldAlert)
+        alert("Names cannot begin with a dot.");
+      lastError = "Names cannot begin with a dot.";
       return false;
     }
 
     //Check for slashes in the name -- not allowed
     if (givenName.indexOf("/") !== -1)
     {
-      alert("Names cannot contain slashes.");
+      if(shouldAlert)
+        alert("Names cannot contain slashes.");
+      lastError = "Names cannot contain slashes.";
       return false;
     }
 
     //Check if this name already exists in localstorage
     if (localStorage.hasOwnProperty(category + ":" + fileStorageName)) {
-      alert("That name is already taken.");
+      if(shouldAlert)
+        alert("That name is already taken.");
+      lastError = "That name is already taken.";
       return false;
     }
 
@@ -90,6 +101,7 @@ exports.setup = function (tree) {
     {
       var result = confirm("\""+givenName + "\" is a built-in module. Are you sure you want to overwrite it?" +
           " Doing so could cause unpredictable behavior!");
+      lastError = "\""+givenName + "\" is a built-in module.";
 
       //If they don't want to overwrite the file, don't allow it to be created
       if(!result) { return false; }
@@ -117,7 +129,7 @@ exports.setup = function (tree) {
     return name;
   }
 
-  function getName(lastName, category) {
+  function oldGetName(lastName, category) {
     var catName = prompt("Name of " + category + ":");
 
     if (catName !== null && catName.length > 0) {
@@ -125,8 +137,8 @@ exports.setup = function (tree) {
         catName += path.extname(lastName);
       }
 
-      if (!validateName(catName, category, true)) {
-        return getName(catName, category);
+      if (!validateName(catName, category, true, true)) {
+        return oldGetName(catName, category);
       }
 
       return catName;
@@ -134,6 +146,52 @@ exports.setup = function (tree) {
 
     return false;
   }
+
+  function getName(lastName, category, toExecuteAfter) {
+
+    //Upper case version of category
+    var type = category.charAt(0).toUpperCase() + category.slice(1);
+    if(lastName === undefined) {lastName = "Enter a name here..."}
+    swal({
+      title: "Rename "+type,
+      text: "Enter a new "+category+" name:",
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: false,
+      animation: "slide-from-top",
+      inputPlaceholder: lastName
+    }, function(inputValue) {
+      //Check the input for problems
+      if (inputValue === false) return false;
+
+      //Check if there is input
+      if (inputValue === "" || inputValue === null)
+      {
+        swal.showInputError("You need to enter a " + category + " name!");
+        return false;
+      }
+
+      //Add an extension if needed
+      if (path.extname(inputValue) === "")
+      {
+        inputValue += path.extname(lastName);
+      }
+
+      //Validate the name
+      if (!validateName(inputValue, category, true, false))
+      {
+        swal.showInputError(lastError);
+        return false;
+      }
+
+      //Execute other code before exiting -- pass it the new name
+      toExecuteAfter(inputValue);
+
+      swal.close();
+      return true;
+    });
+  }
+
 
   function contents(fileName) {
     if (!localStorage.hasOwnProperty("file:" + fileName)) {
@@ -267,7 +325,8 @@ exports.setup = function (tree) {
     }
 
     //Validate the name
-    if (!validateName(to, "file", true)) {
+    if (!validateName(to, "file", true, false)) {
+      swal("Oops!", lastError, "error");
       return;
     }
 
@@ -548,13 +607,14 @@ exports.setup = function (tree) {
     currentDirectory = droppedDire;
 
     //Check for a duplicate name in this directory
-    if (!validateName(name, "file", false)) {
-      name = getName(name, "file");
+    if (!validateName(name, "file", false, false)) {
+      //Custom error - since any file in the file tree must have a otherwise valid filename
+      alert("Oops! There is already a file with the same name here! Please rename the new file.");
+      getName(name, "file", function reName(name){
 
       if (!name) {
         return false;
       }
-    }
 
     //Restore actual current directory
     currentDirectory = storeCurrentDirectory;
@@ -583,8 +643,41 @@ exports.setup = function (tree) {
       });
 
       lastSelect = tree.find('[data-name="' + name + '"]');
-    }
+      }
+   });
 
+      //If we are not dealing with a re-name -- add normally
+    } else {
+
+      //Restore actual current directory
+      currentDirectory = storeCurrentDirectory;
+
+      if (droppedDire !== undefined) {
+        nameWithPath = droppedName + "/" + name;
+      } else {
+        nameWithPath = name;
+      }
+
+      //Add file to UI file tree
+      addFile(nameWithPath);
+
+      //Modify the file's position in localStorage
+      locStoreTransferFile(droppedName, dir, name, stableName);
+
+      //Remove old file position from UI file tree
+      tree.find('[data-name="' + draggedName + '"]').remove();
+
+      //Add CSS and UI elements
+      if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
+        lastSelect.css({ "font-weight": "", "color": "" });
+        tree.find('[data-name="' + name + '"]').css({
+          "font-weight": "bold",
+          "color": "#FF0000"
+        });
+
+        lastSelect = tree.find('[data-name="' + name + '"]');
+      }
+    }
     return true;
   }
 
@@ -774,13 +867,14 @@ exports.setup = function (tree) {
     storeCurrentDirectory = currentDirectory;
     currentDirectory = droppedDire;
 
-    if (!validateName(name, "directory", false)) {
-      name = getName(name, "directory");
+    if (!validateName(name, "directory", false, false)) {
+      alert("Oops! There is already a folder with the same name here! Please rename the new folder.");
+      name = getName(name, "directory", function toRun(name){
 
       if (!name) {
         return false;
       }
-    }
+
 
     if (droppedDire !== undefined) {
       name = droppedName + "/" + name;
@@ -813,7 +907,43 @@ exports.setup = function (tree) {
 
     tree.find('[dire-name="' + draggedName + '"]').remove();
     locStoreDirectoryTransfer(draggedName, name);
+    });
 
+   //If the name is valid -- continue as usual
+} else {
+
+        if (droppedDire !== undefined) {
+          name = droppedName + "/" + name;
+        }
+
+        newDire = addDirectory(name, false);
+        currentDirectory = storeCurrentDirectory;
+
+        display = draggedDire.find("ul").css("display");
+        newDire.children().children("ul").css({ "display": display });
+
+        if (newDire.find("ul").css("display") === "block") {
+          newDire.children(".icon").removeClass("close");
+          newDire.children(".icon").addClass("open");
+        }
+
+        modifyChildren(draggedDire, newDire);
+
+        if (currentDirectory !== undefined) {
+          if (currentDirectory.attr("dire-name") === draggedName) {
+            lastSelect.css({ "font-weight": "", "color": "" });
+            newDire.children().css({ "font-weight": "bold", "color": "#FF0000" });
+            newDire.children().find("*").css({ "color": "#000000" });
+            newDire.children().find(".file").css({ "font-weight": "normal" });
+
+            currentDirectory = newDire;
+            lastSelect = newDire.find("*");
+          }
+        }
+
+        tree.find('[dire-name="' + draggedName + '"]').remove();
+        locStoreDirectoryTransfer(draggedName, name);
+      }
     return true;
   };
 
@@ -867,12 +997,13 @@ exports.setup = function (tree) {
       file = this.files[i];
       fileName = file.name;
 
-      if (!validateName(fileName, "file", true)) {
+      if (!validateName(fileName, "file", true, true)) {
         if (!confirm("Rename the file on upload?")) {
           continue;
         }
 
-        fileName = getName(fileName, "file");
+        //Rename on upload happens here
+        fileName = oldGetName(fileName, "file");
 
         if (!fileName) {
           continue;
@@ -894,49 +1025,78 @@ exports.setup = function (tree) {
     }
   });
 
-  function createFile() {
-    var file = prompt("Name of new file:");
 
-    if (file !== null && file.length > 0) {
-      if (path.extname(file) === "") {
-        file += ".grace";
+  function createFile(filename) {
+    swal({
+      title: "New File",
+      text: "Enter a filename:",
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: false,
+      animation: "slide-from-top",
+      inputPlaceholder: "A file name..."
+    }, function(inputValue) {
+      //Check the input for problems
+      if (inputValue === false) return false;
+
+      if (inputValue === "") {
+        swal.showInputError("You need to enter a File name!");
+        return false;
       }
-
-      if (!validateName(file, "file", true)) {
-        file = getName(file, "file");
-
-        if (!file) {
-          return;
+      if (inputValue !== null && inputValue.length > 0) {
+        if (path.extname(inputValue) === "") {
+          inputValue += ".grace";
         }
-      }
 
-      if (currentDirectory !== undefined) {
-        file = currentDirectory.attr("dire-name") + "/" + file;
-      }
+        if (!validateName(inputValue, "file", true, false)) {
+          swal.showInputError(lastError);
+          return false;
+        }
 
-      localStorage["file:" + file] = "";
-      addFile(file).click();
-    }
+        if (currentDirectory !== undefined) {
+          inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
+        }
+
+        localStorage["file:" + inputValue] = "";
+        addFile(inputValue).click();
+        swal.close();
+      }
+      return true;
+    });
   }
 
   function createDirectory() {
-    var directory = prompt("Name of new directory:");
+    swal({
+      title: "New Folder",
+      text: "Enter a folder name:",
+      type: "input",
+      showCancelButton: true,
+      closeOnConfirm: false,
+      animation: "slide-from-top",
+      inputPlaceholder: "A folder name..."
+    }, function(inputValue) {
+      //Check the input for problems
+      if (inputValue === false) return false;
 
-    if (directory !== null && directory.length > 0) {
-      if (!validateName(directory, "directory", false)) {
-        directory = getName(directory, "directory");
-
-        if (!directory) {
-          return;
+      if (inputValue === "") {
+        swal.showInputError("You need to enter a folder name!");
+        return false;
+      }
+      if (inputValue !== null && inputValue.length > 0) {
+        if (!validateName(inputValue, "directory", false, false)) {
+          swal.showInputError(lastError);
+          return false;
         }
-      }
-      if (currentDirectory !== undefined) {
-        directory = currentDirectory.attr("dire-name") + "/" + directory;
-      }
+        if (currentDirectory !== undefined) {
+          inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
+        }
 
-      localStorage["directory:" + directory] = "";
-      addDirectory(directory, true).click();
-    }
+        localStorage["directory:" + inputValue] = "";
+        addDirectory(inputValue, true).click();
+        swal.close();
+      }
+      return true;
+    });
   }
 
   //Detect clicks for new files
@@ -953,6 +1113,7 @@ exports.setup = function (tree) {
     //Get the name of the directory to delete
     var toDelete = $("body").data('clickedDirectory');
     var isEmpty = checkIfEmpty(toDelete);
+    var message = "";
 
     //Confirm the deletion if not empty!
     if(isEmpty === 0)
@@ -960,26 +1121,37 @@ exports.setup = function (tree) {
       //Remove the dir -- don't need to clean containing files
       removeDir(toDelete);
     }
-    else if(isEmpty === 1 &&
-        confirm("\""+toDelete+"\" contains files, which will also be deleted. Are you sure you want to continue?"))
-    {
-      //Delete and clean up all containing files
-      removeDir(toDelete);
-      removeAllinDirectory(toDelete);
-    }else if(isEmpty === 2 &&
-        confirm("\""+toDelete+"\" contains other empty directories in it. Are you sure you want to continue?"))
-    {
-      //Delete and clean up all containing files
-      removeDir(toDelete);
-      removeAllinDirectory(toDelete);
-    }else if(isEmpty === 3 &&
-        confirm("\""+toDelete+"\" contains files and sub-directories, all of which will be deleted. Are you sure you want to continue?"))
-    {
-      //Delete and clean up all containing files
-      removeDir(toDelete);
-      removeAllinDirectory(toDelete);
+    else if(isEmpty === 1) {message = "\""+toDelete+"\" contains files, which will also be deleted. Are you sure you want to continue?"}
+    else if(isEmpty === 2) {message = "\""+toDelete+"\" contains other empty directories in it. Are you sure you want to continue?"}
+    else if(isEmpty === 3) {message = "\""+toDelete+"\" contains files and sub-directories, all of which will be deleted. Are you sure you want to continue?"}
+
+    //Check if we need to confirm directory deletion
+    if(isEmpty !== 0) {
+      confirmDelete(message, function () {
+        //Delete and clean up all containing files
+        removeDir(toDelete);
+        removeAllinDirectory(toDelete);
+      });
     }
   });
+
+  function confirmDelete(message,toExecAfter)
+  {
+    swal({
+      title: "Are you sure?",
+      text: message,
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#DD6B55",
+      confirmButtonText: "Yes, delete it!",
+      closeOnConfirm: false },
+      function() {
+        //Execute code passed to delete file/directory
+        toExecAfter();
+        //Close the alert when done
+        swal.close();
+      });
+  }
 
   renameDir.click(function () {
     //Get the name of the directory to rename
@@ -987,15 +1159,19 @@ exports.setup = function (tree) {
     var simpleName = parseDirName(fullName);
     var path = "";
     var lastSlash = -1;
-    var newName = prompt("Enter the new directory name:", simpleName);
 
-    //Validate the name
-    if (newName !== null && newName.length > 0) {
-      if (!validateName(newName, "directory", false)) {
-        newName = getName(newName, "directory");
+    //Switch the current directory to the parent dir
+    //of the directory being renamed - for validateName
+    var parent = $("body").data('containingDir');
+    var storeCurrentDirectory = currentDirectory;
+    currentDirectory = parent;
+
+
+    getName(simpleName, "directory", function finish(newName) {
 
         //If same name as now -- return
-        if(newName === simpleName) {
+        if (newName === simpleName)
+        {
           return;
         }
 
@@ -1003,22 +1179,20 @@ exports.setup = function (tree) {
         if (!newName) {
           return;
         }
-      } //If newName is null or length = 0
-    } else {
-    //User opted to cancel rename prompt
-    return;
-  }
 
     //Check for the last slash
     lastSlash = fullName.lastIndexOf("/");
 
     //Add the directory structure to new name
     if (lastSlash !== -1) {
-      path = fullName.substring(0, lastSlash+1);
+      path = fullName.substring(0, lastSlash + 1);
       newName = path + newName;
     }
 
-    renameDirectory(fullName, newName);
+      //Rename the directory then restore the actual current directory
+      renameDirectory(fullName, newName);
+      currentDirectory = storeCurrentDirectory;
+   })
   });
 
 
@@ -1150,6 +1324,7 @@ exports.setup = function (tree) {
     "deleteDir": deleteDir,
     "renameDir": renameDir,
     "onOpen": onOpen,
-    "isChanged": isChanged
+    "isChanged": isChanged,
+    "confirmDelete": confirmDelete
   };
 };

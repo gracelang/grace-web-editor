@@ -313,12 +313,14 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     editor.focus();
   });
 
+  //Function to respond to a "Delete" button click 
   drop.click(function () {
-    if (confirm("Are you sure you want to delete this file?")) {
+    files.confirmDelete("Are you sure you want to delete this file?", function () {
       files.remove();
       view.addClass("hidden");
       feedback.output.clear();
-    }
+
+    });
   });
 
   function resize() {
