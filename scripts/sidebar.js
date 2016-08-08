@@ -9,7 +9,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
 
   isClicked = false;
   orig = sidebar.width();
-  min = 110;
+  min = 135; //Minimum sidebar width
 
   function store() {
     localStorage.sidebarWidth = sidebar.width();
