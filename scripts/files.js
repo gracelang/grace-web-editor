@@ -63,7 +63,7 @@ exports.setup = function (tree) {
       shouldAlert = true;
 
     //Generate the fileStorage name
-    if (currentDirectory !== undefined) {
+    if (currentDirectory !== undefined && currentDirectory.attr("dire-name") !== undefined) {
       fileStorageName = currentDirectory.attr("dire-name") + "/" + givenName;
     }
 
