@@ -31,3 +31,6 @@ scripts/setup.js
 
 # Grace js files
 js/
+
+# included git repository
+brace
