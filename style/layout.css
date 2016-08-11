@@ -549,19 +549,12 @@ a {
 
 .version {
   color: #000000;
-  background-color: #6aacae;
-  border-radius: 70px;
 }
 
-.versionText {
-  color: rgb(32, 61, 62);
-}
 
 #versionBackground{
-  background-color: #3d6364;
-  margin: 3px;
-  padding: 5px;
-  border-radius: 20px;
+  margin-top: 360px;
+  -webkit-user-select: all;
 }
 
 .height-calculator {
@@ -583,9 +576,7 @@ a {
 #controls  td {display: inline-block; }
 
 #left-sidebar .version {
-  margin-top: 5px;
   text-align: center;
-  margin: 5px;
 }
 
 /* CSS for the right-click menu */
