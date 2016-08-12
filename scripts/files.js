@@ -85,12 +85,31 @@ exports.setup = function (tree) {
       return false;
     }
 
-    //Check if this name already exists in localstorage
+    //Check for this identifier explicitly in the directory structure
     if (localStorage.hasOwnProperty(category + ":" + fileStorageName)) {
       if(shouldAlert)
         alert("That name is already taken.");
       lastError = "That name is already taken.";
       return false;
+    }
+
+    //Check if this FILENAME already exists in localstorage - across all directories
+    if(checkBuiltIn) { //Allow disabling of check - for drag and drop
+      var tempName;
+      for (tempName in localStorage) {
+        if (tempName.startsWith("file:")) {
+          //Remove the identifier and parse the name
+          tempName = tempName.substring(5);
+          tempName = parseSlashName(tempName);
+
+          if (tempName === givenName) {
+            if (shouldAlert)
+              alert("That file already exists in another folder!");
+            lastError = "That file already exists in another folder!";
+            return false;
+          }
+        }
+      }
     }
 
     //Change given name to check for the global variable
@@ -114,7 +133,7 @@ exports.setup = function (tree) {
 
   //Takes a full localStorage directory identifier, ex. (thisDir/thatDir)
   //and returns just the actual name ex. (thatDir)
-  function parseDirName(toParse)
+  function parseSlashName(toParse)
   {
     var name = toParse;
     var lastSlash = name.lastIndexOf("/");
@@ -608,7 +627,7 @@ exports.setup = function (tree) {
 
     //Check for a duplicate name in this directory
     if (!validateName(name, "file", false, false)) {
-      //Custom error - since any file in the file tree must have a otherwise valid filename
+      //Custom error - since any file in the file tree must have an otherwise valid filename
       alert("Oops! There is already a file with the same name here! Please rename the new file.");
       getName(name, "file", function reName(name){
 
@@ -1156,7 +1175,7 @@ exports.setup = function (tree) {
   renameDir.click(function () {
     //Get the name of the directory to rename
     var fullName = $("body").data('clickedDirectory');
-    var simpleName = parseDirName(fullName);
+    var simpleName = parseSlashName(fullName);
     var path = "";
     var lastSlash = -1;
 
