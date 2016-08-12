@@ -1042,6 +1042,8 @@ exports.setup = function (tree) {
         lastValid = fileNameList[i];
       }
     }
+    //Reset value to allow same-name uploads
+    input.val("");
   });
 
 
