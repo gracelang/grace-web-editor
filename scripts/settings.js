@@ -74,7 +74,7 @@ exports.setup = function (editor, view) {
 
     theme = localStorage.editorTheme;
     fontSize = localStorage.editorFontSize;
-    tabSize = localStorage.editorTabSize;
+    tabSize = parseInt(localStorage.editorTabSize);
     foldStyle = localStorage.editorFoldStyle;
     wrap = localStorage.editorWrap;
     highlightActiveLine = localStorage.editorHighlightActiveLine === 'true';
