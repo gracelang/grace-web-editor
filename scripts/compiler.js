@@ -174,5 +174,5 @@ worker.onmessage = function (event) {
 };
 
 $(function () {
-  $("#version").text(MiniGrace.version);
+  $("#version").text("Grace Compiler v"+MiniGrace.version);
 });
