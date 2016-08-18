@@ -321,6 +321,16 @@ exports.setup = function (tree) {
     localStorage["file:" + localStorage.currentFile] = content;
   }
 
+  //Set the current file variable in localStorage
+  function setCurrentFile(name)
+  {
+    if (localStorage.hasOwnProperty("currentFile"))
+    {
+      localStorage.currentFile = name;
+    } else {
+      localStorage.setItem("currentFile",name);
+    }
+  }
 
 
   function rename(to) {
@@ -507,6 +517,22 @@ exports.setup = function (tree) {
     }
   }
 
+  //Function to check localStorage for any grace files
+  function checkForFiles()
+  {
+    var found = false;
+
+    //Check if any localStorage key begins with file:
+    for (var i in localStorage) {
+      if (i.startsWith("file:"))
+      {
+        found = true;
+        return true;  //If a file is found - return true
+      }
+    }
+
+    return found;
+  }
 
   function isChanged(name, value) {
     if (!localStorage.hasOwnProperty("file:" + name)) {
@@ -1314,6 +1340,22 @@ exports.setup = function (tree) {
           name.substring(0, 10) === "directory:") {
         addDirectory(name.substring(10), false);
       }
+    }
+
+    //If there are no grace files -- load the welcome file
+    if(checkForFiles() == false)
+    {
+      //Get the welcome file and put it in localStorage
+      $.get("style/Welcome.grace", function (data){
+        localStorage.setItem("file:Welcome.grace", data);
+
+        //Set it as the current file, add it to the file tree and open it
+        setCurrentFile("Welcome.grace");
+        addFile("Welcome.grace");
+        openFile("Welcome.grace");
+      }).fail(function () { //Just in case something happens...
+        alert("Welcome to the Grace Web Editor!");
+      });
     }
   }());
 
