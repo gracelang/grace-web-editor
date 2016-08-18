@@ -67,6 +67,10 @@ function compile(name, source, callback) {
       }
 
       callback(null, output);
+
+      //Call the run as part of this callback
+      var run = document.getElementById("runButton");
+      run.click();
     },
 
     "onFailure": callback

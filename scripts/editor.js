@@ -225,12 +225,10 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         }
       } else {
         feedback.compilation.ready();
-        runProgram();
       }
     });
-  }, function () {
-      runProgram();
-  });
+  }, runProgram 
+  );
 
   function openOutputViewIfHidden() {
     if (view.find("#output-view").hasClass("hide")) {
