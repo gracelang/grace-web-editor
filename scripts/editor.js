@@ -133,6 +133,9 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     minigrace.stdin_read = function () {
         return window.prompt("Input");
     };
+    minigrace.ask = function (question) {
+        return window.prompt(question);
+    };
     minigrace.stdout_write = function (value) {
       feedback.output.write(value);
       openOutputViewIfHidden();
