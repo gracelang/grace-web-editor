@@ -33,8 +33,11 @@ this.window = this;
   window.importScripts("../js/xmodule.js");
   window.importScripts("../js/unicodedata.js");
   window.importScripts("../js/errormessages.js");
-  //dynamically populated
-JAVASCRIPT_SRC_FILES
+  window.importScripts("../js/timer.js");
+
+  // dynamically populated by tools/includeJSLibraries based on the Makefile
+  // variable ALL_LIBRARY_MODULES.  The next line is the key for
+  // JAVASCRIPT_SRC_FILES
 
   sources = {};
 
