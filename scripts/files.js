@@ -53,23 +53,36 @@ exports.setup = function (tree) {
            ext === ".ogg" ? "audio/ogg" : ext === ".wav" ? "audio/wav" : "";
   }
 
-  function validateName(givenName, category, checkBuiltIn, shouldAlert) {
+    function validateName(newName, category, checkBuiltIn, shouldAlert) {
+        // returns true if newName is OK for a file; otherwise false.
+        // shouldAlert is a boolean; true means to post an alert.
+        // category is a string: "file" or "directroy"
+        // if checkBuiltIn, then also check that there is no built-in module with newName
+
+        return validateNameAndDestination(newName,currentDirectory, category, checkBuiltIn, shouldAlert);
+    }
+
+   function validateNameAndDestination(newName, destination, category, checkBuiltIn, shouldAlert) {
+    // returns true if newName is OK for a file; otherwise false.
+    // shouldAlert is a boolean; true means to post an alert.
+    // category is a string: "file" or "directroy"
+    // if checkBuiltIn, then also check that there is no built-in module with newName
 
     //Name that is used in local storage
-    var fileStorageName = givenName; //Default with no directory
+    var fileStorageName = newName; //Default with no directory
 
     //Optional argument alert -- if not provided, shouldAlert=true
     if(shouldAlert === undefined)
       shouldAlert = true;
 
     //Generate the fileStorage name
-    if (currentDirectory !== undefined && currentDirectory.attr("dire-name") !== undefined) {
-      fileStorageName = currentDirectory.attr("dire-name") + "/" + givenName;
+    if (destination && destination.attr("dire-name")) {
+      fileStorageName = destination.attr("dire-name") + "/" + newName;
     }
 
     //***** Name Error Checks Begin Here ********
     //Check if name begins with a dot
-    if (givenName[0] === ".") {
+    if (newName[0] === ".") {
       if(shouldAlert)
         alert("Names cannot begin with a dot.");
       lastError = "Names cannot begin with a dot.";
@@ -77,7 +90,7 @@ exports.setup = function (tree) {
     }
 
     //Check for slashes in the name -- not allowed
-    if (givenName.indexOf("/") !== -1)
+    if (newName.indexOf("/") !== -1)
     {
       if(shouldAlert)
         alert("Names cannot contain slashes.");
@@ -102,7 +115,7 @@ exports.setup = function (tree) {
           tempName = tempName.substring(5);
           tempName = parseSlashName(tempName);
 
-          if (tempName === givenName) {
+          if (tempName === newName) {
             if (shouldAlert)
               alert("That file already exists in another folder!");
             lastError = "That file already exists in another folder!";
@@ -113,14 +126,14 @@ exports.setup = function (tree) {
     }
 
     //Change given name to check for the global variable
-    givenName = path.basename(givenName, ".grace");
+    newName = path.basename(newName, ".grace");
 
     //Check if this name is one of the built-in modules
-    if (checkBuiltIn && typeof global[graceModuleName(givenName)] !== "undefined")
+    if (checkBuiltIn && typeof global[graceModuleName(newName)] !== "undefined")
     {
-      var result = confirm("\""+givenName + "\" is a built-in module. Are you sure you want to overwrite it?" +
+      var result = confirm("\""+newName + "\" is a built-in module. Are you sure you want to overwrite it?" +
           " Doing so could cause unpredictable behavior!");
-      lastError = "\""+givenName + "\" is a built-in module.";
+      lastError = "\""+newName + "\" is a built-in module.";
 
       //If they don't want to overwrite the file, don't allow it to be created
       if(!result) { return false; }
@@ -609,8 +622,8 @@ exports.setup = function (tree) {
   //Dropped dir - directory to move file to
   //DraggedName - full
   function dropFile(draggedFile, droppedDire) {
-    var content, dir, draggedName, droppedName, stableName,
-        name, slashIndex, storeCurrentDirectory, nameWithPath;
+    var content, originalDir, draggedName, droppedName, stableName,
+        name, slashIndex, nameWithPath;
 
     //Full dragged name - can have dir path
     draggedName = draggedFile.attr("data-name");
@@ -618,19 +631,20 @@ exports.setup = function (tree) {
     //Set file name - Name without a directory path
     name = draggedName;
     slashIndex = draggedName.lastIndexOf("/");
+    originalDir = draggedName.substring(0, slashIndex);  //File's  directory; empty string if at top level
 
     //Check where file was dropped, and modify paths accordingly
     if (droppedDire !== tree) {
       droppedName = droppedDire.attr("dire-name");
 
       if (slashIndex !== -1) {
-        dir = draggedName.substring(0, slashIndex);  //File's  directory
+        originalDir = draggedName.substring(0, slashIndex);  //File's  directory
         name = draggedName.substring(slashIndex + 1); //File name
         stableName = name;
       }
 
       //If dragged in own directory
-      if (droppedName === dir) {
+      if (droppedName === originalDir) {
         return false;
       }
     }
@@ -644,15 +658,12 @@ exports.setup = function (tree) {
       //Reset name to basename -- no path!
       name = draggedName.substring(slashIndex + 1);
       stableName = name;
-      droppedDire = undefined;
+      droppedDire = null;
     }
 
-    //Modify current directory -- needed for validateName
-    storeCurrentDirectory = currentDirectory;
-    currentDirectory = droppedDire;
 
     //Check for a duplicate name in this directory
-    if (!validateName(name, "file", false, false)) {
+    if (!validateNameAndDestination(name, droppedDire,"file", false, false)) {
       //Custom error - since any file in the file tree must have an otherwise valid filename
       alert("Oops! There is already a file with the same name here! Please rename the new file.");
       getName(name, "file", function reName(name){
@@ -661,10 +672,7 @@ exports.setup = function (tree) {
         return false;
       }
 
-    //Restore actual current directory
-    currentDirectory = storeCurrentDirectory;
-
-    if (droppedDire !== undefined) {
+    if (droppedDire) {
       nameWithPath = droppedName + "/" + name;
     } else {
       nameWithPath = name;
@@ -674,7 +682,7 @@ exports.setup = function (tree) {
     addFile(nameWithPath);
 
     //Modify the file's position in localStorage
-    locStoreTransferFile(droppedName, dir, name, stableName);
+    locStoreTransferFile(droppedName, originalDir, name, stableName);
 
     //Remove old file position from UI file tree
     tree.find('[data-name="' + draggedName + '"]').remove();
@@ -694,10 +702,7 @@ exports.setup = function (tree) {
       //If we are not dealing with a re-name -- add normally
     } else {
 
-      //Restore actual current directory
-      currentDirectory = storeCurrentDirectory;
-
-      if (droppedDire !== undefined) {
+      if (droppedDire) {
         nameWithPath = droppedName + "/" + name;
       } else {
         nameWithPath = name;
@@ -707,7 +712,7 @@ exports.setup = function (tree) {
       addFile(nameWithPath);
 
       //Modify the file's position in localStorage
-      locStoreTransferFile(droppedName, dir, name, stableName);
+      locStoreTransferFile(droppedName, originalDir, name, stableName);
 
       //Remove old file position from UI file tree
       tree.find('[data-name="' + draggedName + '"]').remove();
@@ -727,27 +732,30 @@ exports.setup = function (tree) {
   }
 
 
-  //Function to transfer a single file from one directory to another
-  //in the localStorage file system
-  //Directory arguments MUST have a FULL path in them
-  //Just the name for the fileName args -- filenames can be same
-  //OldFileName is optional
+  // transfers a single file from one directory to another
+  // in the localStorage file system
+  // Directory arguments MUST have a FULL path in them
+  // Just the name for the fileName args -- filenames can be same
+  // oldFileName is optional; if present, this is a rename from oldFileName to newFileName
   function locStoreTransferFile(newDir, oldDir, newFileName, oldFileName)
   {
     var currentFile, fileNameWithPath, content;
 
     //Check for optional argument "oldFileName"
-    if(oldFileName === undefined) {
+    if(! oldFileName) {
       oldFileName = newFileName;
     }
 
     //This adds the new directory path to the filename
-    if (newDir !== undefined) {
+    if (newDir) {
       fileNameWithPath = newDir + "/" + newFileName;
+    } else {
+      fileNameWithPath = newFileName;
     }
 
     //Create the filename with the old path, if needed
-    if(oldDir !== undefined) {
+    if(oldDir) {
+      // we are here if oldDir is defined and NOT the empty string
       oldFileName = oldDir + "/" + oldFileName;
     }
 
