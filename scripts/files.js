@@ -8,6 +8,7 @@ path = require("path");
 require("jquery-ui");
 require("setimmediate");
 require("sweetalert");
+var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
@@ -374,7 +375,10 @@ exports.setup = function (tree) {
 
     //Pull the "old name" file's content from localStorage
     content = localStorage["file:" + file];
+
+    //Delete the file and it's compiled module on the Window object
     delete localStorage["file:" + file];
+    delete global["gracecode_"+fileSystem.removeExtension(file)];
 
     //If there is a directory currently selected, put the file into that directory
     if (currentDirectory !== undefined) {
@@ -433,6 +437,7 @@ exports.setup = function (tree) {
     }
 
     delete localStorage["file:" + file];
+    delete global["gracecode_"+fileSystem.removeExtension(file)];
     tree.find('[data-name="' + file + '"]').remove();
     delete localStorage.currentFile;
   }
