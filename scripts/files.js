@@ -1223,9 +1223,6 @@ exports.setup = function (tree) {
     //Switch the current directory to the parent dir
     //of the directory being renamed - for validateName
     var parent = $("body").data('containingDir');
-    var storeCurrentDirectory = currentDirectory;
-    currentDirectory = parent;
-
 
     getName(simpleName, "directory", function finish(newName) {
 
@@ -1251,7 +1248,6 @@ exports.setup = function (tree) {
 
       //Rename the directory then restore the actual current directory
       renameDirectory(fullName, newName);
-      currentDirectory = storeCurrentDirectory;
    })
   });
 
