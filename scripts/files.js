@@ -1019,7 +1019,7 @@ exports.setup = function (tree) {
   });
 
   input.change(function () {
-    var file, fileName, fileNameList, i, l, lastValid;
+    var file, fileName, fileNameList, i, l, lastValid, conflictingFiles;
 
     function readFileList(currentFileName, currentFile) {
       var reader = new FileReader();
@@ -1050,40 +1050,108 @@ exports.setup = function (tree) {
     }
 
     fileNameList = [];
+    conflictingFiles = [];
 
+    //Check the name list to see if there are name conflicts,
+    //if there are, mark them, and rename in a loop
     for (i = 0, l = this.files.length; i < l; i += 1) {
       file = this.files[i];
       fileName = file.name;
 
-      if (!validateName(fileName, "file", true, true)) {
-        if (!confirm("Rename the file on upload?")) {
-          continue;
-        }
-
-        //Rename on upload happens here
-        fileName = oldGetName(fileName, "file");
-
-        if (!fileName) {
-          continue;
-        }
+      if (!validateName(fileName, "file", true, false)) {
+          conflictingFiles[i] = true;
+      } else {
+        conflictingFiles[i] = false;
       }
-
-      if (currentDirectory !== undefined) {
-        fileName = currentDirectory.attr("dire-name") + "/" + fileName;
-      }
-
       fileNameList[i] = fileName;
     }
 
-    for (i = 0; i < l; i += 1) {
-      if (fileNameList[i] !== undefined) {
-        readFileList(fileNameList[i], this.files[i]);
-        lastValid = fileNameList[i];
+    renameFileOnUpload(fileNameList, conflictingFiles,0,l,this, function (fileList, that) {
+      for (i = 0; i < l; i += 1) {
+        if (fileList[i] !== undefined) {
+          if (currentDirectory !== undefined) {
+            fileName = currentDirectory.attr("dire-name") + "/" + fileName;
+          }
+          readFileList(fileList[i], that.files[i]);
+          lastValid = fileList[i];
+        }
       }
-    }
-    //Reset value to allow same-name uploads
-    input.val("");
+      //Reset value to allow same-name uploads
+      input.val("");
+    });
   });
+
+  //File list is a array of fileNames
+  //Conflict list is a array of true/false flags for each file
+  function renameFileOnUpload(fileList, conflictList, startIndex, length, thisObj, callback){
+    var i = startIndex;
+
+      //Check if this file conflicts
+      if(conflictList[i]) {
+        swal({
+          title: "Name Conflict: " + fileList[i],
+          text: "The filename \""+fileList[i]+"\" is already taken. "+"Please enter a new name for this file:",
+          type: "input",
+          showCancelButton: true,
+          closeOnConfirm: false,
+          animation: "slide-from-top",
+          inputPlaceholder: "A different name..."
+        }, function (inputValue) {
+          //Check the input for problems
+          if (inputValue === false) return false;
+
+          if (inputValue === "") {
+            swal.showInputError("You need to enter a new name!");
+            return false;
+          }
+          if (inputValue !== null && inputValue.length > 0) {
+            if (!validateName(inputValue, "file", true, false)) {
+              swal.showInputError(lastError);
+              return false;
+            }
+
+            //If everything is valid... we continue with the rename
+            if (currentDirectory !== undefined) {
+              inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
+            }
+
+            //Confirm extension and store name
+            if (inputValue.endsWith(".grace") === false) {
+              inputValue = inputValue + ".grace";
+            }
+
+            //Replace the file in the array of files
+            fileList[i] = inputValue;
+
+            //Check if this is the last file in the array
+            //If so, then we proceed to add the files into memory
+            if ((i + 1) >= length) {
+              //Execute the callback
+              callback(fileList, thisObj);
+              swal.close();
+
+            } else if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
+              renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
+            }
+
+          }
+          return true;
+        });
+      }
+      //END CASE: If there is no name conflict in the upload
+      // and this is the last one
+      else if((i+1) === length) //Note: last index is always length-1
+      {
+        //Execute the callback
+        callback(fileList, thisObj);
+        swal.close();
+      }
+      else
+      {
+        renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
+      }
+
+  }
 
 
   function createFile(filename) {
