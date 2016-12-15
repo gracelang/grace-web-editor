@@ -1,23 +1,38 @@
 "use strict";
 
 var $ = require("jquery");
+var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (editor, view) {
 
-    var unicodeButton, reindentButton;
+    var unicodeButton, reindentButton, downloadAllFiles;
 
     reindentButton = view.find("#refactor-reindent");
     unicodeButton = view.find("#remove-unicode");
+    downloadAllFiles = view.find("#download-all-files");
 
+    //Re-indent event
     reindentButton.mouseup(function () {
         var code = editor.getSession().getValue();
         var tabSize = Number(editor.session.getTabSize());
         editor.getSession().setValue(formatGrace(code, tabSize));
     });
 
+    //Button event to convert unicode
     unicodeButton.mouseup(function () {
         var code = editor.getSession().getValue();
         editor.getSession().setValue(removeUnicode(code));
+    });
+
+    //Function to download all files as a zip file
+    downloadAllFiles.mouseup(function () {
+        var zipName = "Grace-IDE-Archive-";
+        var date = new Date();
+
+        zipName= zipName + (date.getMonth()+1).toString()+"-"+date.getDate().toString()+"-"+date.getFullYear().toString();
+
+        //Generate and download zip
+        fileSystem.downloadZip(zipName, fileSystem.packageAllFiles());
     });
 };
 
