@@ -55,6 +55,8 @@ audio = [];
 exports.setup = function (files, view, fdbk, hideReveal) {
   var download, drop, search, editor, fileName, opening, rename, session;
 
+  var Range = ace.acequire('ace/range').Range;
+
   function stop() {
     windows.forEach(function (win) {
       win.close();
@@ -203,6 +205,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     files.save(value);
 
     session.clearAnnotations();
+    clearMarkers(session);
   });
 
   editor.focus();
@@ -226,6 +229,10 @@ exports.setup = function (files, view, fdbk, hideReveal) {
             "type": "error",
             "text": reason.message
           } ]);
+          if (reason.column) {
+            session.addMarker(new Range(row, reason.column-1, row, reason.column),
+                              "syntax-error", "text");
+          }
         }
       } else {
         feedback.compilation.ready();
@@ -362,6 +369,18 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     }
   });
 
+  function clearMarkers(session) {
+      for (var mId in session.$frontMarkers) {
+          if (session.$frontMarkers.hasOwnProperty) {
+              session.removeMarker(mId);
+          }
+      }
+      for (mId in session.$backMarkers) {
+          if (session.$backMarkers.hasOwnProperty) {
+              session.removeMarker(mId);
+          }
+      }
+  }
   return editor;
 };
 

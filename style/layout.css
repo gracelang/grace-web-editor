@@ -622,6 +622,11 @@ a {
    background-color: #ff002b;
  }
 
+.syntax-error{
+  background-color: orange;
+  position:absolute;
+  text-decoration: overline underline;
+}
 
 .UIicons{
   display: block;
