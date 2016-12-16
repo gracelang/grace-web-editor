@@ -219,9 +219,10 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         openOutputViewIfHidden();
 
         if (reason.module === modname && reason.line) {
+          var row = reason.line - 1;           // ace counts from 0
           session.setAnnotations([ {
-            "row": reason.line - 1,
-            "column": reason.column && reason.column - 1,
+            "row": row,
+            "column": reason.column && reason.column - 1,  // column ignored by ace!
             "type": "error",
             "text": reason.message
           } ]);
@@ -230,8 +231,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         feedback.compilation.ready();
       }
     });
-  }, runProgram 
-  );
+  }, runProgram);
 
   function openOutputViewIfHidden() {
     if (view.find("#output-view").hasClass("hide")) {
@@ -250,13 +250,13 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       fdbk.css('min-height', shownFeedbackSize + 'px');
 
       fileView.animate({
-        height: (view.height() - shownFeedbackSize) + "px",
+        height: (view.height() - shownFeedbackSize) + "px"
       }, 400);
 
       outputView.animate({
         flexGrow: "1",
         padding: "8px",
-        borderBottomWidth: "1pt",
+        borderBottomWidth: "1pt"
       }, 400, function() {
         editor.resize();
         outputView.removeClass("hide");
@@ -267,13 +267,13 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       fdbk.css('max-height', hiddenFeedbackSize + 'px');
 
       fileView.animate({
-        height: (view.height() - hiddenFeedbackSize) + "px",
+        height: (view.height() - hiddenFeedbackSize) + "px"
       }, 400);
 
       outputView.animate({
         flexGrow: "0",
         padding: "0px",
-        borderBottomWidth: "0px",
+        borderBottomWidth: "0px"
       }, 400, function() {
         editor.resize();
         outputView.addClass("hide");
@@ -366,80 +366,66 @@ exports.setup = function (files, view, fdbk, hideReveal) {
 };
 
 
-/*
- ***  Provides Support for Character Equivalencies ***
- *The function creates new command keys to support automatic conversion between
- != and ≠ for example. See the 'replacements' obj. for more info.
- */
+// Supports Character Equivalencies
+function setupCharacterEquivalencies(editor) {
+  // creates new command keys to support automatic conversion between
+  // != and ≠, for example. The 'replacements' object defines the conversions.
 
-function setupCharacterEquivalencies(editor)
-{
-  var cursorMoved = false;  //Global variable to be set when the cursor moves
-                            //after a character replacement occurs
+  var cursorMoved = false;  // variable to be set when the cursor moves
+                            // after a character replacement occurs
 
   //Get ace from brace, from browserify
   var ace = require('brace');
   //Extract the Range functionality for use
   var Range = ace.acequire('ace/range').Range;
 
-  //Possible replacements in the editor
-  var replacements =
-  {
-    "!=":"≠",
-    ">=":"≥",
-    "<=":"≤",
-    "->":"→",
-    "[[":"⟦",
-    "]]":"⟧"
+  var replacements =   {     // dictionary of digraph replacements in the editor
+      "!=":"≠",
+      ">=":"≥",
+      "<=":"≤",
+      "->":"→",
+      "[[":"⟦",
+      "]]":"⟧"
   };
 
-//Possible replacements for undoing the original replace
-  var undoReplace =
-  {
-    "≠":"!=",
-    "≥":">=",
-    "≤":"<=",
-    "→":"->",
-    "⟦":"[[",
-    "⟧":"]]"
-  };
+  var undoReplace =  { };   // the inverse dictionary, to undo the original replacements
+  var finalChars = [ ];     // the final character is the one that triggers the replacement
 
-  //Symbols to add as commands
-  var endSymbols = ['=','>','[',']'];
-
-  //****** Add All Character Equivalancies ********//
-  for(var i =0; i<4; ++i)
-  {
-    var a = endSymbols[i];
-    addCharEq(a);
+  for (var key in replacements) {
+      var val = replacements[key];
+      undoReplace[val] = key;
+      var finalChar = key.slice(-1);
+      if (! finalChars.includes(finalChar)) {
+          finalChars.push(finalChar);
+      }
   }
 
-  function addCharEq(a)
-  {
+  //****** Add All Character Equivalancies ********//
+  for (var i=0, sz=finalChars.length; i<sz; ++i) {
+      addCharEq(finalChars[i]);
+  }
+
+  function addCharEq(a) {
     editor.commands.addCommand({
       name: 'myCommand'+a,
       bindKey: {win: a,  mac: a},
       exec: function(editor) {
-        //Insert '=' to support standard functionality
+        //Insert `a` to support standard functionality
         editor.insert(a);
 
-        //Set the cursor moved to false to allow backspace replacement
-        cursorMoved = false;
+        cursorMoved = false;    // to allow backspace replacement
 
         //Calculate the cursor position
         var cursor = editor.getCursorPosition();
 
         //Check if replacement is possible
-        if(cursor.column >= 2){
-
+        if (cursor.column >= 2) {
           //Get the range and the text
-          var cursorLine = new Range(cursor.row, cursor.column-2, cursor.row, cursor.column);
-          var text = editor.session.getTextRange(cursorLine);
-          if(text in replacements)
-          {
+          var replacementRange = new Range(cursor.row, cursor.column-2, cursor.row, cursor.column);
+          var text = editor.session.getTextRange(replacementRange);
+          if (text in replacements) {
             //Insert the matching symbol
-            editor.session.replace(cursorLine, replacements[text]);
-
+            editor.session.replace(replacementRange, replacements[text]);
           }
         }
       },
@@ -447,41 +433,33 @@ function setupCharacterEquivalencies(editor)
     });
   }
 
-
-//****** BACKSPACE Command Key ********//
+  //****** BACKSPACE Command Key ********//
   editor.commands.addCommand({
     name: 'BACK',
     bindKey: {win: 'backspace',  mac: 'backspace'},
     exec: function(editor) {
       var cursor = editor.getCursorPosition();
 
-      //Check if there is text here, then look for !=
-      if(cursor.column >= 1){
-        var cursorLine = new Range(cursor.row, cursor.column-1, cursor.row, cursor.column);
-        var text = editor.session.getTextRange(cursorLine);
-        if(text in undoReplace && !cursorMoved)
-        {
-          //Replace text - return true to signal overridden functionality
-          editor.session.replace(cursorLine,undoReplace[text]);
-          return true;
+      //Check if there is text here, then look for undoReplacement
+      if (cursor.column >= 1) {
+        var replacementRange = new Range(cursor.row, cursor.column-1, cursor.row, cursor.column);
+        var text = editor.session.getTextRange(replacementRange);
+        if (text in undoReplace && !cursorMoved) {
+          editor.session.replace(replacementRange,undoReplace[text]);
+          return true;  // signals overridden functionality
         }
       }
-
-      //Return false to signal regular backspace functionality
-      return false;
-
+      return false;  // signals normal backspace functionality
     },
-    readOnly: false // false if this command should not apply in readOnly mode
+    readOnly: false // this command should not apply in readOnly mode
   });
 
 
   //****** Cursor Move Check ********//
   //Editor check to see if the cursor has moved
   //used to provide dynamic replacement functionality
-  editor.getSession().selection.on('changeSelection', function(e)
-  {
+  editor.getSession().selection.on('changeSelection', function(e) {
     cursorMoved = true;
   });
 
 }
-
