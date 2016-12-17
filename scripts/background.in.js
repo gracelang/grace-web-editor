@@ -59,7 +59,7 @@ this.window = this;
 
       if (!stop && message.substring(0, 10) !== "minigrace:") {
         message = message.split("\n")[0];
-        match = message.match(/\[(\d+):(?:\(?)(\d+)((?:-\d+)?)(?:\)?)\]/);
+        match = message.match(/\[(\d+):((\d+)(-\d+)?)\]/);
 
         window.postMessage({
           "isSuccessful": false,
