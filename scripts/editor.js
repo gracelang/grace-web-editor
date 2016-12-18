@@ -224,11 +224,16 @@ exports.setup = function (files, view, fdbk, hideReveal) {
 
         if (reason.module === modname && reason.line) {
           var row = reason.line - 1;           // ace counts from 0
+          var se = "Syntax error: ";
+          var msg = reason.message;
+          if (msg.startsWith(se)) {
+              msg = msg.substr(se.length);
+          }
           session.setAnnotations([ {
             "row": row,
             "column": reason.column,  // column ignored by ace!
             "type": "error",
-            "text": reason.message
+            "text": msg
           } ]);
           var rangeMatch = reason.column.match( /^(\d+)-(\d+)$/ );
           var numberMatch = reason.column.match( /^(\d+)$/ );
