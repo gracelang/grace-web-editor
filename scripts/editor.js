@@ -217,6 +217,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     modname = path.basename(name, ".grace");
 
     compiler.compile(modname, session.getValue(), function (reason) {
+      var startCol, endCol;
       if (reason !== null) {
         feedback.error(reason);
         openOutputViewIfHidden();
@@ -225,12 +226,21 @@ exports.setup = function (files, view, fdbk, hideReveal) {
           var row = reason.line - 1;           // ace counts from 0
           session.setAnnotations([ {
             "row": row,
-            "column": reason.column && reason.column - 1,  // column ignored by ace!
+            "column": reason.column,  // column ignored by ace!
             "type": "error",
             "text": reason.message
           } ]);
-          if (reason.column) {
-            session.addMarker(new Range(row, reason.column-1, row, reason.column),
+          var rangeMatch = reason.column.match( /^(\d+)-(\d+)$/ );
+          var numberMatch = reason.column.match( /^(\d+)$/ );
+          if (rangeMatch) {
+            startCol = parseInt(rangeMatch[1], 10) - 1;    // ace uses 0-based
+            endCol = parseInt(rangeMatch[2], 10) - 1;      // column numbers
+            session.addMarker(new Range(row, startCol, row, endCol),
+                              "syntax-error", "text");
+          } else if (numberMatch) {
+            endCol = parseInt(reason.column, 10);
+            startCol = endCol - 1;          // ace uses 0-based column numbers
+            session.addMarker(new Range(row, startCol, row, endCol),
                               "syntax-error", "text");
           }
         }
