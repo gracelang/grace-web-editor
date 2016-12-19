@@ -57,7 +57,7 @@ exports.setup = function (tree) {
     function validateName(newName, category, checkBuiltIn, shouldAlert) {
         // returns true if newName is OK for a file; otherwise false.
         // shouldAlert is a boolean; true means to post an alert.
-        // category is a string: "file" or "directroy"
+        // category is a string: "file" or "directory"
         // if checkBuiltIn, then also check that there is no built-in module with newName
 
         return validateNameAndDestination(newName,currentDirectory, category, checkBuiltIn, shouldAlert);
@@ -66,9 +66,12 @@ exports.setup = function (tree) {
    function validateNameAndDestination(newName, destination, category, checkBuiltIn, shouldAlert) {
     // returns true if newName is OK for a file; otherwise false.
     // shouldAlert is a boolean; true means to post an alert.
-    // category is a string: "file" or "directroy"
+    // category is a string: "file" or "directory"
     // if checkBuiltIn, then also check that there is no built-in module with newName
-
+    
+    //Make sure that the new name has a .grace extension
+    newName = fileSystem.addExtension(newName);
+     
     //Name that is used in local storage
     var fileStorageName = newName; //Default with no directory
 
@@ -1094,11 +1097,32 @@ exports.setup = function (tree) {
           type: "input",
           showCancelButton: true,
           closeOnConfirm: false,
+          closeOnCancel: false,
           animation: "slide-from-top",
           inputPlaceholder: "A different name..."
         }, function (inputValue) {
           //Check the input for problems
-          if (inputValue === false) return false;
+          //Also executes when "CANCEL" button clicked
+          if (inputValue === false){
+
+            //Remove the unresolved element and update traversal counter
+            fileList.splice(i, 1);
+            conflictList.splice(i, 1);
+            i = i-1;
+            length = length-1;
+
+            //Continue parsing list, if elements remain
+            if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
+              renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
+            }
+            else { // If we are at the end of the list...
+              //Execute the callback
+              callback(fileList, thisObj);
+              swal.close();
+            }
+
+            return false;
+          }
 
           if (inputValue === "") {
             swal.showInputError("You need to enter a new name!");
@@ -1140,7 +1164,7 @@ exports.setup = function (tree) {
       }
       //END CASE: If there is no name conflict in the upload
       // and this is the last one
-      else if((i+1) === length) //Note: last index is always length-1
+      else if(((i+1) === length)) //Note: last index is always length-1
       {
         //Execute the callback
         callback(fileList, thisObj);

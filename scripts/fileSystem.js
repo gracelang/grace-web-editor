@@ -97,6 +97,18 @@ exports.setup = function () {
         }
     }
 
+    //Function to add a .grace extension to string
+    function addExtension(filename) {
+
+        //Check if there already is a ".grace" extension
+        if(!(filename.endsWith(".grace"))){
+            filename = filename + ".grace";
+        }
+
+        //If extension already exists, we just return string without any changes
+        return filename;
+    }
+
 
     //*************** Private Functions ****************
 
@@ -136,6 +148,7 @@ exports.setup = function () {
         "addFile": addFile,
         "deleteFile": deleteFile,
         "removeExtension":removeExtension,
+        "addExtension":addExtension,
         "packageFolder":packageFolder,
         "packageAllFiles":packageAllFiles,
         "downloadZip":downloadZip
