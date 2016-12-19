@@ -238,8 +238,8 @@ exports.setup = function (files, view, fdbk, hideReveal) {
           var rangeMatch = reason.column.match( /^(\d+)-(\d+)$/ );
           var numberMatch = reason.column.match( /^(\d+)$/ );
           if (rangeMatch) {
-            startCol = parseInt(rangeMatch[1], 10) - 1;    // ace uses 0-based
-            endCol = parseInt(rangeMatch[2], 10) - 1;      // column numbers
+            startCol = parseInt(rangeMatch[1], 10) - 1; // ace uses 0-based column nrs
+            endCol = parseInt(rangeMatch[2], 10);       // and excludes the endCol
             session.addMarker(new Range(row, startCol, row, endCol),
                               "syntax-error", "text");
           } else if (numberMatch) {
