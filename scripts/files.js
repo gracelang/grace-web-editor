@@ -1071,7 +1071,7 @@ exports.setup = function (tree) {
 
     renameFileOnUpload(fileNameList, conflictingFiles,0,l,this, function (fileList, that) {
       for (i = 0; i < l; i += 1) {
-        if (fileList[i] !== undefined) {
+        if ((fileList[i] !== undefined) && (fileList[i] !== false)){
           if (currentDirectory !== undefined) {
             fileName = currentDirectory.attr("dire-name") + "/" + fileName;
           }
@@ -1106,10 +1106,7 @@ exports.setup = function (tree) {
           if (inputValue === false){
 
             //Remove the unresolved element and update traversal counter
-            fileList.splice(i, 1);
-            conflictList.splice(i, 1);
-            i = i-1;
-            length = length-1;
+            fileList[i] = false;
 
             //Continue parsing list, if elements remain
             if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
