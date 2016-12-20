@@ -12,7 +12,7 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
-      lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir, renameDir;
+      lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir, renameDir, downloadDir;
   var lastError; //Global for last error message sent
   current = null;
 
@@ -22,6 +22,7 @@ exports.setup = function (tree) {
   newDir = $("#new-dir");
   deleteDir = $("#deleteSelected");
   renameDir = $("#renameSelected");
+  downloadDir = $("#downloadFolder");
 
 
   onOpenCallbacks = [];
@@ -117,7 +118,7 @@ exports.setup = function (tree) {
         if (tempName.startsWith("file:")) {
           //Remove the identifier and parse the name
           tempName = tempName.substring(5);
-          tempName = parseSlashName(tempName);
+          tempName = fileSystem.parseSlashName(tempName);
 
           if (tempName === newName) {
             if (shouldAlert)
@@ -146,23 +147,6 @@ exports.setup = function (tree) {
 
     //If all checks pass, return true
     return true;
-  }
-
-  //Takes a full localStorage directory identifier, ex. (thisDir/thatDir)
-  //and returns just the actual name ex. (thatDir)
-  function parseSlashName(toParse)
-  {
-    var name = toParse;
-    var lastSlash = name.lastIndexOf("/");
-
-    //Check for a slash in the name (-1 means not found)
-    if(lastSlash !== -1)
-    {
-      //Remove everything before the slash
-      name = name.substring(lastSlash+1);
-    }
-
-    return name;
   }
 
   function oldGetName(lastName, category) {
@@ -1305,7 +1289,7 @@ exports.setup = function (tree) {
   renameDir.click(function () {
     //Get the name of the directory to rename
     var fullName = $("body").data('clickedDirectory');
-    var simpleName = parseSlashName(fullName);
+    var simpleName = fileSystem.parseSlashName(fullName);
     var path = "";
     var lastSlash = -1;
 
@@ -1338,6 +1322,16 @@ exports.setup = function (tree) {
       //Rename the directory then restore the actual current directory
       renameDirectory(fullName, newName);
    })
+  });
+
+  //Called when "Download" is clicked in the folder context menu
+  downloadDir.click(function () {
+    var fullName = $("body").data('clickedDirectory');
+    var simpleName = fileSystem.parseSlashName(fullName);
+
+    //Package and download the folder
+    fileSystem.downloadZip(simpleName, fileSystem.packageFolder(fullName));
+
   });
 
 

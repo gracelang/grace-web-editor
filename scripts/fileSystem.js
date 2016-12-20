@@ -52,20 +52,21 @@ exports.setup = function () {
     //This function packages a given folder, with all its files and
     //subdirectories into a JSZip object, and then returns this object
     // -- To download the ".zip" file, use .generateAsync and fileSaverJS
-    function packageFolder(name)
+    // -- Function expects a full name with a path to the directory
+    function packageFolder(fullName)
     {
-        name = removeIdentifier(name);
+        fullName = removeIdentifier(fullName);
         var zip = new JSZip();
-        var localFolder = zip.folder(name);
+        var localFolder = zip.folder(fullName);
         var identifier;
 
         for (identifier in localStorage) {
             if (identifier.startsWith("file:") &&
-                identifier.includes(name)) {
+                identifier.includes(fullName)) {
                 localFolder.file(identifier.substring(5), localStorage[identifier]);
             }
             if (identifier.startsWith("directory:") &&
-                identifier.includes(name)) {
+                identifier.includes(fullName)) {
                 localFolder.folder(identifier.substring(10));
             }
         }
@@ -144,11 +145,29 @@ exports.setup = function () {
     }
 
 
+    //Takes a full localStorage directory identifier, ex. (thisDir/thatDir)
+    //and returns just the actual name ex. (thatDir)
+    function parseSlashName(toParse)
+    {
+        var name = toParse;
+        var lastSlash = name.lastIndexOf("/");
+
+        //Check for a slash in the name (-1 means not found)
+        if(lastSlash !== -1)
+        {
+            //Remove everything before the slash
+            name = name.substring(lastSlash+1);
+        }
+
+        return name;
+    }
+
     return {
         "addFile": addFile,
         "deleteFile": deleteFile,
         "removeExtension":removeExtension,
         "addExtension":addExtension,
+        "parseSlashName":parseSlashName,
         "packageFolder":packageFolder,
         "packageAllFiles":packageAllFiles,
         "downloadZip":downloadZip
