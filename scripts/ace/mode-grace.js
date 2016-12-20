@@ -8,7 +8,7 @@ var GraceHighlightRules = acequire("./grace_highlight_rules").GraceHighlightRule
 
 var Mode = function() {
     JavaScriptMode.call(this);
-    
+
     this.$tokenizer = new Tokenizer(new GraceHighlightRules().getRules());
 };
 oop.inherits(Mode, JavaScriptMode);
@@ -86,7 +86,7 @@ oop.inherits(Mode, TextMode);
         if (tokens.length && tokens[tokens.length-1].type == "comment") {
             return indent;
         }
-        
+
         if (state == "start" || state == "regex_allowed") {
             var match = line.match(/^.*(?:\bcase\b.*\:|[\{\(\[])\s*$/);
             if (match) {
@@ -115,11 +115,11 @@ oop.inherits(Mode, TextMode);
     this.autoOutdent = function(state, doc, row) {
         this.$outdent.autoOutdent(doc, row);
     };
-    
+
     this.createWorker = function(session) {
         var worker = new WorkerClient(["ace"], "worker-javascript.js", "ace/mode/javascript_worker", "JavaScriptWorker");
         worker.attachToDocument(session.getDocument());
-            
+
         worker.on("jslint", function(results) {
             var errors = [];
             for (var i=0; i<results.data.length; i++) {
@@ -135,15 +135,15 @@ oop.inherits(Mode, TextMode);
             }
             session.setAnnotations(errors);
         });
-        
+
         worker.on("narcissus", function(e) {
             session.setAnnotations([e.data]);
         });
-        
+
         worker.on("terminate", function() {
             session.clearAnnotations();
         });
-        
+
         return worker;
     };
 
@@ -884,7 +884,7 @@ oop.inherits(FoldMode, BaseFoldMode);
 
     this.foldingStartMarker = /(\{|\[)[^\}\]]*$|^\s*(\/\*)/;
     this.foldingStopMarker = /^[^\[\{]*(\}|\])|^[\s\*]*(\*\/)/;
-    
+
     this.getFoldWidgetRange = function(session, foldStyle, row) {
         var line = session.getLine(row);
         var match = line.match(this.foldingStartMarker);
@@ -901,7 +901,7 @@ oop.inherits(FoldMode, BaseFoldMode);
 
         if (foldStyle !== "markbeginend")
             return;
-            
+
         var match = line.match(this.foldingStopMarker);
         if (match) {
             var i = match.index + match[0].length;
@@ -914,7 +914,7 @@ oop.inherits(FoldMode, BaseFoldMode);
 
             var end = {row: row, column: i};
             var start = session.$findOpeningBracket(match[1], end);
-            
+
             if (!start)
                 return;
 
@@ -924,7 +924,7 @@ oop.inherits(FoldMode, BaseFoldMode);
             return  Range.fromPoints(start, end);
         }
     };
-    
+
 }).call(FoldMode.prototype);
 
 });
@@ -952,7 +952,7 @@ var FoldMode = exports.FoldMode = function() {};
             return "end";
         return "";
     };
-    
+
     this.getFoldWidgetRange = function(session, foldStyle, row) {
         return null;
     };
@@ -965,7 +965,7 @@ var FoldMode = exports.FoldMode = function() {};
         var startColumn = column || line.length;
         var startLevel = line.match(re)[0].length;
         var maxRow = session.getLength()
-        
+
         while (++row < maxRow) {
             line = session.getLine(row);
             var level = line.match(re)[0].length;
@@ -1024,13 +1024,13 @@ var GraceHighlightRules = function() {
     var buildinConstants = lang.arrayToMap(
         ("true|false|done").split("|")
     );
-    
+
     var langClasses = lang.arrayToMap(
         (""
-        
+
         ).split("|")
     );
-    
+
     var importClasses = lang.arrayToMap(
         ("").split("|")
     );
@@ -1136,7 +1136,7 @@ var GraceHighlightRules = function() {
             }
         ]
     };
-    
+
     this.embedRules(DocCommentHighlightRules, "doc-",
         [ DocCommentHighlightRules.getEndRule("start") ]);
 };
