@@ -773,16 +773,21 @@ exports.setup = function (tree) {
 
   //Function to add a directory to the user interface
   //file tree. Does NOT effect localStorage.
-  function addDirectory(name) {
+  function addDirectory(name, status) {
     var div, inserted, li, parent, slashIndex, ul, parentDir;
 
     li = $("<li>");
     li.addClass("directory");
     li.attr("dire-name", name);
 
+    //Format the open/closed icon
     div = $("<div>");
     div.addClass("icon");
-    div.addClass("close");
+    if(status === true){
+      div.addClass("open");
+    } else {
+      div.addClass("close");
+    }
     li.append(div);
 
     div = $("<div>");
@@ -803,7 +808,11 @@ exports.setup = function (tree) {
 
     div.text(name);
     ul = $("<ul>");
-    ul.css({ "display": "block" });
+    if(status === true){
+      ul.css({ "display": "block" });
+    } else {
+      ul.css({ "display": "none" });
+    }
 
     div.append(ul);
     li.append(div);
@@ -1336,11 +1345,12 @@ exports.setup = function (tree) {
 
 
   tree.on("click", ".directory", function (e) {
-    var dir, noChange, slashIndex;
+    var dir, noChange, slashIndex, directoryName;
 
     e.stopPropagation();
     current = $(this);
     noChange = false;
+    directoryName = $(this).attr("dire-name");
 
     if (currentDirectory !== undefined) {
 
@@ -1380,10 +1390,17 @@ exports.setup = function (tree) {
       current.children(".icon").removeClass("close");
       current.children(".icon").addClass("open");
 
+      //Set the directory status in localStorage
+      fileSystem.setDirectoryStatus(directoryName,"open");
+
+
     } else if (current.find("ul").css("display") === "block") {
       current.children().children("ul").css({ "display": "none" });
       current.children(".icon").removeClass("open");
       current.children(".icon").addClass("close");
+
+      //Set the directory status in localStorage
+      fileSystem.setDirectoryStatus(directoryName,"closed");
     }
   });
 
@@ -1430,7 +1447,7 @@ exports.setup = function (tree) {
       }
       if (localStorage.hasOwnProperty(name) &&
           name.substring(0, 10) === "directory:") {
-        addDirectory(name.substring(10), false);
+        addDirectory(name.substring(10), fileSystem.getDirectoryStatus(name));
       }
     }
 

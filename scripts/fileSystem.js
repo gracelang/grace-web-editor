@@ -82,6 +82,46 @@ exports.setup = function () {
             });
     }
 
+    ///****************** Directory UI Functions ****************************
+
+    //This function sets the localStorage marker for an open or closed directory
+    //Setter function for this storage method
+    //Full-Path Name
+    function setDirectoryStatus(name, status) {
+        var storeStatus = "closed";
+
+        //Set the status to be stored, otherwise, store as closed
+        if(status === "open") {
+            storeStatus = "open";
+        }
+
+        //Format the name correctly
+        name = formatName(name, "directory");
+
+        //Update Local Storage
+        localStorage[name] = storeStatus;
+    }
+
+    //This function retrieves the status of a directory
+    //If undefined, it returns a default "closed" status //True = open //False = closed
+    //Expects a full path name
+    function getDirectoryStatus(name) {
+        var status;
+
+        //Format the name correctly
+        name = formatName(name, "directory");
+
+        //Get the status
+        status = localStorage[name];
+
+        //Return the appropriate status
+        if(status === undefined || status === "closed" || status == false){
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     //************** String functions *******************
 
@@ -118,14 +158,14 @@ exports.setup = function () {
     //type: file or directory
     function formatName(name, type) {
 
-        if(type == "file") {
-            if(name.indexOf("file:") === 0) {
+        if(type === "file") {
+            if(name.indexOf("file:") !== 0) {
                 name = "file:"+name;
             }
         }
 
-        if(type == "directory") {
-            if(name.indexOf("directory:") === 0) {
+        if(type === "directory") {
+            if(name.indexOf("directory:") !== 0) {
                 name = "directory:"+name;
             }
         }
@@ -170,7 +210,9 @@ exports.setup = function () {
         "parseSlashName":parseSlashName,
         "packageFolder":packageFolder,
         "packageAllFiles":packageAllFiles,
-        "downloadZip":downloadZip
+        "downloadZip":downloadZip,
+        "setDirectoryStatus":setDirectoryStatus,
+        "getDirectoryStatus":getDirectoryStatus
     };
 };
 
