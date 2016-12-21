@@ -12,7 +12,8 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
-      lastSelect, newFile, newDir, onOpenCallbacks, upload, deleteDir, renameDir, downloadDir;
+      lastSelect, newFile, newDir, onOpenCallbacks, upload,
+      deleteDir, renameDir, downloadDir, searchBar;
   var lastError; //Global for last error message sent
   current = null;
 
@@ -23,6 +24,7 @@ exports.setup = function (tree) {
   deleteDir = $("#deleteSelected");
   renameDir = $("#renameSelected");
   downloadDir = $("#downloadFolder");
+  searchBar = $("#search-bar");
 
 
   onOpenCallbacks = [];
@@ -1165,6 +1167,78 @@ exports.setup = function (tree) {
         renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
       }
 
+  }
+
+
+  //******* Search Bar ********
+
+  //Executes on every key-up event in the search bar
+  searchBar.keyup(function () {
+    var searchValue = searchBar.val();
+
+    //Check if there is a valid search
+    if(searchValue) {
+      executeSearch(searchValue);
+    } else {
+      showFiles();
+      showDirectories();
+    }
+  });
+
+  //Function that searches the file tree
+  //Hides irrelevant files/folders, shows the relevant ones
+  function executeSearch(value) {
+    var directoryName = "";
+    var fileName = "";
+    var directoryObj, fileObj;
+
+    //Hide/show directories
+    $(".directory").each(function (i, obj) {
+      directoryObj = $(obj);
+      directoryName = directoryObj.attr("dire-name");
+
+      //If the search keyword is in the folder, make sure it is visible,
+      //otherwise hide it
+      if(fileSystem.checkFileInFolder(directoryName,value)){
+        directoryObj.show();
+      } else {
+        directoryObj.hide();
+      }
+    });
+
+    //Hide/show files
+    $(".file").each(function (i, obj) {
+      fileObj = $(obj);
+      fileName = fileSystem.parseSlashName(fileObj.attr("data-name"));
+
+      //Check if the file starts with the search value
+      if(fileName.includes(value)) {
+        fileObj.show();
+        fileObj.parents().show();
+
+        //Otherwise -- hide the folders that don't contain these files
+      } else {
+        fileObj.hide();
+      }
+    });
+
+  }
+
+  //Function to show any hidden files
+  //Removes the "display:none" css from all files
+  function showFiles() {
+    $(".file").each(function (i, obj) {
+      var fileObj = $(obj);
+      fileObj.show();
+    });
+  }
+
+  //Function to show any hidden directories
+  //Removes the "display:none" css from all directories
+  function showDirectories() {
+    $(".directory").each(function (i, obj) {
+       $(obj).show();
+    });
   }
 
 

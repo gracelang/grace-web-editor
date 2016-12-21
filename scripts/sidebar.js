@@ -5,7 +5,7 @@ var $ = require("jquery");
 require("setimmediate");
 
 exports.setup = function (editor, sidebar, resize, hideReveal) {
-  var isClicked, min, orig, isHidden;
+  var isClicked, min, orig;
 
   isClicked = false;
   orig = sidebar.width();

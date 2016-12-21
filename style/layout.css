@@ -186,7 +186,8 @@ a {
 
 #left-sidebar .sidebar-view {
   max-height: calc(100% - 55px);
-  min-height: calc(100% - 55px);
+  min-height: calc(100% - 97px);
+  overflow: hidden;
 }
 
 #left-sidebar .sidebar-view .body {
@@ -195,7 +196,7 @@ a {
   border-top: 1px solid #586e75;
   cursor: default;
   overflow-y: scroll;
-  max-height: 85%;
+  max-height: 92%;
 }
 
 #left-sidebar .sidebar-buttons .button{
@@ -632,3 +633,18 @@ a {
   margin: 2px;
   cursor: pointer;
 }
+
+/* Search Bar CSS */
+#search-bar{
+  display: block;
+  padding: 3px;
+  margin: 5px auto 15px auto;
+  width: 127px;
+  transition: width 0.3s;
+  transition-timing-function: ease-in-out
+}
+
+#search-bar:focus{
+  width: 92%;
+}
+

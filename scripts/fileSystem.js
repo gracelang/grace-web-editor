@@ -12,6 +12,7 @@ var fileSaver = require("filesaver.js");
 
 exports.setup = function () {
 
+    ///****************** Local Storage Functions ****************************
     //Function to add a file
     function addFile(filename) {
 
@@ -27,6 +28,24 @@ exports.setup = function () {
     //Return a list of all files in folder
     function getFilesInFolder(foldername) {
 
+    }
+
+    //Function to check if a file exists in a folder
+    function checkFileInFolder(dirName, filename) {
+        dirName = removeIdentifier(dirName);
+        var toCheck = "file:"+dirName+"/";
+        var tempName;
+        for (tempName in localStorage) {
+            if (tempName.startsWith(toCheck)) {
+                //Parse the name
+                tempName = parseSlashName(tempName);
+
+                //If the parsed name contains the file name- we have a match
+                return (tempName.includes(filename));
+            }
+        }
+        //Default return value of false
+        return false;
     }
 
     ///****************** Download Functions ****************************
@@ -205,6 +224,7 @@ exports.setup = function () {
     return {
         "addFile": addFile,
         "deleteFile": deleteFile,
+        "checkFileInFolder":checkFileInFolder,
         "removeExtension":removeExtension,
         "addExtension":addExtension,
         "parseSlashName":parseSlashName,
