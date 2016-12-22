@@ -168,30 +168,42 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
     var refactorButton = $("#show-refactor");
     var settingsButton = $("#show-settings");
     var filesButton = $("#show-files");
+    var searchBar = $("#search-bar");
+    var fillerSearchDiv = $("#filler-div");
 
+    //Hide/Reveal divs and buttons based on
+    //what is currently displayed
     if (view == "refactor") {
       refactorView.removeClass("hidden");
-      settingsView.addClass("hidden");
-      filesView.addClass("hidden");
+      settingsButton.removeClass("hidden");
+      filesButton.removeClass("hidden");
+      fillerSearchDiv.removeClass("hidden");
 
       refactorButton.addClass("hidden");
-      settingsButton.removeClass("hidden");
-      filesButton.removeClass("hidden");
-    } else if (view == "settings") {
-      refactorView.addClass("hidden");
-      settingsView.removeClass("hidden");
+      settingsView.addClass("hidden");
       filesView.addClass("hidden");
+      searchBar.addClass("hidden");
+    } else if (view == "settings") {
 
-      refactorButton.removeClass("hidden");
-      settingsButton.addClass("hidden");
       filesButton.removeClass("hidden");
+      settingsView.removeClass("hidden");
+      refactorButton.removeClass("hidden");
+      fillerSearchDiv.removeClass("hidden");
+
+      settingsButton.addClass("hidden");
+      refactorView.addClass("hidden");
+      filesView.addClass("hidden");
+      searchBar.addClass("hidden");
+
     } else if (view == "files") {
+      filesView.removeClass("hidden");
+      refactorButton.removeClass("hidden");
+      settingsButton.removeClass("hidden");
+      searchBar.removeClass("hidden");
+
+      fillerSearchDiv.addClass("hidden");
       refactorView.addClass("hidden");
       settingsView.addClass("hidden");
-      filesView.removeClass("hidden");
-
-      refactorButton.removeClass("hidden");
-      settingsButton.removeClass("hidden");
       filesButton.addClass("hidden");
     }
   }

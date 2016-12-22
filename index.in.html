@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow-y: hidden;">
 
   <head>
     <meta charset="utf-8">
@@ -74,7 +74,7 @@
 
     <nav id="left-sidebar" class="vertical no-select fill-height">
       <div id="files-view" class="fill sidebar-view">
-        <header class="header horizontal">
+        <header id="file-header" class="header horizontal">
           <div id="upload" class="button">
             <div class="icon">&#8623;</div>
             <div class="label">Upload</div>
@@ -268,6 +268,8 @@
 
       <div class="fill sidebar-buttons">
         <input type="text" id="search-bar" name="search-bar" placeholder="Filter..." autocomplete="on">
+        <div id="filler-div" class="hidden" value="filler">
+        </div>
         <div id="show-files" class="button hidden" value="files">
           <span class="icon">&#8801;</span>
           <span class="label">Files</span>

@@ -648,3 +648,11 @@ a {
   width: 92%;
 }
 
+#filler-div{
+  height: 45px;
+}
+
+#file-header{
+  margin-top: 1px;
+  padding-bottom: 0;
+}
