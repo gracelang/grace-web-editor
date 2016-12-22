@@ -375,6 +375,20 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   });
 
   search.mouseup(function () {
+   toggleSearchReplace();
+  });
+
+  editor.commands.addCommand({
+    name: 'myCommand',
+    bindKey: {win: 'Ctrl-F',  mac: 'Command-F'},
+    exec: function(editor) {
+      toggleSearchReplace();
+    }
+  });
+
+  //Function that toggles between the search and replace
+  //functions of the ace editor
+  function toggleSearchReplace() {
     if (search.find(".label").html() == "Search") {
       editor.execCommand("find");
       search.find(".label").html("Replace");
@@ -382,7 +396,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       editor.execCommand("replace");
       search.find(".label").html("Search");
     }
-  });
+  }
 
   function clearMarkers(session) {
       for (var mId in session.$frontMarkers) {
