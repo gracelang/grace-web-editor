@@ -366,8 +366,7 @@ exports.setup = function (tree) {
     content = localStorage["file:" + file];
 
     //Delete the file and it's compiled module on the Window object
-    delete localStorage["file:" + file];
-    delete global["gracecode_"+fileSystem.removeExtension(file)];
+    fileSystem.deleteFile(file);
 
     //If there is a directory currently selected, put the file into that directory
     if (currentDirectory !== undefined) {
@@ -425,8 +424,7 @@ exports.setup = function (tree) {
       throw new Error("Remove when no file is open");
     }
 
-    delete localStorage["file:" + file];
-    delete global["gracecode_"+fileSystem.removeExtension(file)];
+    fileSystem.deleteFile(file);
     tree.find('[data-name="' + file + '"]').remove();
     delete localStorage.currentFile;
   }
@@ -474,7 +472,7 @@ exports.setup = function (tree) {
         }
 
         //Delete the localStorage file
-        delete localStorage[i];
+        fileSystem.deleteFile(fileName);
       }
     }
 

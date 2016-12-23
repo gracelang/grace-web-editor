@@ -20,9 +20,18 @@ exports.setup = function () {
 
     //Function to delete file from localStorage
     //Expects full file-url from file-tree
-    function deleteFile(filename)
-    {
+    function deleteFile(filename) {
+        //Parse the identifier as a precaution
+        filename = removeIdentifier(filename);
 
+        //Delete the file from localStorage
+        delete localStorage["file:" + filename];
+
+        //Make sure the filename is parsed for compiled version deletion
+        filename = parseSlashName(removeExtension(filename));
+
+        //Delete any compiled code loaded to the page
+        delete global["gracecode_" + filename];
     }
 
     //Return a list of all files in folder
