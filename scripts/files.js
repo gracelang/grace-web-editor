@@ -105,6 +105,14 @@ exports.setup = function (tree) {
       return false;
     }
 
+     //Check extension -- only valid ones allowed
+     if (fileSystem.validateExtension(newName) == false) {
+       if (shouldAlert)
+         alert("Names must have a valid extension.");
+       lastError = "\""+fileSystem.getExtension(newName)+"\" is not a supported extension.";
+       return false;
+     }
+
     //Check for this identifier explicitly in the directory structure
     if (localStorage.hasOwnProperty(category + ":" + fileStorageName)) {
       if(shouldAlert)

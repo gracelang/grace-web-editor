@@ -12,6 +12,10 @@ var fileSaver = require("filesaver.js");
 
 exports.setup = function () {
 
+    //Global Variables
+    const validExtensions = [".grace", ".txt", ".json", ".xml", ".js", ".html", ".xhtml",
+        ".jpg", ".jpeg", ".bmp", ".gif", ".png", ".mp3", ".ogg", ".wav"];
+
     ///****************** Local Storage Functions ****************************
     //Function to add a file
     function addFile(filename) {
@@ -170,12 +174,48 @@ exports.setup = function () {
     function addExtension(filename) {
 
         //Check if there already is a ".grace" extension
-        if(!(filename.endsWith(".grace"))){
+        if(!(hasExtension(filename))){
             filename = filename + ".grace";
         }
 
         //If extension already exists, we just return string without any changes
         return filename;
+    }
+
+    //Function to check if a string has an extension
+    function hasExtension(filename) {
+        var lastPeriod = filename.lastIndexOf(".");
+
+        //Check if no extension -- then we're ok
+        return (lastPeriod !== -1);
+    }
+
+    function getExtension(filename) {
+        var lastPeriod = filename.lastIndexOf(".");
+
+        //Check if no extension -- then we're ok
+        if(lastPeriod === -1) return true;
+
+        //Simplify the argument
+        filename = filename.substring(lastPeriod);
+
+        //Return the extension of the filename
+        return filename;
+    }
+
+    //Returns whether an extension is valid or not,
+    // true = valid // false = invalid
+    function validateExtension(filename) {
+        var lastPeriod = filename.lastIndexOf(".");
+
+        //Check if no extension -- then we're ok
+        if(lastPeriod === -1) return true;
+
+        //Simplify the argument
+        filename = filename.substring(lastPeriod);
+
+        //Check if it is a valid extension
+        return validExtensions.includes(filename);
     }
 
 
@@ -236,6 +276,8 @@ exports.setup = function () {
         "checkFileInFolder":checkFileInFolder,
         "removeExtension":removeExtension,
         "addExtension":addExtension,
+        "getExtension":getExtension,
+        "validateExtension":validateExtension,
         "parseSlashName":parseSlashName,
         "packageFolder":packageFolder,
         "packageAllFiles":packageAllFiles,
