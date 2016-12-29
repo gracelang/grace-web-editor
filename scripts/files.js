@@ -370,19 +370,13 @@ exports.setup = function (tree) {
       return;
     }
 
-    //Pull the "old name" file's content from localStorage
-    content = localStorage["file:" + file];
-
-    //Delete the file and it's compiled module on the Window object
-    fileSystem.deleteFile(file);
-
     //If there is a directory currently selected, put the file into that directory
     if (currentDirectory !== undefined) {
       newDataName = currentDirectory.attr("dire-name") + "/" + newDataName;
     }
 
-    //Write the new file to local storage and add it's old content to it
-    localStorage["file:" + newDataName] = content;
+    //Change the file identifiers in the file-system
+    fileSystem.modifyFilePath(file,newDataName);
 
     //Replace the name in the file-tree on the webpage
     tree.find('[data-name="' + file + '"]').attr("data-name", newDataName);
@@ -773,9 +767,7 @@ exports.setup = function (tree) {
     }
 
     //Move the actual content of the file
-    content = localStorage["file:" + oldFileName];
-    delete localStorage["file:" + oldFileName];
-    localStorage["file:" + fileNameWithPath] = content;
+    fileSystem.modifyFilePath(oldFileName, fileNameWithPath);
   }
 
 

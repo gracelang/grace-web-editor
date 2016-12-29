@@ -53,9 +53,10 @@ intervals = [];
 audio = [];
 
 exports.setup = function (files, view, fdbk, hideReveal) {
-  var download, drop, search, editor, fileName, opening, rename, session;
+  var download, drop, search, editor, fileName, opening, rename, session, fileSystem, selection;
 
   var Range = ace.acequire('ace/range').Range;
+  fileSystem = require("./fileSystem.js").setup();
 
   function stop() {
     windows.forEach(function (win) {
@@ -172,6 +173,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   editor.$blockScrolling = Infinity;
 
   session = editor.getSession();
+  selection = editor.selection;
   session.setUseSoftTabs(true);
   session.setMode("ace/mode/grace");
 
@@ -183,13 +185,41 @@ exports.setup = function (files, view, fdbk, hideReveal) {
   $(document).on("hideEditor", function () {
     view.addClass("hidden");
   });
+  
+  //Change event responder to keep track of cursor position
+  selection.on("changeCursor", function(){
+    var name, cursor, lastRow, lastColumn;
+    //If file is in the process of being opened, ignore event
+    if (opening) { return; }
 
+    //Get filename to store cursor
+    name = localStorage["currentFile"];
+
+    //Get the cursor information
+    cursor = editor.getCursorPosition();
+    lastRow = cursor.row;
+    lastColumn = cursor.column;
+
+    //Store the cursor position
+    fileSystem.storeLastCursorPosition(name,lastRow,lastColumn);
+  });
+
+  //Change event responder to keep track of code folding
+  session.on("changeFold", function(){
+    //Get the current filename
+    var name = localStorage["currentFile"];
+    if (opening) { return; }
+
+    //Store all of the code folds for the file
+    fileSystem.storeAllFolds(name, editor.session.getAllFolds());
+  });
+
+  //Happens every time any text is changed in the editor
   session.on("change", function () {
     var name, value, toCheck;
 
-    if (opening) {
-      return;
-    }
+    //If the file is currently being loaded
+    if (opening) { return; }
 
     name = fileName.text();
     toCheck = localStorage.getItem("filePathName");
@@ -208,7 +238,6 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     clearMarkers(session);
   });
 
-  editor.focus();
 
   feedback = feedback.setup(fdbk, function () {
     var modname, name;
@@ -310,6 +339,8 @@ exports.setup = function (files, view, fdbk, hideReveal) {
 
   files.onOpen(function (name, content) {
     var slashIndex = name.lastIndexOf("/");
+    var cursor = fileSystem.getLastCursorPosition(name);
+    var folds = fileSystem.getStoredFolds(name);
 
     if (slashIndex !== -1) {
       name = name.substring(slashIndex + 1);
@@ -321,7 +352,17 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     setDownload(name, content);
 
     opening = true;
+    //Put the content of the file into the editor
     session.setValue(content);
+
+    //Restore code folds
+    if(folds != undefined && folds.length != undefined && folds.length != false) {
+      for(var i = 0; i < folds.length; i++) {
+        editor.session.addFold("...",folds[i]);
+      }
+    }
+    //Put the cursor in the correct place
+    editor.gotoLine(cursor.row,cursor.column, true);
     opening = false;
 
     if (compiler.isCompiled(name)) {
@@ -342,7 +383,6 @@ exports.setup = function (files, view, fdbk, hideReveal) {
       files.remove();
       view.addClass("hidden");
       feedback.output.clear();
-
     });
   });
 
