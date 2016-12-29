@@ -1,14 +1,17 @@
 "use strict";
 
-// Framework for "file.js" to utilize to make it easier to work with LocalStorage
-// and make the code more readable. This is intended as a complete API for the file system,
-// and can be expanded to the files as needed.
+// Framework for the IDE to make it easier to work with LocalStorage and make the code more readable.
+// This is intended as a complete API for the file system, and can be expanded as needed.
 // Functionality includes:
-//  - Add folders/files
-//  - Remove folders/files
-//  - Check if folder/file exists
-var JSZip = require("jszip");
-var fileSaver = require("filesaver.js");
+//  - Add/Remove folders and files
+//  - Check if a folder/file exists
+//  - Store attributes for files
+//  - String parsing functions
+var JSZip, fileSaver, ace, Range;
+JSZip = require("jszip");
+fileSaver = require("filesaver.js");
+ace = require("brace");
+Range = ace.acequire('ace/range').Range;
 
 exports.setup = function () {
 
@@ -218,9 +221,162 @@ exports.setup = function () {
         return validExtensions.includes(filename);
     }
 
+    //************** File-Data Functions Functions *******************
+    // A suite of functions to provide a way to store data about files in the editor
+    // Uses JSON to store objects as strings in localStorage
+
+    function storeLastCursorPosition(filename,row,column) {
+        storeAttributeForFile(filename,"cursorRow",row);
+        storeAttributeForFile(filename,"cursorCol",column);
+    }
+
+    function getLastCursorPosition(filename) {
+        //Cursor object to return data
+        var cursor = {};
+
+        //Retrieve the data
+        cursor.row = getAttributeForFile(filename, "cursorRow");
+        cursor.column = getAttributeForFile(filename, "cursorCol");
+
+        //Check the data, if unusable, set to 0
+        if (cursor.row == undefined || cursor.column == undefined) {
+            cursor.row = 0;
+            cursor.column = 0;
+        }
+        return cursor;
+    }
+
+    //Stores all of the folded code in a file, when given the
+    //object returned by the Ace editor with the command: editor.session.getAllFolds();
+    //Note: Each time this is called, it re-writes the fold object from scratch.
+    //Given the limited functionality of knowing when a fold is removed, it could be harder
+    //to do individual checks
+    function storeAllFolds(filename, aceFolds) {
+        var folds, toAdd;
+
+        //Initialize the folds object
+        folds = [];
+
+        //For each fold range, add a fold object to the fileStore
+        for(var i in aceFolds)
+        {
+            if(aceFolds[i] != undefined && aceFolds[i].range != undefined && aceFolds[i] != false)
+            {
+                folds = addFold(folds, aceFolds[i].range);
+            }
+        }
+
+        //Store the object
+        storeAttributeForFile(filename,"folds",folds);
+    }
+
+    //Stores the fold range for a filename
+    //Uses, Ace editor's fold class
+    function addFold(folds,range) {
+        var toAdd;
+
+        //Initialize the fold we are adding
+        toAdd = new aceFold();
+        toAdd.loadFromRange(range);
+
+        //If folds has not yet been created, use an empty object
+        if(folds == undefined){folds=[]}
+
+        //Check if fold is already there
+        for(var i in folds){
+            if(i["startRow"] != undefined && i["startRow"] != false) {
+                //If we find an identical one, we stop looking
+                if(i.isSame(toAdd)){
+                    return folds;
+                }
+            }
+        }
+        //If not, add it --
+        //If we get to here, it means that none of the above matched
+        folds.push(toAdd);
+        return folds;
+    }
+
+    function getStoredFolds(filename) {
+        //Search for the folds
+        var folds = getAttributeForFile(filename,"folds");
+
+        //Turn each of the attributes into actual aceFold objects
+        for(var i in folds) {
+            folds[i] = convertToRange(folds[i]);
+        }
+
+        if(folds != false) {
+            return folds;
+        } else {
+            return {};
+        }
+    }
+
+    function storeAttributeForFile(filename,key,data) {
+        var fileData;
+
+        //See if the file has any current data stored
+        fileData= getFileData(filename);
+
+        //If no data stored, initialize a new object
+        if(!fileData) {fileData = {};}
+
+        //Store attributes
+        fileData[key] = data;
+
+        //Put it back in localStorage
+        setFileData(filename,fileData);
+    }
+
+    function getAttributeForFile(filename,key) {
+        var fileData;
+
+        //See if the file has any current data stored
+        fileData= getFileData(filename);
+
+        //If no data stored, initialize a new object
+        if(!fileData) {return false;}
+
+        //Otherwise, return the data asked for
+        return fileData[key];
+    }
+
+    //Function to retrieve a file-data object from localStorage
+    function getFileData(filename) {
+        var fileData;
+        //Prep the string for search
+        filename = removeIdentifier(filename);
+        filename = "file-data:"+filename;
+
+        fileData = localStorage[filename];
+
+        //Return the data if available
+        if(fileData === undefined || fileData == false){
+            return false;
+        } else {
+            return JSON.parse(fileData);
+        }
+    }
+
+    //Function to store an data object for a specific file
+    function setFileData(filename, dataObj) {
+        //Prep the string for storage
+        filename = removeIdentifier(filename);
+        filename = "file-data:"+filename;
+
+        //Store the file-data object
+        dataObj = JSON.stringify(dataObj);
+        localStorage.setItem(filename,dataObj);
+    }
+
+    //Function to convert an aceFolds(or similar) object to a Range object
+    function convertToRange(aceFold) {
+        return (new Range(aceFold.startRow, aceFold.startColumn, aceFold.endRow, aceFold.endColumn));
+    }
+
 
     //*************** Private Functions ****************
-
     //Takes whatever name is given and formats it appropriately
     //name: string of filename
     //type: file or directory
@@ -270,6 +426,50 @@ exports.setup = function () {
         return name;
     }
 
+    //A internal code folding class to keep track of folded code
+    //in the IDE Ace editor. Ace has it's own internal classes for this,
+    //but they cannot be stored in localStorage
+    function aceFold() {
+        this.startRow = 0;
+        this.startColumn = 0;
+        this.endRow = 0;
+        this.endColumn = 0;
+        //Function to check if a fold is identical to itself
+        this.isSame = function (toCompare) {
+            if(toCompare.startRow === this.startRow &&
+                toCompare.startColumn === this.startColumn &&
+                toCompare.endRow === this.endRow &&
+                toCompare.endColumn === this.endColumn) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+        //Function to load our fields from a aceFold Object
+        this.loadFromSelf = function (aFold) {
+            this.startRow = aFold.startRow;
+            this.startColumn = aFold.startColumn;
+            this.endRow = aFold.endRow;
+            this.endColumn = aFold.endColumn;
+            return this;
+        };
+
+        //Function to load our fields from a ace Range object
+        this.loadFromRange = function (aRange) {
+            this.startRow = aRange.start.row;
+            this.startColumn = aRange.start.column;
+            this.endRow = aRange.end.row;
+            this.endColumn = aRange.end.column;
+            return this;
+        };
+
+        //Function to convert self to a Range Object
+        this.convertToRange = function () {
+            return (new Range(this.startRow, this.startColumn, this.endRow, this.endColumn));
+        };
+    }
+
+
     return {
         "addFile": addFile,
         "deleteFile": deleteFile,
@@ -283,7 +483,11 @@ exports.setup = function () {
         "packageAllFiles":packageAllFiles,
         "downloadZip":downloadZip,
         "setDirectoryStatus":setDirectoryStatus,
-        "getDirectoryStatus":getDirectoryStatus
+        "getDirectoryStatus":getDirectoryStatus,
+        "storeLastCursorPosition":storeLastCursorPosition,
+        "getLastCursorPosition":getLastCursorPosition,
+        "storeAllFolds":storeAllFolds,
+        "getStoredFolds":getStoredFolds
     };
 };
 
