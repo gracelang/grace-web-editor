@@ -34,6 +34,9 @@ exports.setup = function () {
         //Delete the file from localStorage
         delete localStorage["file:" + filename];
 
+        //Delete the file's data
+        deleteFileData(filename);
+
         //Make sure the filename is parsed for compiled version deletion
         filename = parseSlashName(removeExtension(filename));
 
@@ -44,6 +47,23 @@ exports.setup = function () {
     //Return a list of all files in folder
     function getFilesInFolder(foldername) {
 
+    }
+
+    //A function to update the filename of a file
+    //Called on rename or on a drag/drop to a folder
+    function modifyFilePath(oldFileName,newFileName) {
+        var content;
+
+        //1 - Rename File
+        content = localStorage[formatName(oldFileName,"file")];
+        localStorage[formatName(newFileName,"file")] = content;
+
+        //2 - Rename File Data (if it exists)
+        content = getFileData(oldFileName);
+        if(content) {setFileData(newFileName,content);}
+
+        //3 - Delete all the pieces of old file
+        deleteFile(oldFileName);
     }
 
     //Function to check if a file exists in a folder
@@ -370,6 +390,16 @@ exports.setup = function () {
         localStorage.setItem(filename,dataObj);
     }
 
+    //Function to delete file data, if needed
+    function deleteFileData(filename) {
+        //Prep the string for storage
+        filename = removeIdentifier(filename);
+        filename = "file-data:"+filename;
+
+        //Delete the data
+        delete localStorage[filename];
+    }
+
     //Function to convert an aceFolds(or similar) object to a Range object
     function convertToRange(aceFold) {
         return (new Range(aceFold.startRow, aceFold.startColumn, aceFold.endRow, aceFold.endColumn));
@@ -473,6 +503,7 @@ exports.setup = function () {
     return {
         "addFile": addFile,
         "deleteFile": deleteFile,
+        "modifyFilePath":modifyFilePath,
         "checkFileInFolder":checkFileInFolder,
         "removeExtension":removeExtension,
         "addExtension":addExtension,
