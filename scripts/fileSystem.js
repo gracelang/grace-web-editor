@@ -22,7 +22,11 @@ exports.setup = function () {
     ///****************** Local Storage Functions ****************************
     //Function to add a file
     function addFile(filename) {
+        //Format the name
+        filename = formatName(filename,"file");
 
+        //Add it to local storage
+        localStorage[filename] = "";
     }
 
     //Function to delete file from localStorage
@@ -42,11 +46,6 @@ exports.setup = function () {
 
         //Delete any compiled code loaded to the page
         delete global["gracecode_" + filename];
-    }
-
-    //Return a list of all files in folder
-    function getFilesInFolder(foldername) {
-
     }
 
     //A function to update the filename of a file
@@ -187,9 +186,10 @@ exports.setup = function () {
         var extPosition = filename.lastIndexOf(".");
 
         //If there is an extension
-        if(extPosition !== -1)
-        {
+        if(extPosition !== -1) {
             return filename.substring(0,extPosition);
+        } else {
+            return filename; //Else return filename as is
         }
     }
 

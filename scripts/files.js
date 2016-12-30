@@ -72,8 +72,10 @@ exports.setup = function (tree) {
     // category is a string: "file" or "directory"
     // if checkBuiltIn, then also check that there is no built-in module with newName
     
-    //Make sure that the new name has a .grace extension
-    newName = fileSystem.addExtension(newName);
+    //Make sure that a new filename has a .grace extension
+    if(category === "file"){
+      newName = fileSystem.addExtension(newName);
+    }
      
     //Name that is used in local storage
     var fileStorageName = newName; //Default with no directory
