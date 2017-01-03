@@ -234,6 +234,9 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     setDownload(name, value);
     files.save(value);
 
+    //Store all of the code folds for the file
+    fileSystem.storeAllFolds(name, editor.session.getAllFolds());
+
     session.clearAnnotations();
     clearMarkers(session);
   });
