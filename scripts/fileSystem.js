@@ -1,7 +1,9 @@
 "use strict";
 
 // Framework for the IDE to make it easier to work with LocalStorage and make the code more readable.
-// This is intended as a complete API for the file system, and can be expanded as needed.
+// This is intended as a complete API for the file system, and can be expanded as needed. Currently,
+// the functionality provided here is used in "files.js" and "editor.js." Both files use it to interact with
+// localStorage to store and retrieve files and their data.
 // Functionality includes:
 //  - Add/Remove folders and files
 //  - Check if a folder/file exists
@@ -245,6 +247,8 @@ exports.setup = function () {
     // A suite of functions to provide a way to store data about files in the editor
     // Uses JSON to store objects as strings in localStorage
 
+    // ***** CURSOR ****
+    //Functions to get and set the cursor position for a file
     function storeLastCursorPosition(filename,row,column) {
         storeAttributeForFile(filename,"cursorRow",row);
         storeAttributeForFile(filename,"cursorCol",column);
@@ -266,6 +270,25 @@ exports.setup = function () {
         return cursor;
     }
 
+    // ***** SCROLL BAR ****
+    //Functions to get and set the scroll bar position
+    function storeScrollBarPosition(filename, scrollPos) {
+        storeAttributeForFile(filename,"scrollPos",scrollPos);
+    }
+
+    function getScrollBarPosition(filename) {
+        //Get and check position for errors
+        var scroll = getAttributeForFile(filename, "scrollPos");
+
+        //If error - reset to 0
+        if(scroll === undefined){
+            return 0;
+        } else {
+            return scroll;
+        }
+    }
+
+    // ***** CODE FOLDS ****
     //Stores all of the folded code in a file, when given the
     //object returned by the Ace editor with the command: editor.session.getAllFolds();
     //Note: Each time this is called, it re-writes the fold object from scratch.
@@ -317,15 +340,20 @@ exports.setup = function () {
         return folds;
     }
 
+    //Returns an object with all of the stored folds for a file
     function getStoredFolds(filename) {
         //Search for the folds
         var folds = getAttributeForFile(filename,"folds");
+
+        //Check for validity -- if undefined, return here
+        if(folds === undefined) { return {}; }
 
         //Turn each of the attributes into actual aceFold objects
         for(var i in folds) {
             folds[i] = convertToRange(folds[i]);
         }
 
+        //Check for return
         if(folds != false) {
             return folds;
         } else {
@@ -355,8 +383,9 @@ exports.setup = function () {
         //See if the file has any current data stored
         fileData= getFileData(filename);
 
-        //If no data stored, initialize a new object
-        if(!fileData) {return false;}
+        //If no data stored, return an undefined value
+        //(easier to check for than "false")
+        if(!fileData) {return undefined;}
 
         //Otherwise, return the data asked for
         return fileData[key];
@@ -375,7 +404,11 @@ exports.setup = function () {
         if(fileData === undefined || fileData == false){
             return false;
         } else {
-            return JSON.parse(fileData);
+            try{
+                return JSON.parse(fileData);
+            } catch (err){
+                return false;
+            }
         }
     }
 
@@ -517,6 +550,8 @@ exports.setup = function () {
         "getDirectoryStatus":getDirectoryStatus,
         "storeLastCursorPosition":storeLastCursorPosition,
         "getLastCursorPosition":getLastCursorPosition,
+        "storeScrollBarPosition":storeScrollBarPosition,
+        "getScrollBarPosition":getScrollBarPosition,
         "storeAllFolds":storeAllFolds,
         "getStoredFolds":getStoredFolds
     };

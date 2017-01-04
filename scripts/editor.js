@@ -241,6 +241,16 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     clearMarkers(session);
   });
 
+  //Respond to changes in the scroll position
+  session.on("changeScrollTop", function(scrollTopPosition){
+    //Get the current filename
+    var name = localStorage["currentFile"];
+    if (opening) { return; }
+
+    //Set the scroll position
+    fileSystem.storeScrollBarPosition(name,scrollTopPosition);
+  });
+
 
   feedback = feedback.setup(fdbk, function () {
     var modname, name;
@@ -344,6 +354,7 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     var slashIndex = name.lastIndexOf("/");
     var cursor = fileSystem.getLastCursorPosition(name);
     var folds = fileSystem.getStoredFolds(name);
+    var scrollPos = fileSystem.getScrollBarPosition(name);
 
     if (slashIndex !== -1) {
       name = name.substring(slashIndex + 1);
@@ -364,8 +375,12 @@ exports.setup = function (files, view, fdbk, hideReveal) {
         editor.session.addFold("...",folds[i]);
       }
     }
+
     //Put the cursor in the correct place
-    editor.gotoLine(cursor.row,cursor.column, true);
+    editor.gotoLine((cursor.row+1),(cursor.column+1), false);
+
+    //Set the scroll position
+    editor.session.setScrollTop(scrollPos);
     opening = false;
 
     if (compiler.isCompiled(name)) {
