@@ -52,8 +52,10 @@ timers = [];
 intervals = [];
 audio = [];
 
-exports.setup = function (files, view, fdbk, hideReveal) {
-  var download, drop, search, editor, fileName, opening, rename, session, fileSystem, selection;
+exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
+  var download, imgDownload, audioDownload, remove, search, editor, fileName, opening, rename,
+      session, fileSystem, selection, textFileName, imgFileName, audioFileName,
+      textRename, imgRename, audioRename;
 
   var Range = ace.acequire('ace/range').Range;
   fileSystem = require("./fileSystem.js").setup();
@@ -110,12 +112,23 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     audio.push(element);
   };
 
+  //Download button
   download = view.find(".download");
-  fileName = view.find(".file-name");
-  search = view.find(".search");
-  drop = view.find(".delete");
 
+  //File names
+  textFileName = view.find(".file-name");
+  imgFileName = imgView.find(".file-name");
+  audioFileName = audioView.find(".file-name");
+
+  //Rename fields
   rename = view.find(".file-name-input");
+  textRename = rename;
+  imgRename= imgView.find(".file-name-input");
+  audioRename = audioView.find(".file-name-input");
+
+  //Search and remove
+  search = view.find(".search");
+  remove = $(".delete");
 
   function runProgram() {
     var escaped, modname;
@@ -350,11 +363,16 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     toggleOutputView();
   });
 
-  files.onOpen(function (name, content) {
+  files.onOpen(function (name, content, type) {
     var slashIndex = name.lastIndexOf("/");
     var cursor = fileSystem.getLastCursorPosition(name);
     var folds = fileSystem.getStoredFolds(name);
     var scrollPos = fileSystem.getScrollBarPosition(name);
+
+    //Look at the file type and set the tag globally
+    if(type === "text"){ fileName = textFileName; rename = textRename; }
+    else if(type === "image"){ fileName = imgFileName; rename = imgRename; }
+    else { fileName = audioFileName; rename = audioRename; }
 
     if (slashIndex !== -1) {
       name = name.substring(slashIndex + 1);
@@ -363,43 +381,50 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     fileName.text(name);
     fileName.show();
     rename.hide();
-    setDownload(name, content);
 
-    opening = true;
-    //Put the content of the file into the editor
-    session.setValue(content);
+    //If the file is a text file -- open the editor
+    if(type === "text") {
+      opening = true;
+      //Put the content of the file into the editor
+      session.setValue(content);
 
-    //Restore code folds
-    if(folds != undefined && folds.length != undefined && folds.length != false) {
-      for(var i = 0; i < folds.length; i++) {
-        editor.session.addFold("...",folds[i]);
+      //Set the download value
+      setDownload(name, content);
+
+      //Restore code folds
+      if(folds != undefined && folds.length != undefined && folds.length != false) {
+        for(var i = 0; i < folds.length; i++) {
+          editor.session.addFold("...",folds[i]);
+        }
       }
+
+      //Put the cursor in the correct place
+      editor.gotoLine((cursor.row+1),(cursor.column+1), false);
+
+      //Set the scroll position
+      editor.session.setScrollTop(scrollPos);
+      opening = false;
+
+      if (compiler.isCompiled(name)) {
+        feedback.compilation.ready();
+      } else if (compiler.isCompiling(name)) {
+        feedback.compilation.building();
+      } else {
+        feedback.compilation.waiting();
+      }
+
+      view.removeClass("hidden");
+      editor.focus();
     }
-
-    //Put the cursor in the correct place
-    editor.gotoLine((cursor.row+1),(cursor.column+1), false);
-
-    //Set the scroll position
-    editor.session.setScrollTop(scrollPos);
-    opening = false;
-
-    if (compiler.isCompiled(name)) {
-      feedback.compilation.ready();
-    } else if (compiler.isCompiling(name)) {
-      feedback.compilation.building();
-    } else {
-      feedback.compilation.waiting();
-    }
-
-    view.removeClass("hidden");
-    editor.focus();
   });
 
   //Function to respond to a "Delete" button click 
-  drop.click(function () {
+  remove.click(function () {
     files.confirmDelete("Are you sure you want to delete this file?", function () {
       files.remove();
       view.addClass("hidden");
+      imgView.addClass("hidden");
+      audioView.addClass("hidden");
       feedback.output.clear();
     });
   });
@@ -408,23 +433,55 @@ exports.setup = function (files, view, fdbk, hideReveal) {
     rename.attr("size", rename.val().length + 1);
   }
 
-  fileName.click(function () {
+  textFileName.click(function(){
+    startRename(textFileName)
+  });
+  imgFileName.click(function(){
+    startRename(imgFileName)
+  });
+  audioFileName.click(function(){
+    startRename(audioFileName)
+  });
+
+  textRename.change(function () {
+    executeRename(textRename);
+  }).keypress(function (event) {
+    finishRename(event, textRename);
+  }).keydown(resize).keyup(resize);
+
+  imgRename.change(function () {
+    executeRename(imgRename);
+  }).keypress(function (event) {
+    finishRename(event, imgRename);
+  }).keydown(resize).keyup(resize);
+
+  audioRename.change(function () {
+    executeRename(audioRename);
+  }).keypress(function (event) {
+    finishRename(event, audioRename);
+  }).keydown(resize).keyup(resize);
+
+  //*********** Renaming Functions ************
+  function startRename(fileName) {
     fileName.hide();
     rename.val(fileName.text()).css("display", "inline-block").focus();
     resize();
-  });
+  }
 
-  rename.change(function () {
+  function executeRename(rename) {
     var name = rename.css("display", "none").val();
     fileName.show();
     files.rename(name);
-  }).keypress(function (event) {
+  }
+
+  function finishRename(event, rename) {
     if (event.which === 13) {
       rename.blur();
     } else {
       resize();
     }
-  }).keydown(resize).keyup(resize);
+  }
+  // *******************************************
 
   // Ace seems to have trouble with adjusting to flexible CSS. Force a resize
   // once the size settles.

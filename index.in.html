@@ -342,25 +342,48 @@
 
         <pre id="output-view" class="output fill"></pre>
       </section>
-
-    </div>
-
-    <div id="graphics-view" class="no-select">
-      <section>
-        <canvas id="graphics" width="300" height="500"></canvas>
-      </section>
     </div>
 
     <div id="image-view" class="view horizontal fill fill-height hidden">
-      <img src="" width="700" height="550" alt="Image file">
+      <header class="custom-header header horizontal">
+        <div class="fill">
+          <div class="file-name media-file">File Name</div>
+          <input class="file-name-input media-file" style="display: none;">
+        </div>
+        <div class="file-delete delete button">
+          <span class="label">Delete</span>
+          <span class="icon">⊗</span>
+        </div>
+      </header>
+      <div id="image-wrap">
+        <img id="image-display" src="" width="700" height="550" alt="Image file">
+      </div>
     </div>
 
     <div id="audio-view" class="view horizontal fill fill-height hidden">
-      <audio controls>
-        <source src="scripts/plink.wav" type="audio/wav">
-        Your browser does not support the audio element.
-      </audio>
+      <header class="custom-header header horizontal">
+        <div class="fill">
+          <div class="file-name media-file">File Name</div>
+          <input class="file-name-input media-file" style="display: none;">
+        </div>
+        <div class="file-delete delete button">
+          <span class="label">Delete</span>
+          <span class="icon">⊗</span>
+        </div>
+      </header>
+      <div id="audio-wrap">
+        <audio controls id="audio-display">
+          <source src="scripts/plink.wav" type="audio/wav">
+          Your browser does not support the audio element.
+        </audio>
+        </div>
     </div>
+
+  <div id="graphics-view" class="no-select">
+    <section>
+      <canvas id="graphics" width="300" height="500"></canvas>
+    </section>
+  </div>
 
     <div id="minigrace-dump">
       <input id="debugtoggle" type="checkbox">

@@ -302,7 +302,7 @@ exports.setup = function (tree) {
       audioTag.type = "";
 
       onOpenCallbacks.forEach(function (callback) {
-        callback(fileName, content);
+        callback(fileName, content, "text");
       });
     } else if (isImage(fileName)) {
       $("#grace-view").addClass("hidden");
@@ -313,8 +313,12 @@ exports.setup = function (tree) {
       audioTag.src = "";
       audioTag.type = "";
 
-      imageTag = document.querySelector("img");
+      imageTag = document.getElementById("image-display");
       imageTag.src = content;
+
+      onOpenCallbacks.forEach(function (callback) {
+        callback(fileName, content, "image");
+      });
     } else if (isAudio(fileName)) {
       $("#grace-view").addClass("hidden");
       $("#image-view").addClass("hidden");
@@ -323,6 +327,10 @@ exports.setup = function (tree) {
       audioTag = document.querySelector("audio");
       audioTag.src = content;
       audioTag.type = mediaType(fileName);
+
+      onOpenCallbacks.forEach(function (callback) {
+        callback(fileName, content, "audio");
+      });
     }
   }
 
@@ -1129,11 +1137,6 @@ exports.setup = function (tree) {
             //If everything is valid... we continue with the rename
             if (currentDirectory !== undefined) {
               inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
-            }
-
-            //Confirm extension and store name
-            if (inputValue.endsWith(".grace") === false) {
-              inputValue = inputValue + ".grace";
             }
 
             //Replace the file in the array of files

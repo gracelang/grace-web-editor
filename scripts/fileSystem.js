@@ -19,7 +19,8 @@ exports.setup = function () {
 
     //Global Variables
     const validExtensions = [".grace", ".txt", ".json", ".xml", ".js", ".html", ".xhtml",
-        ".jpg", ".jpeg", ".bmp", ".gif", ".png", ".mp3", ".ogg", ".wav"];
+        ".jpg", ".jpeg", ".bmp", ".gif", ".png", ".mp3", ".m4a", ".ogg", ".wav"];
+    const textExtensions = [".grace", ".txt", ".json", ".xml", ".js", ".html", ".xhtml"];
 
     ///****************** Local Storage Functions ****************************
     //Function to add a file
@@ -218,8 +219,8 @@ exports.setup = function () {
     function getExtension(filename) {
         var lastPeriod = filename.lastIndexOf(".");
 
-        //Check if no extension -- then we're ok
-        if(lastPeriod === -1) return true;
+        //Check if no extension 
+        if(lastPeriod === -1) return false;
 
         //Simplify the argument
         filename = filename.substring(lastPeriod);
@@ -241,6 +242,21 @@ exports.setup = function () {
 
         //Check if it is a valid extension
         return validExtensions.includes(filename);
+    }
+
+    //Returns whether ot not a file is a text file
+    // true = yes // false = no
+    function checkIfTextFile(filename) {
+        var lastPeriod = filename.lastIndexOf(".");
+
+        //Check if no extension -- probably a text file
+        if(lastPeriod === -1) return true;
+
+        //Simplify the argument
+        filename = filename.substring(lastPeriod);
+
+        //Check if it is a valid extension
+        return textExtensions.includes(filename);
     }
 
     //************** File-Data Functions Functions *******************

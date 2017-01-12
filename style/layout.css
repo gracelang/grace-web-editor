@@ -119,6 +119,10 @@ a {
   text-align: center;
 }
 
+.custom-header{
+  width: 100%;
+}
+
 .button, .wait {
   display: inline-block;
   text-align: left;
@@ -399,7 +403,6 @@ a {
 
 .view .file-name-input {
   padding: 0px;
-  margin: 0px;
 
   background-color: transparent;
   border: 0px;
@@ -655,4 +658,54 @@ a {
 #file-header{
   margin-top: 1px;
   padding-bottom: 0;
+}
+
+#image-display{
+  display: block;
+  padding: 3px;
+  margin: 5px auto 5px auto;
+  background: white;
+  border-radius: 3px;
+  width: 800px;
+  height: auto;
+  max-height: 93%;
+  max-width: 98%;
+}
+
+#image-wrap{
+  height: inherit;
+  background-color: white;
+  border-right: black 1px solid;
+  border-top-right-radius: 3px;
+  border-top: black 1px solid;
+  width: 100%;
+}
+
+#audio-display{
+  display: block;
+  padding: 10px;
+  margin: 5px auto 5px auto;
+  background: white;
+  border-radius: 3px;
+  width: 90%;
+}
+
+#audio-wrap{
+  height: inherit;
+  background-color: white;
+  border-right: black 1px solid;
+  border-top-right-radius: 3px;
+  border-top: black 1px solid;
+  width: 100%;
+}
+
+#filename-display{
+  font-size: 10pt;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+  white-space: nowrap;
+  overflow-x: hidden;
+}
+
+.media-file{
+  margin-left: 75px;
 }
