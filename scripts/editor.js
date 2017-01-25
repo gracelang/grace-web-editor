@@ -363,6 +363,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     toggleOutputView();
   });
 
+  //Function executed to load a file into the web editor
   files.onOpen(function (name, content, type) {
     var slashIndex = name.lastIndexOf("/");
     var cursor = fileSystem.getLastCursorPosition(name);
@@ -403,6 +404,10 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
 
       //Set the scroll position
       editor.session.setScrollTop(scrollPos);
+
+      //Clear all markers and code-highlighting the editor
+      session.clearAnnotations();
+      clearMarkers(session);
       opening = false;
 
       if (compiler.isCompiled(name)) {
