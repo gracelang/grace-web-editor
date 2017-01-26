@@ -55,11 +55,10 @@ this.window = this;
     stop = false;
 
     window.minigrace.stderr_write = function (message) {
-      var match;
-
-      if (!stop && message.substring(0, 10) !== "minigrace:") {
-        message = message.split("\n")[0];
-        match = message.match(/\[(\d+):((\d+)(-\d+)?)\]/);
+        if (message.charAt(message.length - 1) === "\n") {
+            message = message.substring(0, -1);
+        }
+        var match = message.match(/\[(\d+):((\d+)(-\d+)?)\]/);
 
         window.postMessage({
           "isSuccessful": false,
@@ -73,9 +72,6 @@ this.window = this;
               message.substring(message.indexOf(" ") + 1) : message
           }
         });
-
-        stop = true;
-      }
     };
 
     window.minigrace.modname = name;
