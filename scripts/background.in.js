@@ -50,32 +50,62 @@ this.window = this;
   };
 
   function compile(name, source) {
-    var dialect, escaped, output, stop;
-
-    stop = false;
+    var stop = false;
+    var compiler_output = "";
+    var lineNr = "0";
+    var cols = "0";
+    var description;
 
     window.minigrace.stderr_write = function (message) {
-      var match;
+        if ((compiler_output !== "") && (! compiler_output.endsWith("\n"))) {
+            compiler_output = compiler_output + "\n";
+        }
+        var match = message.match(/\[(\d+):(\d+(-\d+)?)\]: (.*)/);
+        if (match) {
+            lineNr = match[1];
+            cols = match[2];
+            description = match[4];
+        } else {
+            match = message.match(/\[(\d+)]: (.*)/);
+            if (match) {
+                lineNr = match[1];
+                description = match[2];
+            } else {
+                description = message;
+            }
+        }
 
-      if (!stop && message.substring(0, 10) !== "minigrace:") {
-        message = message.split("\n")[0];
-        match = message.match(/\[(\d+):((\d+)(-\d+)?)\]/);
+        compiler_output = compiler_output + description;
 
-        window.postMessage({
-          "isSuccessful": false,
-          "name": name,
-          "match": message,
-          "reason": {
-            "module": name,
-            "line": match && match[1],
-            "column": match && match[2],
-            "message": match ?
-              message.substring(message.indexOf(" ") + 1) : message
-          }
-        });
+        if (message.startsWith(name + ".grace")) {
+            stop = true;
+            window.postMessage({
+              "isSuccessful": false,
+              "name": name,
+              "match": "WOMBAT: " + message,
+              "reason": {
+                "module": name,
+                "line": lineNr,
+                "column": cols,
+                "message": compiler_output
+              }
+            });
+        }
 
-        stop = true;
-      }
+        if (message.startsWith("minigrace:")) {
+            stop = true;
+            window.postMessage({
+              "isSuccessful": false,
+              "name": name,
+              "match": "Compiler Error.  " + message,
+              "reason": {
+                "module": "minigrace",
+                "line": lineNr,
+                "column": cols,
+                "message": compiler_output
+              }
+            });
+        }
     };
 
     window.minigrace.modname = name;
@@ -85,7 +115,7 @@ this.window = this;
       window.minigrace.compile(source);
     } catch (error) {
       if (error instanceof ReferenceError) {
-        dialect = error.message.match(/^gracecode_(\w+)/);
+        var dialect = error.message.match(/^gracecode_(\w+)/);
 
         if (dialect !== null) {
           window.postMessage({
@@ -111,8 +141,8 @@ this.window = this;
     }
 
     if (!window.minigrace.compileError) {
-      escaped = graceModuleName(name);
-      output = window.minigrace.generated_output;
+      var escaped = graceModuleName(name);
+      var output = window.minigrace.generated_output;
 
       window.eval("var myframe;" + output +
                      ";window." + escaped + "=" + escaped);
