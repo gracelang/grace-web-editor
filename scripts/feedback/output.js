@@ -51,7 +51,7 @@ exports.setup = function (output) {
       } else {
         location = '    in "' + error.module + '"';
 
-        if (error.line !== null) {
+        if (error.line) {   // not null and not 0
           location += " (line " + error.line + ", column " + error.column + ")";
         }
       }
