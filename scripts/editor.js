@@ -272,7 +272,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     modname = path.basename(name, ".grace");
 
     compiler.compile(modname, session.getValue(), function (reason) {
-      var startCol, endCol;
+      var startCol, endCol, endLine;
       if (reason !== null) {
         feedback.error(reason);
         openOutputViewIfHidden();
@@ -290,16 +290,21 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
             "type": "error",
             "text": msg
           } ]);
-          var rangeMatch = reason.column.match( /^(\d+)-(\d+)$/ );
-          var numberMatch = reason.column.match( /^(\d+)$/ );
-          if (rangeMatch) {
+          var doubleRangeMatch, rangeMatch, numberMatch;
+          if (doubleRangeMatch = reason.column.match( /^(\d+)-(\d+):(\d+)$/ )) {
+            startCol = parseInt(doubleRangeMatch[1], 10) - 1; // ace uses 0-based column nrs
+            endLine = parseInt(doubleRangeMatch[2], 10) - 1;  // and line nrs
+            endCol = parseInt(doubleRangeMatch[3], 10);       // and excludes the endCol
+            session.addMarker(new Range(row, startCol, endLine, endCol),
+                              "syntax-error", "text");
+          } else if (rangeMatch = reason.column.match( /^(\d+)-(\d+)$/ )) {
             startCol = parseInt(rangeMatch[1], 10) - 1; // ace uses 0-based column nrs
             endCol = parseInt(rangeMatch[2], 10);       // and excludes the endCol
             session.addMarker(new Range(row, startCol, row, endCol),
                               "syntax-error", "text");
-          } else if (numberMatch) {
-            endCol = parseInt(reason.column, 10);
-            startCol = endCol - 1;          // ace uses 0-based column numbers
+          } else if (numberMatch = reason.column.match( /^(\d+)$/ )) {
+            endCol = parseInt(numberMatch[1], 10) - 1;  // ace uses 0-based column nrs
+            startCol = endCol - 1;
             session.addMarker(new Range(row, startCol, row, endCol),
                               "syntax-error", "text");
           }

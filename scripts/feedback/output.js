@@ -36,7 +36,7 @@ exports.setup = function (output) {
     },
 
     "error": function (error) {
-      var location;
+      var location, mlMatch;
 
       if (typeof error === "string") {
         output.append(newError(error));
@@ -51,8 +51,14 @@ exports.setup = function (output) {
       } else {
         location = '    in "' + error.module + '"';
 
-        if (error.line && (error.line != 0)) {   // not null and not 0 or "0
-          location += " (line " + error.line + ", column " + error.column + ")";
+        if (error.line && (error.line != 0)) {   // not null and not 0 or "0"
+          location += " (line " + error.line + ", column ";
+          if (mlMatch = error.column.match( /^(\d+)-(\d+):(\d+)$/ )) {
+              location += mlMatch[1] + " - line " + mlMatch[2] +
+                            ", column " + mlMatch[3] + ")";
+          } else {
+              location += error.column + ")";
+          }
         }
       }
 

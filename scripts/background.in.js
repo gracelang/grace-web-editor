@@ -60,11 +60,11 @@ this.window = this;
         if ((compiler_output !== "") && (! compiler_output.endsWith("\n"))) {
             compiler_output = compiler_output + "\n";
         }
-        var match = message.match(/\[(\d+):(\d+(-\d+)?)\]: (.*)/);
+        var match = message.match(/\[(\d+):(\d+(-(\d+:)?\d+)?)\]: (.*)/);
         if (match) {
             lineNr = match[1];
             cols = match[2];
-            description = match[4];
+            description = match[5];
         } else {
             match = message.match(/\[(\d+)]: (.*)/);
             if (match) {
@@ -82,7 +82,7 @@ this.window = this;
             window.postMessage({
               "isSuccessful": false,
               "name": name,
-              "match": "WOMBAT: " + message,
+              "match": "",
               "reason": {
                 "module": name,
                 "line": lineNr,
