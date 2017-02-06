@@ -264,6 +264,16 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     fileSystem.storeScrollBarPosition(name,scrollTopPosition);
   });
 
+  function wrapTo(str, len) {
+    // returns a new string containing all of the words of str, but wrapped
+    // with newlines so that no line is longer than len.
+    if (str.length <= len) return str.trim();
+    var currBreak = str.lastIndexOf(" ", len);
+    if (currBreak === -1) currBreak = len;   // force a break if there is no space
+
+    var trimmedPrefix = str.substring(0, currBreak).trim();
+    return trimmedPrefix + "\n" + wrapTo(str.substring(currBreak+1), len);
+  }
 
   feedback = feedback.setup(fdbk, function () {
     var modname, name;
@@ -288,7 +298,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
             "row": row,
             "column": reason.column,  // column ignored by ace!
             "type": "error",
-            "text": msg
+            "text": wrapTo(msg, 80)
           } ]);
           var doubleRangeMatch, rangeMatch, numberMatch;
           if (doubleRangeMatch = reason.column.match( /^(\d+)-(\d+):(\d+)$/ )) {
