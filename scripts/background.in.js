@@ -92,7 +92,8 @@ this.window = this;
             });
         }
 
-        if (message.startsWith("minigrace:")) {
+        if (( message.startsWith("minigrace:") ||
+              message.startsWith("Compilation terminated"))) {
             stop = true;
             window.postMessage({
               "isSuccessful": false,
