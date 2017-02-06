@@ -78,6 +78,8 @@ this.window = this;
         compiler_output = compiler_output + description;
 
         if (message.startsWith(name + ".grace")) {
+            // This is the normal case of a syntax error in a module
+            // being compiled.
             stop = true;
             window.postMessage({
               "isSuccessful": false,
@@ -92,8 +94,28 @@ this.window = this;
             });
         }
 
+        if (match = message.match( /.* on line (\d+) of ([^ :]+):/ )) {
+            //  When a dialect contains a bug, this gets the name of
+            //  the dialect and puts it into reason.
+            stop = true;
+            window.postMessage({
+              "isSuccessful": false,
+              "name": name,
+              "match": "",
+              "reason": {
+                "module": match[2],
+                "line": match[1],
+                "column": cols,
+                "message": compiler_output
+              }
+            });
+        }
+
         if (( message.startsWith("minigrace:") ||
               message.startsWith("Compilation terminated"))) {
+            //  This is designed to catch other errors, such as a compiler
+            //  crash, and ensure that some output is generated, rather than
+            //  the foregorund process forever waiting for a response.
             stop = true;
             window.postMessage({
               "isSuccessful": false,
