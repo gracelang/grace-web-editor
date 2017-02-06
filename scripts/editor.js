@@ -313,8 +313,8 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
             session.addMarker(new Range(row, startCol, row, endCol),
                               "syntax-error", "text");
           } else if (numberMatch = reason.column.match( /^(\d+)$/ )) {
-            endCol = parseInt(numberMatch[1], 10) - 1;  // ace uses 0-based column nrs
-            startCol = endCol - 1;
+            startCol = parseInt(numberMatch[1], 10) - 1; // ace uses 0-based column nrs
+            endCol = startCol + 1;                       // and excludes the endCol
             session.addMarker(new Range(row, startCol, row, endCol),
                               "syntax-error", "text");
           }
