@@ -300,6 +300,9 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
             "type": "error",
             "text": wrapTo(msg, 80)
           } ]);
+          editor.resize(true);  // to work-around an ACE bug; see
+                     // https://groups.google.com/forum/#!topic/ace-discuss/Dyz8U2N16HQ
+          editor.scrollToLine(row, true, true, function () {});
           var doubleRangeMatch, rangeMatch, numberMatch;
           if (doubleRangeMatch = reason.column.match( /^(\d+)-(\d+):(\d+)$/ )) {
             startCol = parseInt(doubleRangeMatch[1], 10) - 1; // ace uses 0-based column nrs
