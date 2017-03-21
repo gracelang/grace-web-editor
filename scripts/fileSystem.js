@@ -48,7 +48,7 @@ exports.setup = function () {
         filename = parseSlashName(removeExtension(filename));
 
         //Delete any compiled code loaded to the page
-        delete global["gracecode_" + filename];
+        global[graceModuleName(filename)] = undefined;
     }
 
     //A function to update the filename of a file
