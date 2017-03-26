@@ -709,3 +709,9 @@ a {
 .media-file{
   margin-left: 75px;
 }
+
+#help{
+  margin-top: 3px;
+  margin-right: 10px;
+  color: #b58900;
+}
