@@ -24,7 +24,6 @@ this.window = this;
   window.importScripts("../js/identifierKinds.js");
   window.importScripts("../js/ast.js");
   window.importScripts("../js/parser.js");
-  window.importScripts("../js/genc.js");
   window.importScripts("../js/genjs.js");
   window.importScripts("../js/buildinfo.js");
   window.importScripts("../js/identifierresolution.js");
