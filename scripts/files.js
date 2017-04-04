@@ -12,7 +12,7 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
-      lastSelect, newFile, newDir, onOpenCallbacks, upload,
+      lastSelect, newFile, newFileAPI, newDir, onOpenCallbacks, upload,
       deleteDir, renameDir, downloadDir, searchBar;
   var lastError; //Global for last error message sent
   current = null;
@@ -20,6 +20,7 @@ exports.setup = function (tree) {
   input = $("#upload-input");
   upload = $("#upload");
   newFile = $("#new-file");
+  newFileAPI = $("#new-file-io-api");
   newDir = $("#new-dir");
   deleteDir = $("#deleteSelected");
   renameDir = $("#renameSelected");
@@ -1326,6 +1327,15 @@ exports.setup = function (tree) {
   //Detect clicks for new directory
   newDir.click(function(){
       createDirectory();
+  });
+
+  //Detect a request from the gracelib io module to create a new file
+  newFileAPI.click(function () {
+    //Get the name of the new file
+    var name = newFileAPI.html();
+
+    //Add the file to the file-tree
+    addFile(name);
   });
 
   deleteDir.click(function () {
