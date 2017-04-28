@@ -1078,6 +1078,7 @@ exports.setup = function (tree) {
         if ((fileList[i] !== undefined) && (fileList[i] !== false)){
           if (currentDirectory !== undefined) {
             fileName = currentDirectory.attr("dire-name") + "/" + fileName;
+            fileList[i] = fileName;
           }
           readFileList(fileList[i], that.files[i]);
           lastValid = fileList[i];
