@@ -1026,7 +1026,7 @@ exports.setup = function (tree) {
   });
 
   input.change(function () {
-    var file, fileName, fileNameList, i, l, lastValid, conflictingFiles;
+    var file, fileNameList, i, l, lastValid, conflictingFiles;
 
     function readFileList(currentFileName, currentFile) {
       var reader = new FileReader();
@@ -1063,22 +1063,17 @@ exports.setup = function (tree) {
     //if there are, mark them, and rename in a loop
     for (i = 0, l = this.files.length; i < l; i += 1) {
       file = this.files[i];
-      fileName = file.name;
 
-      if (!validateName(fileName, "file", true, false)) {
-          conflictingFiles[i] = true;
-      } else {
-        conflictingFiles[i] = false;
-      }
-      fileNameList[i] = fileName;
+      conflictingFiles[i] = !validateName(file.name, "file", true, false);
+      fileNameList[i] = file.name;
     }
 
     renameFileOnUpload(fileNameList, conflictingFiles,0,l,this, function (fileList, that) {
       for (i = 0; i < l; i += 1) {
         if ((fileList[i] !== undefined) && (fileList[i] !== false)){
+          //Add the file to currently selected directory
           if (currentDirectory !== undefined) {
-            fileName = currentDirectory.attr("dire-name") + "/" + fileName;
-            fileList[i] = fileName;
+            fileList[i] = currentDirectory.attr("dire-name") + "/" + fileSystem.parseSlashName(fileList[i]);
           }
           readFileList(fileList[i], that.files[i]);
           lastValid = fileList[i];
@@ -1141,8 +1136,8 @@ exports.setup = function (tree) {
               inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
             }
 
-            //Replace the file in the array of files
-            fileList[i] = inputValue;
+            //Replace the file in the array of files with ".grace" extension if none
+            fileList[i] = fileSystem.addExtension(inputValue);
 
             //Check if this is the last file in the array
             //If so, then we proceed to add the files into memory
