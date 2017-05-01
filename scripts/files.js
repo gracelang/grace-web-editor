@@ -147,12 +147,8 @@ exports.setup = function (tree) {
 
     //Check if this name is one of the built-in modules
     if (checkBuiltIn && typeof global[graceModuleName(newName)] !== "undefined") {
-      var result = confirm("\""+newName + "\" is a built-in module. Are you sure you want to overwrite it?" +
-          " Doing so could cause unpredictable behavior!");
-      lastError = "\""+newName + "\" is a built-in module.";
-
-      //If they don't want to overwrite the file, don't allow it to be created
-      if (!result) { return false; }
+      lastError = "That file is a built-in module.";
+      return false;
     }
 
     return true;
@@ -627,9 +623,8 @@ exports.setup = function (tree) {
       if (droppedName === originalDir) {
         return false;
       }
-    }
-    else //If dropped onto base tree
-    {
+    }  else {   //If dropped onto base tree
+
       //If not on tree, but no branch also
       if (slashIndex === -1) {
         return false;
@@ -1026,14 +1021,17 @@ exports.setup = function (tree) {
     for (i = 0, l = this.files.length; i < l; i += 1) {
       file = this.files[i];
 
-      conflictingFiles[i] = !validateName(file.name, "file", true, false);
+      conflictingFiles[i] = {
+        conflictExists:(!validateName(file.name, "file", true, false)),
+        builtInConflict:(lastError==="That file is a built-in module.")
+      };
       fileNameList[i] = file.name;
     }
 
     renameFileOnUpload(fileNameList, conflictingFiles,0,l,this, function (fileList, that) {
       for (i = 0; i < l; i += 1) {
         if ((fileList[i] !== undefined) && (fileList[i] !== false)){
-          //Add the file to currently selected directory
+          //Add the selected directory identifier to the file path
           if (currentDirectory !== undefined) {
             fileList[i] = currentDirectory.attr("dire-name") + "/" + fileSystem.parseSlashName(fileList[i]);
           }
@@ -1047,17 +1045,32 @@ exports.setup = function (tree) {
   });
 
   //File list is a array of fileNames
-  //Conflict list is a array of true/false flags for each file
+  //Conflict list is a array of objects with true/false error flags for each file
   function renameFileOnUpload(fileList, conflictList, startIndex, length, thisObj, callback){
     var i = startIndex;
+    var alertTitle = "Name Conflict: " + fileList[i];
+    var alertText, confirmText, cancelText;
+
+    if(conflictList[i].conflictExists && conflictList[i].builtInConflict){
+      alertText = "The filename \""+fileList[i]+"\" is a built-in module. Uploading this file without renaming it will overwrite this module." +
+          " Doing so could cause unpredictable behavior!";
+      confirmText = "Rename and Upload";
+      cancelText = "Upload Without Renaming";
+    } else {
+      alertText = "The filename \""+fileList[i]+"\" is already taken. "+"Please enter a new name for this file:";
+      confirmText = "Rename and Upload";
+      cancelText = "Cancel";
+    }
 
       //Check if this file conflicts
-      if(conflictList[i]) {
+      if(conflictList[i].conflictExists) {
         swal({
-          title: "Name Conflict: " + fileList[i],
-          text: "The filename \""+fileList[i]+"\" is already taken. "+"Please enter a new name for this file:",
+          title: alertTitle,
+          text: alertText,
           type: "input",
           showCancelButton: true,
+          confirmButtonText: confirmText,
+          cancelButtonText: cancelText,
           closeOnConfirm: false,
           closeOnCancel: false,
           animation: "slide-from-top",
@@ -1067,8 +1080,10 @@ exports.setup = function (tree) {
           //Also executes when "CANCEL" button clicked
           if (inputValue === false) {
 
-            //Remove the unresolved element and update traversal counter
-            fileList[i] = false;
+            //Remove the unresolved element and update traversal counter if valid conflict
+            if(!conflictList[i].builtInConflict) {
+              fileList[i] = false;
+            }
 
             //Continue parsing list, if elements remain
             if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
@@ -1078,7 +1093,6 @@ exports.setup = function (tree) {
               callback(fileList, thisObj);
               swal.close();
             }
-
             return false;
           }
 
@@ -1091,13 +1105,11 @@ exports.setup = function (tree) {
               swal.showInputError(lastError);
               return false;
             }
-
             //If everything is valid... we continue with the rename
             if (currentDirectory !== undefined) {
               inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
             }
-
-            //Replace the file in the array of files with ".grace" extension if none
+            //Add ".grace" if no extension existed and update the filename
             fileList[i] = fileSystem.addExtension(inputValue);
 
             //Check if this is the last file in the array
@@ -1110,21 +1122,18 @@ exports.setup = function (tree) {
             } else if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
               renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
             }
-
           }
           return true;
         });
       }
       //END CASE: If there is no name conflict in the upload
       // and this is the last one
-      else if(((i+1) === length)) //Note: last index is always length-1
-      {
+      else if(((i+1) === length)){ //Note: last index is always length-1
         //Execute the callback
         callback(fileList, thisObj);
         swal.close();
       }
-      else
-      {
+      else {
         renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
       }
 
