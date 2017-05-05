@@ -100,8 +100,7 @@ exports.setup = function (tree) {
     }
 
     //Check for slashes in the name -- not allowed
-    if (newName.indexOf("/") !== -1)
-    {
+    if (newName.indexOf("/") !== -1) {
       if(shouldAlert)
         alert("Names cannot contain slashes.");
       lastError = "Names cannot contain slashes.";
@@ -125,7 +124,7 @@ exports.setup = function (tree) {
     }
 
     //Check if this FILENAME already exists in localstorage - across all directories
-    if(checkBuiltIn) { //Allow disabling of check - for drag and drop
+    if (checkBuiltIn) { //Allow disabling of check - for drag and drop
       var tempName;
       for (tempName in localStorage) {
         if (tempName.startsWith("file:")) {
@@ -147,20 +146,17 @@ exports.setup = function (tree) {
     newName = path.basename(newName, ".grace");
 
     //Check if this name is one of the built-in modules
-    if (checkBuiltIn && typeof global[graceModuleName(newName)] !== "undefined")
-    {
+    if (checkBuiltIn && typeof global[graceModuleName(newName)] !== "undefined") {
       var result = confirm("\""+newName + "\" is a built-in module. Are you sure you want to overwrite it?" +
           " Doing so could cause unpredictable behavior!");
       lastError = "\""+newName + "\" is a built-in module.";
 
       //If they don't want to overwrite the file, don't allow it to be created
-      if(!result) { return false; }
+      if (!result) { return false; }
     }
-    //***** Name Error Checks End Here ********
 
-    //If all checks pass, return true
     return true;
-  }
+  }  // end of function validateNameAndDestination
 
   function oldGetName(lastName, category) {
     var catName = prompt("Name of " + category + ":");
@@ -169,60 +165,52 @@ exports.setup = function (tree) {
       if (path.extname(catName) === "") {
         catName += path.extname(lastName);
       }
-
       if (!validateName(catName, category, true, true)) {
         return oldGetName(catName, category);
       }
-
       return catName;
     }
-
     return false;
   }
 
   function getName(lastName, category, toExecuteAfter) {
-
-    //Upper case version of category
-    var type = category.charAt(0).toUpperCase() + category.slice(1);
-    if(lastName === undefined) {lastName = "Enter a name here..."}
+    if (lastName === undefined) { lastName = "Enter a name here..." }
     swal({
-      title: "Rename "+type,
-      text: "Enter a new "+category+" name:",
-      type: "input",
-      showCancelButton: true,
-      closeOnConfirm: false,
-      animation: "slide-from-top",
-      inputPlaceholder: lastName
-    }, function(inputValue) {
-      //Check the input for problems
-      if (inputValue === false) return false;
+          title: "Rename " + category,
+          text: "Enter a new " + category + " name:",
+          type: "input",
+          showCancelButton: true,
+          closeOnConfirm: false,
+          animation: "slide-from-top",
+          inputPlaceholder: lastName
+        }, function(inputValue) {
+          //Check the input for problems
+          if (inputValue === false) return false;
 
-      //Check if there is input
-      if (inputValue === "" || inputValue === null)
-      {
-        swal.showInputError("You need to enter a " + category + " name!");
-        return false;
-      }
+          //Check if there is input
+          if (inputValue === "" || inputValue === null) {
+            swal.showInputError("You need to enter a " + category + " name!");
+            return false;
+          }
 
-      //Add an extension if needed
-      if (path.extname(inputValue) === "")
-      {
-        inputValue += path.extname(lastName);
-      }
+          //Add an extension if needed
+          if (path.extname(inputValue) === "") {
+            inputValue += path.extname(lastName);
+          }
 
-      //Validate the name
-      if (!validateName(inputValue, category, true, false))
-      {
-        swal.showInputError(lastError);
-        return false;
-      }
+          //Validate the name
+          if (!validateName(inputValue, category, true, false)) {
+            swal.showInputError(lastError);
+            return false;
+          }
 
-      //Execute other code before exiting -- pass it the new name
-      toExecuteAfter(inputValue);
+          //Execute other code before exiting -- pass it the new name
+          toExecuteAfter(inputValue);
 
-      swal.close();
-      return true;
-    });
+          swal.close();
+          return true;
+        }
+    );
   }
 
 
@@ -248,16 +236,12 @@ exports.setup = function (tree) {
     noChange = false;
 
     if (currentDirectory !== undefined) {
-
       if (currentDirectory.hasClass("directory")) {
-
         if (currentDirectory.find("ul").css("display") === "none") {
           slashIndex = fileName.lastIndexOf("/");
-
           if (slashIndex !== -1) {
             directory = fileName.substring(0, slashIndex);
           }
-
           if (currentDirectory.attr("dire-name") === directory) {
             noChange = true;
           }
@@ -344,10 +328,8 @@ exports.setup = function (tree) {
   }
 
   //Set the current file variable in localStorage
-  function setCurrentFile(name)
-  {
-    if (localStorage.hasOwnProperty("currentFile"))
-    {
+  function setCurrentFile(name) {
+    if (localStorage.hasOwnProperty("currentFile")) {
       localStorage.currentFile = name;
     } else {
       localStorage.setItem("currentFile",name);
@@ -403,8 +385,7 @@ exports.setup = function (tree) {
   //Allows the renaming of directories
   //Old name needed to find the directory being renamed
   //** "newName" is expected to have the full path to the directory**
-  function renameDirectory(oldName, newName)
-  {
+  function renameDirectory(oldName, newName) {
     var oldDir;
     oldDir = $("body").data("directoryObj");
 
@@ -442,8 +423,7 @@ exports.setup = function (tree) {
     delete localStorage.currentFile;
   }
 
-  function removeDir(name)
-  {
+  function removeDir(name) {
     //Check if deleting something valid...
     if (name == undefined) {
       alert("Oops! Can't delete this directory!");
@@ -461,22 +441,20 @@ exports.setup = function (tree) {
   }
 
   //Removes everything in localStorgae that begins with this directory ID
-  function removeAllinDirectory(name)
-  {
+  function removeAllinDirectory(name) {
     var toCheckFile = "file:"+name+"/";
     var toCheckDir = "directory:"+name+"/";
     var editorFile = localStorage.getItem("currentFile");
 
     //Delete all files in directory -- look in localStorage
     for (var i in localStorage) {
-      if (i.startsWith(toCheckFile)){
+      if (i.startsWith(toCheckFile)) {
 
         //Get the filename for comparison...
         var fileName = i.substring(i.indexOf(":")+1);
 
         //Check if the current file is in the directory being deleted
-        if(editorFile === fileName)
-        {
+        if (editorFile === fileName) {
           //Delete the current editor file
           delete localStorage.currentFile;
 
@@ -500,8 +478,7 @@ exports.setup = function (tree) {
 
   //Function to check if the directory is empty
   //Returns 1 if contains files, 2 if directories, 3 if both, 0 if empty
-  function checkIfEmpty(name)
-  {
+  function checkIfEmpty(name) {
     var hasFiles = false;
     var hasDirs = false;
     var toCheckFile = "file:"+name+"/";
@@ -536,14 +513,12 @@ exports.setup = function (tree) {
   }
 
   //Function to check localStorage for any grace files
-  function checkForFiles()
-  {
+  function checkForFiles() {
     var found = false;
 
     //Check if any localStorage key begins with file:
     for (var i in localStorage) {
-      if (i.startsWith("file:"))
-      {
+      if (i.startsWith("file:")) {
         found = true;
         return true;  //If a file is found - return true
       }
@@ -671,42 +646,40 @@ exports.setup = function (tree) {
     if (!validateNameAndDestination(name, droppedDire,"file", false, false)) {
       //Custom error - since any file in the file tree must have an otherwise valid filename
       alert("Oops! There is already a file with the same name here! Please rename the new file.");
-      getName(name, "file", function reName(name){
+      getName(name, "file", function reName(name) {
 
-      if (!name) {
-        return false;
-      }
+        if (!name) {
+            return false;
+        }
 
-    if (droppedDire) {
-      nameWithPath = droppedName + "/" + name;
-    } else {
-      nameWithPath = name;
-    }
+        if (droppedDire) {
+          nameWithPath = droppedName + "/" + name;
+        } else {
+          nameWithPath = name;
+        }
 
-    //Add file to UI file tree
-    addFile(nameWithPath);
+        //Add file to UI file tree
+        addFile(nameWithPath);
 
-    //Modify the file's position in localStorage
-    locStoreTransferFile(droppedName, originalDir, name, stableName);
+        //Modify the file's position in localStorage
+        locStoreTransferFile(droppedName, originalDir, name, stableName);
 
-    //Remove old file position from UI file tree
+        //Remove old file position from UI file tree
     tree.find('[data-name="' + draggedName + '"]').remove();
 
-    //Add CSS and UI elements
-    if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
-      lastSelect.css({ "font-weight": "", "color": "" });
+        //Add CSS and UI elements
+        if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
+          lastSelect.css({ "font-weight": "", "color": "" });
       tree.find('[data-name="' + name + '"]').css({
-        "font-weight": "bold",
-        "color": "#FF0000"
-      });
+            "font-weight": "bold",
+            "color": "#FF0000"
+          });
 
       lastSelect = tree.find('[data-name="' + name + '"]');
-      }
-   });
-
-      //If we are not dealing with a re-name -- add normally
+          }
+      });
     } else {
-
+      // re-naming is not required, so add normally
       if (droppedDire) {
         nameWithPath = droppedName + "/" + name;
       } else {
@@ -742,8 +715,7 @@ exports.setup = function (tree) {
   // Directory arguments MUST have a FULL path in them
   // Just the name for the fileName args -- filenames can be same
   // oldFileName is optional; if present, this is a rename from oldFileName to newFileName
-  function locStoreTransferFile(newDir, oldDir, newFileName, oldFileName)
-  {
+  function locStoreTransferFile(newDir, oldDir, newFileName, oldFileName) {
     var currentFile, fileNameWithPath, content;
 
     //Check for optional argument "oldFileName"
@@ -886,7 +858,6 @@ exports.setup = function (tree) {
   //them from one directory to another
   function modifyChildren(draggedDire, newDire) {
     draggedDire.children().children().children().each(function () {
-
       if ($(this).hasClass("file")) {
         dropFile($(this), newDire);
 
@@ -933,50 +904,42 @@ exports.setup = function (tree) {
     currentDirectory = droppedDire;
 
     if (!validateName(name, "directory", false, false)) {
-      alert("Oops! There is already a folder with the same name here! Please rename the new folder.");
-      name = getName(name, "directory", function toRun(name){
+        alert("Oops! There is already a folder with the same name; please rename the new folder.");
+        name = getName(name, "directory", function toRun(name){
+            if (!name) {
+                return false;
+            }
+            if (droppedDire !== undefined) {
+              name = droppedName + "/" + name;
+            }
+            newDire = addDirectory(name, false);
+            currentDirectory = storeCurrentDirectory;
 
-      if (!name) {
-        return false;
-      }
+            display = draggedDire.find("ul").css("display");
+            newDire.children().children("ul").css({ "display": display });
 
+            if (newDire.find("ul").css("display") === "block") {
+              newDire.children(".icon").removeClass("close");
+              newDire.children(".icon").addClass("open");
+            }
+            modifyChildren(draggedDire, newDire);
+            if (currentDirectory !== undefined) {
+              if (currentDirectory.attr("dire-name") === draggedName) {
+                lastSelect.css({ "font-weight": "", "color": "" });
+                newDire.children().css({ "font-weight": "bold", "color": "#FF0000" });
+                newDire.children().find("*").css({ "color": "#000000" });
+                newDire.children().find(".file").css({ "font-weight": "normal" });
 
-    if (droppedDire !== undefined) {
-      name = droppedName + "/" + name;
-    }
-
-    newDire = addDirectory(name, false);
-    currentDirectory = storeCurrentDirectory;
-
-    display = draggedDire.find("ul").css("display");
-    newDire.children().children("ul").css({ "display": display });
-
-    if (newDire.find("ul").css("display") === "block") {
-      newDire.children(".icon").removeClass("close");
-      newDire.children(".icon").addClass("open");
-    }
-
-    modifyChildren(draggedDire, newDire);
-
-    if (currentDirectory !== undefined) {
-      if (currentDirectory.attr("dire-name") === draggedName) {
-        lastSelect.css({ "font-weight": "", "color": "" });
-        newDire.children().css({ "font-weight": "bold", "color": "#FF0000" });
-        newDire.children().find("*").css({ "color": "#000000" });
-        newDire.children().find(".file").css({ "font-weight": "normal" });
-
-        currentDirectory = newDire;
-        lastSelect = newDire.find("*");
-      }
-    }
+                currentDirectory = newDire;
+                lastSelect = newDire.find("*");
+              }
+            }
 
     tree.find('[dire-name="' + draggedName + '"]').remove();
-    locStoreDirectoryTransfer(draggedName, name);
-    });
-
-   //If the name is valid -- continue as usual
-} else {
-
+            locStoreDirectoryTransfer(draggedName, name);
+        });
+    } else {
+        // the name is valid -- continue as usual
         if (droppedDire !== undefined) {
           name = droppedName + "/" + name;
         }
@@ -1008,14 +971,13 @@ exports.setup = function (tree) {
 
         tree.find('[dire-name="' + draggedName + '"]').remove();
         locStoreDirectoryTransfer(draggedName, name);
-      }
+    }
     return true;
   };
 
   //Function to transfer directory contents in localStorage
   //** Expects FULL directory path **
-  function locStoreDirectoryTransfer(oldName, newName)
-  {
+  function locStoreDirectoryTransfer(oldName, newName) {
     var content = localStorage["directory:" + oldName];
     delete localStorage["directory:" + oldName];
     localStorage["directory:" + newName] = content;
@@ -1103,7 +1065,7 @@ exports.setup = function (tree) {
         }, function (inputValue) {
           //Check the input for problems
           //Also executes when "CANCEL" button clicked
-          if (inputValue === false){
+          if (inputValue === false) {
 
             //Remove the unresolved element and update traversal counter
             fileList[i] = false;
@@ -1111,8 +1073,7 @@ exports.setup = function (tree) {
             //Continue parsing list, if elements remain
             if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
               renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
-            }
-            else { // If we are at the end of the list...
+            } else { // If we are at the end of the list...
               //Execute the callback
               callback(fileList, thisObj);
               swal.close();
@@ -1341,8 +1302,7 @@ exports.setup = function (tree) {
     var message = "";
 
     //Confirm the deletion if not empty!
-    if(isEmpty === 0)
-    {
+    if (isEmpty === 0) {
       //Remove the dir -- don't need to clean containing files
       removeDir(toDelete);
     }
@@ -1360,8 +1320,7 @@ exports.setup = function (tree) {
     }
   });
 
-  function confirmDelete(message,toExecAfter)
-  {
+  function confirmDelete(message,toExecAfter) {
     swal({
       title: "Are you sure?",
       text: message,
@@ -1392,28 +1351,22 @@ exports.setup = function (tree) {
     getName(simpleName, "directory", function finish(newName) {
 
         //If same name as now -- return
-        if (newName === simpleName)
-        {
-          return;
+        if ((!newName) || (newName === simpleName)) {
+            // if no newname entered, or new name is same as current name
+            return;
+        }
+        //Check for the last slash
+        lastSlash = fullName.lastIndexOf("/");
+
+        //Add the directory structure to new name
+        if (lastSlash !== -1) {
+          path = fullName.substring(0, lastSlash + 1);
+          newName = path + newName;
         }
 
-        //If no new name entered
-        if (!newName) {
-          return;
-        }
-
-    //Check for the last slash
-    lastSlash = fullName.lastIndexOf("/");
-
-    //Add the directory structure to new name
-    if (lastSlash !== -1) {
-      path = fullName.substring(0, lastSlash + 1);
-      newName = path + newName;
-    }
-
-      //Rename the directory then restore the actual current directory
-      renameDirectory(fullName, newName);
-   })
+        //Rename the directory then restore the actual current directory
+        renameDirectory(fullName, newName);
+    })
   });
 
   //Called when "Download" is clicked in the folder context menu
@@ -1436,9 +1389,7 @@ exports.setup = function (tree) {
     directoryName = $(this).attr("dire-name");
 
     if (currentDirectory !== undefined) {
-
       if (currentDirectory.hasClass("directory")) {
-
         if (currentDirectory.find("ul").css("display") === "none") {
           slashIndex = current.attr("dire-name").lastIndexOf("/");
 
@@ -1506,13 +1457,10 @@ exports.setup = function (tree) {
 
     "drop": function (event, ui) {
       if (ui.draggable.hasClass("file")) {
-
         if (!dropFile(ui.draggable, tree)) {
           ui.draggable.draggable("option", "revert", true);
         }
-
       } else if (ui.draggable.hasClass("directory")) {
-
         if (!dropDirectory(ui.draggable, tree)) {
           ui.draggable.draggable("option", "revert", true);
         }
@@ -1535,8 +1483,7 @@ exports.setup = function (tree) {
     }
 
     //If there are no grace files -- load the welcome file
-    if(checkForFiles() == false)
-    {
+    if(checkForFiles() == false) {
       //Get the welcome file and put it in localStorage
       $.get("style/Welcome.grace", function (data){
         localStorage.setItem("file:Welcome.grace", data);
