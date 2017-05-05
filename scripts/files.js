@@ -257,12 +257,12 @@ exports.setup = function (tree) {
         lastSelect.css({ "font-weight": "", "color": "" });
       }
 
-      tree.find('[data-name="' + fileName + '"]').css({
+      tree.find('[data-name=' + JSON.stringify(fileName) + ']').css({
         "font-weight": "bold",
         "color": "#FF0000"
       });
 
-      lastSelect = tree.find('[data-name="' + fileName + '"]');
+      lastSelect = tree.find('[data-name=' + JSON.stringify(fileName) + ']');
     }
 
     slashIndex = fileName.lastIndexOf("/");
@@ -270,7 +270,7 @@ exports.setup = function (tree) {
     //Check if there is a directory -- otherwise set to undefined.
     if (slashIndex !== -1) {
       directory = fileName.substring(0, slashIndex);
-      currentDirectory = tree.find('[dire-name="' + directory + '"]');
+      currentDirectory = tree.find('[dire-name=' + JSON.stringify(directory) + ']');
     } else {
       currentDirectory = undefined;
     }
@@ -372,8 +372,8 @@ exports.setup = function (tree) {
     fileSystem.modifyFilePath(file,newDataName);
 
     //Replace the name in the file-tree on the webpage
-    tree.find('[data-name="' + file + '"]').attr("data-name", newDataName);
-    tree.find('[data-name="' + newDataName + '"]').find(".file-name").text(to);
+    tree.find('[data-name=' + JSON.stringify(file) + ']').attr("data-name", newDataName);
+    tree.find('[data-name=' + JSON.stringify(newDataName) + ']').find(".file-name").text(to);
 
     //Update the current file variable in local storage
     localStorage.currentFile = newDataName;
@@ -408,7 +408,7 @@ exports.setup = function (tree) {
     modifyChildren(oldDir, newDir);
 
     delete localStorage["directory:" + oldDir.attr("dire-name")];
-    tree.find('[dire-name="' + oldDir.attr("dire-name") + '"]').remove();
+    tree.find('[dire-name=' + JSON.stringify(oldDir.attr("dire-name")) + ']').remove();
   }
 
   function remove() {
@@ -419,7 +419,7 @@ exports.setup = function (tree) {
     }
 
     fileSystem.deleteFile(file);
-    tree.find('[data-name="' + file + '"]').remove();
+    tree.find('[data-name=' + JSON.stringify(file) + ']').remove();
     delete localStorage.currentFile;
   }
 
@@ -437,7 +437,7 @@ exports.setup = function (tree) {
 
     //Remove from localStorage and from html tree
     delete localStorage["directory:" + name];
-    tree.find('[dire-name="' + name + '"]').remove();
+    tree.find('[dire-name=' + JSON.stringify(name) + ']').remove();
   }
 
   //Removes everything in localStorgae that begins with this directory ID
@@ -555,7 +555,7 @@ exports.setup = function (tree) {
       parentDir = name.substring(0, slashIndex);
       name = name.substring(slashIndex + 1);
 
-      currentDirectory = tree.find('[dire-name="' + parentDir + '"]');
+      currentDirectory = tree.find('[dire-name=' + JSON.stringify(parentDir) + ']');
     }
     else{
       currentDirectory = undefined;
@@ -665,17 +665,17 @@ exports.setup = function (tree) {
         locStoreTransferFile(droppedName, originalDir, name, stableName);
 
         //Remove old file position from UI file tree
-    tree.find('[data-name="' + draggedName + '"]').remove();
+        tree.find('[data-name=' + JSON.stringify(draggedName) + ']').remove();
 
         //Add CSS and UI elements
         if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
           lastSelect.css({ "font-weight": "", "color": "" });
-      tree.find('[data-name="' + name + '"]').css({
+          tree.find('[data-name=' + JSON.stringify(name) + ']').css({
             "font-weight": "bold",
             "color": "#FF0000"
           });
 
-      lastSelect = tree.find('[data-name="' + name + '"]');
+          lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
           }
       });
     } else {
@@ -693,17 +693,17 @@ exports.setup = function (tree) {
       locStoreTransferFile(droppedName, originalDir, name, stableName);
 
       //Remove old file position from UI file tree
-      tree.find('[data-name="' + draggedName + '"]').remove();
+      tree.find('[data-name=' + JSON.stringify(draggedName) + ']').remove();
 
       //Add CSS and UI elements
       if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
         lastSelect.css({ "font-weight": "", "color": "" });
-        tree.find('[data-name="' + name + '"]').css({
+        tree.find('[data-name=' + JSON.stringify(name) + ']').css({
           "font-weight": "bold",
           "color": "#FF0000"
         });
 
-        lastSelect = tree.find('[data-name="' + name + '"]');
+        lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
       }
     }
     return true;
@@ -783,7 +783,7 @@ exports.setup = function (tree) {
       name = name.substring(slashIndex + 1);
 
       //Look for parent Dir...
-      currentDirectory = tree.find('[dire-name="' + parentDir + '"]');
+      currentDirectory = tree.find('[dire-name=' + JSON.stringify(parentDir) + ']');
     }
     else {
       currentDirectory = undefined;
@@ -935,7 +935,7 @@ exports.setup = function (tree) {
               }
             }
 
-    tree.find('[dire-name="' + draggedName + '"]').remove();
+            tree.find('[dire-name=' + JSON.stringify(draggedName) + ']').remove();
             locStoreDirectoryTransfer(draggedName, name);
         });
     } else {
@@ -969,7 +969,7 @@ exports.setup = function (tree) {
           }
         }
 
-        tree.find('[dire-name="' + draggedName + '"]').remove();
+        tree.find('[dire-name=' + JSON.stringify(draggedName) + ']').remove();
         locStoreDirectoryTransfer(draggedName, name);
     }
     return true;
