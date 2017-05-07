@@ -58,20 +58,20 @@ exports.setup = function (tree) {
            ext === ".ogg" ? "audio/ogg" : ext === ".wav" ? "audio/wav" : "";
   }
 
-    function validateName(newName, category, checkBuiltIn, shouldAlert) {
+    function validateName(newName, category, checkLocalStorage, shouldAlert) {
         // returns true if newName is OK for a file; otherwise false.
         // shouldAlert is a boolean; true means to post an alert.
         // category is a string: "file" or "directory"
-        // if checkBuiltIn, then also check that there is no built-in module with newName
+        // if checkLocalStorage, then also check that there is no localStorage file with newName
 
-        return validateNameAndDestination(newName,currentDirectory, category, checkBuiltIn, shouldAlert);
+        return validateNameAndDestination(newName,currentDirectory, category, checkLocalStorage, shouldAlert);
     }
 
-   function validateNameAndDestination(newName, destination, category, checkBuiltIn, shouldAlert) {
+   function validateNameAndDestination(newName, destination, category, checkLocalStorage, shouldAlert) {
     // returns true if newName is OK for a file; otherwise false.
     // shouldAlert is a boolean; true means to post an alert.
     // category is a string: "file" or "directory"
-    // if checkBuiltIn, then also check that there is no built-in module with newName
+    // if checkLocalStorage, then also check that there is no localStorage file with newName
     
     //Make sure that a new filename has a .grace extension
     if(category === "file"){
@@ -124,7 +124,7 @@ exports.setup = function (tree) {
     }
 
     //Check if this FILENAME already exists in localstorage - across all directories
-    if (checkBuiltIn) { //Allow disabling of check - for drag and drop
+    if (checkLocalStorage) { //Allow disabling of check - for drag and drop
       var tempName;
       for (tempName in localStorage) {
         if (tempName.startsWith("file:")) {
@@ -145,14 +145,38 @@ exports.setup = function (tree) {
     //Change given name to check for the global variable
     newName = path.basename(newName, ".grace");
 
-    //Check if this name is one of the built-in modules
-    if (checkBuiltIn && typeof global[graceModuleName(newName)] !== "undefined") {
-      lastError = "That file is a built-in module.";
-      return false;
-    }
-
     return true;
   }  // end of function validateNameAndDestination
+
+  function isBuiltInModule(filename) {
+    //Check if this filename is one of the built-in modules
+    filename = fileSystem.parseSlashName(fileSystem.removeExtension(filename));
+    return(typeof global[graceModuleName(filename)] !== "undefined");
+  }
+  
+  function checkForBuiltInConflict(filename, callback) {
+    //Check if this name is one of the built-in modules
+    filename = fileSystem.parseSlashName(fileSystem.removeExtension(filename));
+    if (isBuiltInModule(filename)) {
+      swal({
+        title: "Built-in Conflict",
+        text: "The filename \"" + fileSystem.parseSlashName(filename)+ "\" corresponds to a built-in module."+
+              " Using this name will overwrite the built-in module. Doing so could cause unpredictable behavior!",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Overwrite",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#d13838",
+        animation: "slide-from-top"
+      }, function (inputValue) {
+        if (inputValue) {
+          callback();
+        }
+      });
+    } else {
+      callback();
+    }
+  }
 
   function oldGetName(lastName, category) {
     var catName = prompt("Name of " + category + ":");
@@ -358,24 +382,25 @@ exports.setup = function (tree) {
       swal("Oops!", lastError, "error");
       return;
     }
+    checkForBuiltInConflict(to, function () {
+      //If there is a directory currently selected, put the file into that directory
+      if (currentDirectory !== undefined) {
+        newDataName = currentDirectory.attr("dire-name") + "/" + newDataName;
+      }
 
-    //If there is a directory currently selected, put the file into that directory
-    if (currentDirectory !== undefined) {
-      newDataName = currentDirectory.attr("dire-name") + "/" + newDataName;
-    }
+      //Change the file identifiers in the file-system
+      fileSystem.modifyFilePath(file,newDataName);
 
-    //Change the file identifiers in the file-system
-    fileSystem.modifyFilePath(file,newDataName);
+      //Replace the name in the file-tree on the webpage
+      tree.find('[data-name=' + JSON.stringify(file) + ']').attr("data-name", newDataName);
+      tree.find('[data-name=' + JSON.stringify(newDataName) + ']').find(".file-name").text(to);
 
-    //Replace the name in the file-tree on the webpage
-    tree.find('[data-name=' + JSON.stringify(file) + ']').attr("data-name", newDataName);
-    tree.find('[data-name=' + JSON.stringify(newDataName) + ']').find(".file-name").text(to);
+      //Update the current file variable in local storage
+      localStorage.currentFile = newDataName;
 
-    //Update the current file variable in local storage
-    localStorage.currentFile = newDataName;
-
-    //Open the new file in the ace editor
-    openFile(newDataName);
+      //Open the new file in the ace editor
+      openFile(newDataName);
+    });
   }
 
   //Allows the renaming of directories
@@ -1023,7 +1048,7 @@ exports.setup = function (tree) {
 
       conflictingFiles[i] = {
         conflictExists:(!validateName(file.name, "file", true, false)),
-        builtInConflict:(lastError==="That file is a built-in module.")
+        builtInConflict: isBuiltInModule(file.name)
       };
       fileNameList[i] = file.name;
     }
@@ -1051,8 +1076,8 @@ exports.setup = function (tree) {
     var alertTitle = "Name Conflict: " + fileList[i];
     var alertText, confirmText, cancelText;
 
-    if(conflictList[i].conflictExists && conflictList[i].builtInConflict){
-      alertText = "The filename \""+fileList[i]+"\" is a built-in module. Uploading this file without renaming it will overwrite this module." +
+    if(conflictList[i].builtInConflict){
+      alertText = "The filename \""+fileList[i]+"\" corresponds to a built-in module. Uploading this file without renaming it will overwrite this module." +
           " Doing so could cause unpredictable behavior!";
       confirmText = "Rename and Upload";
       cancelText = "Upload Without Renaming";
@@ -1063,7 +1088,7 @@ exports.setup = function (tree) {
     }
 
       //Check if this file conflicts
-      if(conflictList[i].conflictExists) {
+      if(conflictList[i].conflictExists || conflictList[i].builtInConflict) {
         swal({
           title: alertTitle,
           text: alertText,
@@ -1243,9 +1268,11 @@ exports.setup = function (tree) {
           inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
         }
 
-        localStorage["file:" + inputValue] = "";
-        addFile(inputValue).click();
-        swal.close();
+        checkForBuiltInConflict(inputValue, function () {
+          localStorage["file:" + inputValue] = "";
+          addFile(inputValue).click();
+          swal.close();
+        });
       }
       return true;
     });
