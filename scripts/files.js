@@ -1505,18 +1505,34 @@ exports.setup = function (tree) {
   });
 
   (function () {
-    var name;
+    var name, fileList = [], directoryList = [];
 
+    //Get file and directory names, then add them to the UI file tree
     for (name in localStorage) {
       if (localStorage.hasOwnProperty(name) &&
           name.substring(0, 5) === "file:") {
-        addFile(name.substring(5));
+        fileList.push(name.substring(5));
       }
       if (localStorage.hasOwnProperty(name) &&
           name.substring(0, 10) === "directory:") {
-        addDirectory(name.substring(10), fileSystem.getDirectoryStatus(name));
+        directoryList.push(name.substring(10));
       }
     }
+
+    //Sort directories by level-depth for correct adding order
+    directoryList.sort(function (a,b){
+      var levelA = a.split("/").length-1;
+      var levelB = b.split("/").length-1;
+      
+      return (levelA-levelB);
+    });
+
+    directoryList.forEach(function(dirName){
+      addDirectory(dirName, fileSystem.getDirectoryStatus(dirName));
+    });
+    fileList.forEach(function(fileName){
+      addFile(fileName);
+    });
 
     //If there are no grace files -- load the welcome file
     if(checkForFiles() == false) {
