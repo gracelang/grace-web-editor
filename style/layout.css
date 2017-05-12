@@ -640,11 +640,16 @@ a {
 /* Search Bar CSS */
 #search-bar{
   display: block;
-  padding: 3px;
+  border: 1px solid #cccccc;
+  border-radius: 2px;
+  padding: 4px;
   margin: 5px auto 15px auto;
-  width: 127px;
+  width: 135px;
   transition: width 0.3s;
-  transition-timing-function: ease-in-out
+  transition-timing-function: ease-in-out;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 #search-bar:focus{

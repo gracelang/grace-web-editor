@@ -1168,12 +1168,10 @@ exports.setup = function (tree) {
   //******* Search Bar ********
 
   //Executes on every key-up event in the search bar
-  searchBar.keyup(function () {
-    var searchValue = searchBar.val();
-
+  searchBar.on("input", function() {
     //Check if there is a valid search
-    if(searchValue) {
-      executeSearch(searchValue);
+    if(this.value) {
+      executeSearch(this.value);
     } else {
       showFiles();
       showDirectories();
