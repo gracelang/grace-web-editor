@@ -108,7 +108,7 @@ exports.setup = function (tree) {
     }
 
      //Check extension -- only valid ones allowed
-     if (fileSystem.validateExtension(newName) == false) {
+     if (! fileSystem.validateExtension(newName)) {
        if (shouldAlert)
          alert("Names must have a valid extension.");
        lastError = "\""+fileSystem.getExtension(newName)+"\" is not a supported extension.";
@@ -194,7 +194,7 @@ exports.setup = function (tree) {
   }
 
   function getName(lastName, category, toExecuteAfter) {
-    if (lastName === undefined) { lastName = "Enter a name here..." }
+    if (lastName === undefined) { lastName = "Enter a name here..."; }
     swal({
           title: "Rename " + category,
           text: "Enter a new " + category + " name:",
@@ -489,7 +489,7 @@ exports.setup = function (tree) {
     }
 
     //Delete all directories in directory being deleted
-    for (var i in localStorage) {
+    for (i in localStorage) {
       if (i.startsWith(toCheckDir)) {
         //Delete the directory
         delete localStorage[i];
@@ -514,7 +514,7 @@ exports.setup = function (tree) {
     }
 
     //Check if it still contains directories
-    for (var i in localStorage) {
+    for (i in localStorage) {
       if (i.startsWith(toCheckDir)) {
         hasDirs = true;
         break; //since we know there is at least 1 directory
@@ -668,9 +668,7 @@ exports.setup = function (tree) {
       alert("Oops! There is already a file with the same name here! Please rename the new file.");
       getName(name, "file", function reName(name) {
 
-        if (!name) {
-            return false;
-        }
+        if (!name) { return; }
 
         if (droppedDire) {
           nameWithPath = droppedName + "/" + name;
@@ -688,7 +686,7 @@ exports.setup = function (tree) {
         tree.find('[data-name=' + JSON.stringify(draggedName) + ']').remove();
 
         //Add CSS and UI elements
-        if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
+        if (lastSelect && lastSelect.attr("data-name") === draggedName) {
           lastSelect.css({ "font-weight": "", "color": "" });
           tree.find('[data-name=' + JSON.stringify(name) + ']').css({
             "font-weight": "bold",
@@ -696,7 +694,7 @@ exports.setup = function (tree) {
           });
 
           lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
-          }
+        }
       });
     } else {
       // re-naming is not required, so add normally
@@ -925,10 +923,8 @@ exports.setup = function (tree) {
 
     if (!validateName(name, "directory", false, false)) {
         alert("Oops! There is already a folder with the same name; please rename the new folder.");
-        name = getName(name, "directory", function toRun(name){
-            if (!name) {
-                return false;
-            }
+        name = getName(name, "directory", function toRun(name) {
+            if (!name) { return; }
             if (droppedDire !== undefined) {
               name = droppedName + "/" + name;
             }
@@ -1342,12 +1338,16 @@ exports.setup = function (tree) {
       //Remove the dir -- don't need to clean containing files
       removeDir(toDelete);
     }
-    else if(isEmpty === 1) {message = "\""+toDelete+"\" contains files, which will also be deleted. Are you sure you want to continue?"}
-    else if(isEmpty === 2) {message = "\""+toDelete+"\" contains other empty directories in it. Are you sure you want to continue?"}
-    else if(isEmpty === 3) {message = "\""+toDelete+"\" contains files and sub-directories, all of which will be deleted. Are you sure you want to continue?"}
+    else if (isEmpty === 1) {
+        message = "\""+toDelete+"\" contains files, which will also be deleted. Are you sure you want to continue?";
+    } else if (isEmpty === 2) {
+        message = "\""+toDelete+"\" contains other empty directories in it. Are you sure you want to continue?";
+    } else if( isEmpty === 3) {
+        message = "\""+toDelete+"\" contains files and sub-directories, all of which will be deleted. Are you sure you want to continue?";
+    }
 
     //Check if we need to confirm directory deletion
-    if(isEmpty !== 0) {
+    if (isEmpty !== 0) {
       confirmDelete(message, function () {
         //Delete and clean up all containing files
         removeDir(toDelete);
@@ -1402,7 +1402,7 @@ exports.setup = function (tree) {
 
         //Rename the directory then restore the actual current directory
         renameDirectory(fullName, newName);
-    })
+    });
   });
 
   //Called when "Download" is clicked in the folder context menu
@@ -1535,7 +1535,7 @@ exports.setup = function (tree) {
     });
 
     //If there are no grace files -- load the welcome file
-    if(checkForFiles() == false) {
+    if(! checkForFiles()) {
       //Get the welcome file and put it in localStorage
       $.get("style/Welcome.grace", function (data){
         localStorage.setItem("file:Welcome.grace", data);
