@@ -534,7 +534,7 @@ exports.setup = function (tree) {
   }
 
   //Function to check localStorage for any grace files
-  function checkForFiles() {
+  function filesExistInLocalStorage() {
     var found = false;
 
     //Check if any localStorage key begins with file:
@@ -1341,7 +1341,7 @@ exports.setup = function (tree) {
     else if (isEmpty === 1) {
         message = "\""+toDelete+"\" contains files, which will also be deleted. Are you sure you want to continue?";
     } else if (isEmpty === 2) {
-        message = "\""+toDelete+"\" contains other empty directories in it. Are you sure you want to continue?";
+        message = "\""+toDelete+"\" contains other empty directories. Are you sure you want to continue?";
     } else if( isEmpty === 3) {
         message = "\""+toDelete+"\" contains files and sub-directories, all of which will be deleted. Are you sure you want to continue?";
     }
@@ -1509,21 +1509,19 @@ exports.setup = function (tree) {
 
     //Get file and directory names, then add them to the UI file tree
     for (name in localStorage) {
-      if (localStorage.hasOwnProperty(name) &&
-          name.substring(0, 5) === "file:") {
-        fileList.push(name.substring(5));
-      }
-      if (localStorage.hasOwnProperty(name) &&
-          name.substring(0, 10) === "directory:") {
-        directoryList.push(name.substring(10));
+      if (localStorage.hasOwnProperty(name)) {
+        if (name.substring(0, 5) === "file:") {
+          fileList.push(name.substring(5));
+        } else if (name.substring(0, 10) === "directory:") {
+          directoryList.push(name.substring(10));
+        }
       }
     }
 
-    //Sort directories by level-depth for correct adding order
+    //Sort directories by level, so that they are added in top-down order
     directoryList.sort(function (a,b){
       var levelA = a.split("/").length-1;
       var levelB = b.split("/").length-1;
-      
       return (levelA-levelB);
     });
 
@@ -1535,7 +1533,7 @@ exports.setup = function (tree) {
     });
 
     //If there are no grace files -- load the welcome file
-    if(! checkForFiles()) {
+    if(! filesExistInLocalStorage()) {
       //Get the welcome file and put it in localStorage
       $.get("style/Welcome.grace", function (data){
         localStorage.setItem("file:Welcome.grace", data);
