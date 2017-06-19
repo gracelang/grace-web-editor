@@ -12,15 +12,16 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (tree) {
   var current, currentDirectory, dropDirectory, input,
-      lastSelect, newFile, newFileAPI, newDir, onOpenCallbacks, upload,
-      deleteDir, renameDir, downloadDir, searchBar;
+      lastSelect, newFile, addFileAPI, newDir, onOpenCallbacks, upload,
+      removeFileAPI, deleteDir, renameDir, downloadDir, searchBar;
   var lastError; //Global for last error message sent
   current = null;
 
   input = $("#upload-input");
   upload = $("#upload");
   newFile = $("#new-file");
-  newFileAPI = $("#new-file-io-api");
+  addFileAPI = $("#add-file-io-api");
+  removeFileAPI = $("#remove-file-io-api");
   newDir = $("#new-dir");
   deleteDir = $("#deleteSelected");
   renameDir = $("#renameSelected");
@@ -1316,14 +1317,15 @@ exports.setup = function (tree) {
       createDirectory();
   });
 
-  //Detect a request from the gracelib io module to create a new file
-  newFileAPI.click(function () {
-    //Get the name of the new file
-    var name = newFileAPI.html();
-
-    //Add the file to the file-tree
-    addFile(name);
+  //Detect a request from the gracelib io module to add/remove files from the UI file tree 
+  addFileAPI.click(function () {
+    addFile(addFileAPI.html());
   });
+
+  removeFileAPI.click(function () {
+    tree.find('[data-name=' + JSON.stringify(removeFileAPI.html()) + ']').remove();
+  });
+
 
   deleteDir.click(function () {
     //Get the name of the directory to delete
