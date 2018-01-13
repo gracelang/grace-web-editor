@@ -59,100 +59,74 @@ exports.setup = function (tree) {
            ext === ".ogg" ? "audio/ogg" : ext === ".wav" ? "audio/wav" : "";
   }
 
-    function validateName(newName, category, checkLocalStorage, shouldAlert) {
-        // returns true if newName is OK for a file; otherwise false.
-        // shouldAlert is a boolean; true means to post an alert.
-        // category is a string: "file" or "directory"
-        // if checkLocalStorage, then also check that there is no localStorage file with newName
-
-        return validateNameAndDestination(newName,currentDirectory, category, checkLocalStorage, shouldAlert);
-    }
-
-   function validateNameAndDestination(newName, destination, category, checkLocalStorage, shouldAlert) {
+  function validateName(newName, category, checkLocalStorage) {
     // returns true if newName is OK for a file; otherwise false.
-    // shouldAlert is a boolean; true means to post an alert.
     // category is a string: "file" or "directory"
     // if checkLocalStorage, then also check that there is no localStorage file with newName
+    // If result is false, the global variable lastError will contain a descriptive message.
+
+    return validateNameAndDestination(newName, currentDirectory, category, checkLocalStorage);
+  }
+
+  function validateNameAndDestination(newName, destination, category, checkLocalStorage) {
+    // returns true if newName is OK for a file; otherwise false.
+    // category is a string: "file" or "directory"
+    // if checkLocalStorage, then also check that there is no localStorage file with newName
+    // If result is false, the global variable lastError will contain a descriptive message.
     
-    //Make sure that a new filename has a .grace extension
-    if(category === "file"){
-      newName = fileSystem.addExtension(newName);
+    //Make sure that a newName has a .grace extension
+    if (category === "file") {
+        newName = fileSystem.addExtension(newName);
     }
      
     //Name that is used in local storage
     var fileStorageName = newName; //Default with no directory
 
-    //Optional argument alert -- if not provided, shouldAlert=true
-    if(shouldAlert === undefined)
-      shouldAlert = true;
-
     //Generate the fileStorage name
     if (destination && destination.attr("dire-name")) {
-      fileStorageName = destination.attr("dire-name") + "/" + newName;
+        fileStorageName = destination.attr("dire-name") + "/" + newName;
     }
-
-    //***** Name Error Checks Begin Here ********
-    //Check if name begins with a dot
     if (newName[0] === ".") {
-      if(shouldAlert)
-        alert("Names cannot begin with a dot.");
-      lastError = "Names cannot begin with a dot.";
-      return false;
+        lastError = "Names cannot begin with a dot.";
+        return false;
     }
-
-    //Check for slashes in the name -- not allowed
     if (newName.indexOf("/") !== -1) {
-      if(shouldAlert)
-        alert("Names cannot contain slashes.");
-      lastError = "Names cannot contain slashes.";
-      return false;
+        lastError = "Names cannot contain slashes.";
+        return false;
     }
-
-     //Check extension -- only valid ones allowed
-     if (! fileSystem.validateExtension(newName)) {
-       if (shouldAlert)
-         alert("Names must have a valid extension.");
-       lastError = "\""+fileSystem.getExtension(newName)+"\" is not a supported extension.";
+    if (! fileSystem.validateExtension(newName)) {
+       lastError = '"' + fileSystem.getExtension(newName)+ '" is not a supported extension.';
        return false;
-     }
+    }
 
     //Check for this identifier explicitly in the directory structure
     if (localStorage.hasOwnProperty(category + ":" + fileStorageName)) {
-      if(shouldAlert)
-        alert("That name is already taken.");
-      lastError = "That name is already taken.";
-      return false;
+        lastError = "That name is already taken.";
+        return false;
     }
-
-    //Check if this FILENAME already exists in localstorage - across all directories
-    if (checkLocalStorage) { //Allow disabling of check - for drag and drop
-      var tempName;
-      for (tempName in localStorage) {
-        if (tempName.startsWith("file:")) {
-          //Remove the identifier and parse the name
-          tempName = tempName.substring(5);
-          tempName = fileSystem.parseSlashName(tempName);
-
-          if (tempName === newName) {
-            if (shouldAlert)
-              alert("That file already exists in another folder!");
-            lastError = "That file already exists in another folder!";
-            return false;
-          }
-        }
-      }
+    //Check if newName already exists in localstorage - across all directories
+    if (checkLocalStorage && fileExistsLocally(newName)) {
+        lastError = "That file already exists in another folder.";
+        return false;
     }
-
-    //Change given name to check for the global variable
-    newName = path.basename(newName, ".grace");
-
     return true;
   }  // end of function validateNameAndDestination
 
   function isBuiltInModule(filename) {
     //Check if this filename is one of the built-in modules
-    filename = fileSystem.parseSlashName(fileSystem.removeExtension(filename));
-    return(typeof global[graceModuleName(filename)] !== "undefined");
+    let simpleName = fileSystem.parseSlashName(fileSystem.removeExtension(filename));
+    if (! global[graceModuleName(simpleName)]) { return false; }
+    return ! fileExistsLocally(simpleName + ".grace");
+  }
+
+  function fileExistsLocally(basename) {
+      for (var localName in localStorage) {
+          if (localName.startsWith("file:")) {
+              var localBasename = fileSystem.parseSlashName(localName.substring(5));
+              if (localBasename === basename) { return true; }
+          }
+      }
+      return false;
   }
   
   function checkForBuiltInConflict(filename, callback) {
@@ -179,22 +153,7 @@ exports.setup = function (tree) {
     }
   }
 
-  function oldGetName(lastName, category) {
-    var catName = prompt("Name of " + category + ":");
-
-    if (catName !== null && catName.length > 0) {
-      if (path.extname(catName) === "") {
-        catName += path.extname(lastName);
-      }
-      if (!validateName(catName, category, true, true)) {
-        return oldGetName(catName, category);
-      }
-      return catName;
-    }
-    return false;
-  }
-
-  function getName(lastName, category, toExecuteAfter) {
+  function getName(lastName, category, continuation) {
     if (lastName === undefined) { lastName = "Enter a name here..."; }
     swal({
           title: "Rename " + category,
@@ -220,13 +179,13 @@ exports.setup = function (tree) {
           }
 
           //Validate the name
-          if (!validateName(inputValue, category, true, false)) {
-            swal.showInputError(lastError);
-            return false;
+          if (! validateName(inputValue, category, true)) {
+              swal.showInputError(lastError);
+              return false;
           }
 
-          //Execute other code before exiting -- pass it the new name
-          toExecuteAfter(inputValue);
+          //Execute continuation before exiting -- pass it the new name
+          continuation(inputValue);
 
           swal.close();
           return true;
@@ -379,9 +338,9 @@ exports.setup = function (tree) {
     }
 
     //Validate the name
-    if (!validateName(to, "file", true, false)) {
-      swal("Oops!", lastError, "error");
-      return;
+    if (! validateName(to, "file", true)) {
+        swal("Oops!", lastError, "error");
+        return;
     }
     checkForBuiltInConflict(to, function () {
       //If there is a directory currently selected, put the file into that directory
@@ -664,7 +623,7 @@ exports.setup = function (tree) {
 
 
     //Check for a duplicate name in this directory
-    if (!validateNameAndDestination(name, droppedDire,"file", false, false)) {
+    if (! validateNameAndDestination(name, droppedDire, "file") ) {
       //Custom error - since any file in the file tree must have an otherwise valid filename
       alert("Oops! There is already a file with the same name here! Please rename the new file.");
       getName(name, "file", function reName(name) {
@@ -922,7 +881,7 @@ exports.setup = function (tree) {
     storeCurrentDirectory = currentDirectory;
     currentDirectory = droppedDire;
 
-    if (!validateName(name, "directory", false, false)) {
+    if (! validateName(name, "directory", false)) {
         alert("Oops! There is already a folder with the same name; please rename the new folder.");
         name = getName(name, "directory", function toRun(name) {
             if (!name) { return; }
@@ -1035,130 +994,104 @@ exports.setup = function (tree) {
       }
     }
 
+    // check the files for name conflicts;
+    // if conflicts are found, mark them, and rename
     fileNameList = [];
     conflictingFiles = [];
-
-    //Check the name list to see if there are name conflicts,
-    //if there are, mark them, and rename in a loop
     for (i = 0, l = this.files.length; i < l; i += 1) {
-      file = this.files[i];
-
-      conflictingFiles[i] = {
-        conflictExists:(!validateName(file.name, "file", true, false)),
-        builtInConflict: isBuiltInModule(file.name)
-      };
-      fileNameList[i] = file.name;
+        file = this.files[i];
+        conflictingFiles[i] = {
+            conflictExists: (! validateName(file.name, "file", true)),
+            builtInConflict: isBuiltInModule(file.name)
+        };
+        fileNameList[i] = file.name;
     }
 
-    renameFileOnUpload(fileNameList, conflictingFiles,0,l,this, function (fileList, that) {
-      for (i = 0; i < l; i += 1) {
-        if ((fileList[i] !== undefined) && (fileList[i] !== false)){
-          //Add the selected directory identifier to the file path
-          if (currentDirectory !== undefined) {
-            fileList[i] = currentDirectory.attr("dire-name") + "/" + fileSystem.parseSlashName(fileList[i]);
-          }
-          readFileList(fileList[i], that.files[i]);
-          lastValid = fileList[i];
+    renameFileOnUpload(fileNameList, conflictingFiles, 0, this,
+        function (fileList, that) {
+              for (var i = 0, l = fileList.length; i < l; i += 1) {
+                if (fileList[i]) {
+                  //Add the selected directory identifier to the file path
+                  if (currentDirectory !== undefined) {
+                      fileList[i] = currentDirectory.attr("dire-name") + "/" +
+                            fileSystem.parseSlashName(fileList[i]);
+                  }
+                  readFileList(fileList[i], that.files[i]);
+                  lastValid = fileList[i];
+                }
+              }
+              //Reset value to allow same-name uploads
+              input.val("");
         }
-      }
-      //Reset value to allow same-name uploads
-      input.val("");
-    });
-  });
+    );
+  });  // end of input.change
 
-  //File list is a array of fileNames
-  //Conflict list is a array of objects with true/false error flags for each file
-  function renameFileOnUpload(fileList, conflictList, startIndex, length, thisObj, callback){
-    var i = startIndex;
-    var alertTitle = "Name Conflict: " + fileList[i];
+
+  function renameFileOnUpload(fileList, conflictList, i, thisObj, callback) {
+        // fileList is a array of fileNames
+        // conflictList is a array of objects with Boolean attributes
+        // conflictExists and builtInConflict for each file
+        // i is the index within fileList of the next file to be checked.
+    var fn = fileList[i];
+    var alertTitle = "Name Conflict: " + fn;
     var alertText, confirmText, cancelText;
 
-    if(conflictList[i].builtInConflict){
-      alertText = "The filename \""+fileList[i]+"\" corresponds to a built-in module. Uploading this file without renaming it will overwrite this module." +
-          " Doing so could cause unpredictable behavior!";
+    if (conflictList[i].builtInConflict) {
+      alertText = "The filename \"" + fn +
+            "\" corresponds to a built-in module. Uploading this file without" +
+            " renaming it will overwrite this module, which could cause" +
+            " unpredictable behavior!";
       confirmText = "Rename and Upload";
       cancelText = "Upload Without Renaming";
     } else {
-      alertText = "The filename \""+fileList[i]+"\" is already taken. "+"Please enter a new name for this file:";
+      alertText = "The filename \"" + fn + "\" is already taken." +
+            " Please enter a new name for the file.";
       confirmText = "Rename and Upload";
       cancelText = "Cancel";
     }
 
-      //Check if this file conflicts
-      if(conflictList[i].conflictExists || conflictList[i].builtInConflict) {
+    if (conflictList[i].conflictExists || conflictList[i].builtInConflict) {
         swal({
-          title: alertTitle,
-          text: alertText,
-          type: "input",
-          showCancelButton: true,
-          confirmButtonText: confirmText,
-          cancelButtonText: cancelText,
-          closeOnConfirm: false,
-          closeOnCancel: false,
-          animation: "slide-from-top",
-          inputPlaceholder: "A different name..."
-        }, function (inputValue) {
-          //Check the input for problems
-          //Also executes when "CANCEL" button clicked
-          if (inputValue === false) {
-
-            //Remove the unresolved element and update traversal counter if valid conflict
-            if(!conflictList[i].builtInConflict) {
-              fileList[i] = false;
-            }
-
-            //Continue parsing list, if elements remain
-            if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
-              renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
-            } else { // If we are at the end of the list...
-              //Execute the callback
-              callback(fileList, thisObj);
-              swal.close();
-            }
-            return false;
-          }
-
-          if (inputValue === "") {
-            swal.showInputError("You need to enter a new name!");
-            return false;
-          }
-          if (inputValue !== null && inputValue.length > 0) {
-            if (!validateName(inputValue, "file", true, false)) {
-              swal.showInputError(lastError);
-              return false;
-            }
-            //If everything is valid... we continue with the rename
-            if (currentDirectory !== undefined) {
-              inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
-            }
-            //Add ".grace" if no extension existed and update the filename
-            fileList[i] = fileSystem.addExtension(inputValue);
-
-            //Check if this is the last file in the array
-            //If so, then we proceed to add the files into memory
-            if ((i + 1) >= length) {
-              //Execute the callback
-              callback(fileList, thisObj);
-              swal.close();
-
-            } else if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
-              renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
-            }
-          }
-          return true;
+              title: alertTitle,
+              text: alertText,
+              type: "input",
+              showCancelButton: true,
+              confirmButtonText: confirmText,
+              cancelButtonText: cancelText,
+              closeOnConfirm: false,
+              closeOnCancel: false,
+              animation: "slide-from-top",
+              inputPlaceholder: "A different name..."},
+          function (inputValue) {
+             if (inputValue === null) {
+                // a null inputValue means cancel was clicked, ESC pressed, or the
+                // user clicked outside of the modal dialog, so drop this file.
+                fileList[i] = false;
+             } else if (inputValue === "") {
+                swal.showInputError("You need to enter a new name!");
+                return false;
+             } else {
+                 if (! validateName(inputValue, "file", true)) {
+                    swal.showInputError(lastError);
+                    return false;
+                 }
+                 // everything is valid... we continue with the rename
+                 if (currentDirectory) {
+                    inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
+                 }
+                 //Add ".grace" if no extension existed and update the filename
+                 fileList[i] = fileSystem.addExtension(inputValue);
+             }
+             if (i === fileList.length - 1) {
+                 // this is the last file in the array, so execute the callback
+                 swal.close();
+                 callback(fileList, thisObj);
+             } else {
+                 renameFileOnUpload(fileList, conflictList, i + 1, thisObj, callback);
+             }
+             return true;
         });
-      }
-      //END CASE: If there is no name conflict in the upload
-      // and this is the last one
-      else if(((i+1) === length)){ //Note: last index is always length-1
-        //Execute the callback
-        callback(fileList, thisObj);
-        swal.close();
-      }
-      else {
-        renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
-      }
-
+     }
   }
 
 
@@ -1254,7 +1187,7 @@ exports.setup = function (tree) {
           inputValue += ".grace";
         }
 
-        if (!validateName(inputValue, "file", true, false)) {
+        if (! validateName(inputValue, "file", true)) {
           swal.showInputError(lastError);
           return false;
         }
@@ -1291,7 +1224,7 @@ exports.setup = function (tree) {
         return false;
       }
       if (inputValue !== null && inputValue.length > 0) {
-        if (!validateName(inputValue, "directory", false, false)) {
+        if (! validateName(inputValue, "directory", false)) {
           swal.showInputError(lastError);
           return false;
         }
@@ -1356,7 +1289,7 @@ exports.setup = function (tree) {
     }
   });
 
-  function confirmDelete(message,toExecAfter) {
+  function confirmDelete(message, continuation) {
     swal({
       title: "Are you sure?",
       text: message,
@@ -1366,10 +1299,8 @@ exports.setup = function (tree) {
       confirmButtonText: "Yes, delete it!",
       closeOnConfirm: false },
       function() {
-        //Execute code passed to delete file/directory
-        toExecAfter();
-        //Close the alert when done
-        swal.close();
+          continuation();
+          swal.close();
       });
   }
 
