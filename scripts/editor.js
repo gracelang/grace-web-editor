@@ -147,10 +147,12 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     minigrace.lastDebugMode = true;
 
     minigrace.stdin_read = function () {
-        return window.prompt("Input");
+        return minigrace.ask("Input");
     };
     minigrace.ask = function (question) {
-        return window.prompt(question);
+        let result = window.prompt(question);
+        if (result === null) result = "";
+        return result;
     };
     minigrace.stdout_write = function (value) {
       feedback.output.write(value);
