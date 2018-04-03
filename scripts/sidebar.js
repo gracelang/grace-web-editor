@@ -46,13 +46,18 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
     $(menu).hide();
   });
 
+  function contextMenuClick(event) {
+      if (event.which == 3) { return true }  // right mouse button
+      return (event.which == 1) && event.ctrlKey  // control + left mouse
+  }
+
   //Delegate functions
   //Stop the menu from appearing when user right-clicks on files
   $("#file-tree").delegate(".file", "mousedown", function(e) {
     "use strict";
     var menu = document.querySelector(".context-menu");
 
-    if (e.which == 3) {
+    if (contextMenuClick(e)) {
       //Stop any parent function from being called by event
       e.preventDefault();
       e.stopPropagation();
@@ -68,7 +73,7 @@ exports.setup = function (editor, sidebar, resize, hideReveal) {
     var menu = document.querySelector(".context-menu");
 
     // If it's a right-click
-    if(e.which == 3) {
+    if(contextMenuClick(e)) {
       //Stop any parent function from being called by event
       e.preventDefault();
       e.stopPropagation();
