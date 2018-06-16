@@ -963,7 +963,7 @@ exports.setup = function (tree) {
     input.click();
   });
 
-  input.change(function () {
+  input.change(function dealWithUploads () {
     var file, fileNameList, i, l, lastValid, conflictingFiles;
 
     function readFileList(currentFileName, currentFile) {
@@ -1007,7 +1007,7 @@ exports.setup = function (tree) {
         fileNameList[i] = file.name;
     }
 
-    renameFileOnUpload(fileNameList, conflictingFiles, 0, this,
+    renameFileOnUpload(fileNameList, conflictingFiles, 0, l, this,
         function (fileList, that) {
               for (var i = 0, l = fileList.length; i < l; i += 1) {
                 if (fileList[i]) {
@@ -1022,35 +1022,31 @@ exports.setup = function (tree) {
               }
               //Reset value to allow same-name uploads
               input.val("");
-        }
-    );
-  });  // end of input.change
+    });
+  });
 
-
-  function renameFileOnUpload(fileList, conflictList, i, thisObj, callback) {
-        // fileList is a array of fileNames
-        // conflictList is a array of objects with Boolean attributes
-        // conflictExists and builtInConflict for each file
-        // i is the index within fileList of the next file to be checked.
-    var fn = fileList[i];
-    var alertTitle = "Name Conflict: " + fn;
+  //File list is a array of fileNames
+  //Conflict list is a array of objects with true/false error flags for each file
+  function renameFileOnUpload(fileList, conflictList, startIndex, length, thisObj, callback){
+    var i = startIndex;
+    var alertTitle = "Name Conflict: " + fileList[i];
     var alertText, confirmText, cancelText;
 
     if (conflictList[i].builtInConflict) {
-      alertText = "The filename \"" + fn +
-            "\" corresponds to a built-in module. Uploading this file without" +
-            " renaming it will overwrite this module, which could cause" +
-            " unpredictable behavior!";
+      alertText = "The filename \""+fileList[i]+"\" corresponds to a built-in module. " +
+        "Uploading this file without renaming it will overwrite this module, " +
+        "which could cause unpredictable behavior!";
       confirmText = "Rename and Upload";
       cancelText = "Upload Without Renaming";
     } else {
-      alertText = "The filename \"" + fn + "\" is already taken." +
-            " Please enter a new name for the file.";
+      alertText = "The filename \""+fileList[i]+"\" is already taken. " +
+            "Please enter a new name for this file:";
       confirmText = "Rename and Upload";
       cancelText = "Cancel";
     }
 
     if (conflictList[i].conflictExists || conflictList[i].builtInConflict) {
+        // the file name conflicts
         swal({
               title: alertTitle,
               text: alertText,
@@ -1061,37 +1057,69 @@ exports.setup = function (tree) {
               closeOnConfirm: false,
               closeOnCancel: false,
               animation: "slide-from-top",
-              inputPlaceholder: "A different name..."},
-          function (inputValue) {
-             if (inputValue === null) {
-                // a null inputValue means cancel was clicked, ESC pressed, or the
-                // user clicked outside of the modal dialog, so drop this file.
+              inputPlaceholder: "A different name..."
+             }, function (inputValue) {
+          //Check the input for problems
+          //Also executes when "CANCEL" button clicked
+          if (inputValue === false) {
+
+            //Remove the unresolved element and update traversal counter if valid conflict
+            if(!conflictList[i].builtInConflict) {
                 fileList[i] = false;
-             } else if (inputValue === "") {
+            }
+
+            //Continue parsing list, if elements remain
+            if ((i + 1) < length) { //If i+1 is < length (l), keep going through the list
+              renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
+            } else { // If we are at the end of the list...
+              //Execute the callback
+              callback(fileList, thisObj);
+              swal.close();
+            }
+            return false;
+          }
+
+          if (inputValue === "") {
                 swal.showInputError("You need to enter a new name!");
                 return false;
-             } else {
-                 if (! validateName(inputValue, "file", true)) {
+          }
+          if (inputValue !== null && inputValue.length > 0) {
+            if (!validateName(inputValue, "file", true, false)) {
                     swal.showInputError(lastError);
                     return false;
                  }
-                 // everything is valid... we continue with the rename
-                 if (currentDirectory) {
+            //If everything is valid... we continue with the rename
+            if (currentDirectory !== undefined) {
                     inputValue = currentDirectory.attr("dire-name") + "/" + inputValue;
                  }
                  //Add ".grace" if no extension existed and update the filename
                  fileList[i] = fileSystem.addExtension(inputValue);
-             }
-             if (i === fileList.length - 1) {
-                 // this is the last file in the array, so execute the callback
-                 swal.close();
-                 callback(fileList, thisObj);
-             } else {
-                 renameFileOnUpload(fileList, conflictList, i + 1, thisObj, callback);
-             }
-             return true;
+
+            //Check if this is the last file in the array
+            //If so, then we proceed to add the files into memory
+            if ((i + 1) >= length) {
+                //Execute the callback
+                callback(fileList, thisObj);
+                swal.close();
+            } else if ((i + 1) < length) {
+                // keep going through the list
+                renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
+            }
+          }
+          return true;
         });
      }
+     //END CASE: If there is no name conflict in the upload
+     // and this is the last one
+     else if ((i+1) === length) { //Note: last index is always length-1
+        //Execute the callback
+        callback(fileList, thisObj);
+        swal.close();
+     }
+     else {
+        renameFileOnUpload(fileList, conflictList, (i + 1), length, thisObj, callback);
+     }
+
   }
 
 
