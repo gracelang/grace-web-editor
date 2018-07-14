@@ -38,8 +38,7 @@ exports.setup = function (editor, view) {
 
 //**************** Unicode Removal Functions ****************
 
-var replacements =
-{
+const replacements = {
     "≠":"!=",
     "≥":">=",
     "≤":"<=",
@@ -48,16 +47,12 @@ var replacements =
     "⟧":"]]"
 };
 
-function removeUnicode(text)
-{
-    var char, regEx;
-    //Replace each value with its ascii equivalency
-    for (char in replacements)
-    {
-        regEx = new RegExp(char,"g");
-        text = text.replace(regEx,replacements[char]);
+function removeUnicode(text) {
+    //Replace each value with its ascii equivalent
+    for (let uCh in replacements) {
+        const regEx = new RegExp(uCh, "g");
+        text = text.replace(regEx, replacements[uCh]);
     }
-
     return text;
 }
 
@@ -75,11 +70,35 @@ function stringRepeat(pattern, count) {
         count >>= 1, pattern += pattern;
     }
     return result + pattern;
-}
+};
 
-function charCount(text, char) {
-    return text.split(char).length - 1
-}
+function examineBraces(text) {
+    let braceCount= 0;
+    let inString= false;
+    let prev= '\u0000';
+    let unmatchedLeftBrace = false;
+    for (let c of text) {
+        if ((c === '"') && (prev !== '\\')) {
+            inString= ! inString;
+        } else if ((c === '/') && (prev == '/')) {
+            return {
+                braceCount: braceCount,
+                unmatchedLeftBrace: unmatchedLeftBrace
+            };
+        } else if (! inString) {
+            if (c === '{') {
+                braceCount++; unmatchedLeftBrace= true;
+            } else if (c === '}') {
+                braceCount--; unmatchedLeftBrace= false;
+            }
+        }
+        prev = c;
+    };
+    return {
+        braceCount: braceCount,
+        unmatchedLeftBrace: unmatchedLeftBrace
+    };
+};
 
 function indentOf(text) {
     var length = text.length;
@@ -87,9 +106,7 @@ function indentOf(text) {
         if (text.charCodeAt(ix) != 32) return ix;
     }
     return 0;  // text is nothing but spaces
-}
-
-//var tabSize = Number(editor.session.getTabSize());
+};
 
 function formatGrace(code, tabSize) {
     // Continuation lines cause headaches.  We can ignore all of the
@@ -97,14 +114,15 @@ function formatGrace(code, tabSize) {
     // continuation lines.  This code assumes that any increase in
     // indentation not due to a change in brace level indicates a
     // continuation line.  It formats continuation lines in the output
-    // using a continuaiton indent that is 2 spaces greater than tabSize.
+    // using a continuation indent that is 2 spaces greater than tabSize.
     var braceDepth = 0;
     var continuationIndent = tabSize + 2;
     var formattedCode = '';
     var inContinuation = false;
     var prevIndent = 0;
     var prevBraceChange = 0;
-    var lines = code.split("\n");
+    var prevUnmatchedLeftBrace = false;
+    var lines = code.split(/\n|\r\n?|\u2028/);  //split on any of the line endings
     // if there is a newline at the end of the code, there will
     // be a final blank line in the array lines.
     var length = lines.length;
@@ -119,30 +137,40 @@ function formatGrace(code, tabSize) {
             if (i < (length - 1)) formattedCode = formattedCode + '\n';
         } else {
             var currentIndent = indentOf(line);
-            var openBraces = charCount(trimmedLine, "{");
-            var closeBraces = charCount(trimmedLine, "}");
-            var currentBraceChange = openBraces - closeBraces;
-            var startsWithClose = trimmedLine[0] === "}";
+            const braceObj = examineBraces(trimmedLine);
+            const currentBraceChange = braceObj.braceCount;
+            if (typeof(currentBraceChange) === "undefined") debugger;
+            var startsWithClose = trimmedLine.startsWith("}");
 
             var indentSize = tabSize * braceDepth;
             if (startsWithClose) indentSize = indentSize - tabSize;
-
-            if (inContinuation) {
-                if (currentIndent < prevIndent) inContinuation = false;
+            if (trimmedLine.startsWith("//")) {
+                // a comment line; don't update variables
             } else {
-                if ((currentIndent > prevIndent) && (prevBraceChange <= 0))
-                    inContinuation = true;
+                if (prevUnmatchedLeftBrace) {
+                    inContinuation = false;
+                }
+                if (inContinuation) {
+                    if ((currentIndent < prevIndent) || (prevBraceChange !== 0)) {
+                        inContinuation = false;
+                    }
+                } else {
+                    if ((currentIndent > prevIndent) && (prevBraceChange === 0)) {
+                        inContinuation = true;
+                    }
+                }
+                if (inContinuation) {
+                    indentSize = indentSize + continuationIndent;
+                }
+                prevIndent = currentIndent;
+                prevBraceChange = (startsWithClose ? 1 : 0) + currentBraceChange;
+                prevUnmatchedLeftBrace = braceObj.unmatchedLeftBrace;
             }
-            if (inContinuation) {
-                indentSize = indentSize + continuationIndent;
-            }
-
             braceDepth = braceDepth + currentBraceChange;
-            var indentedLine = stringRepeat(' ', indentSize) + trimmedLine
+            let indentedLine = stringRepeat(' ', indentSize) + trimmedLine
             formattedCode = formattedCode + indentedLine + '\n';
-            prevIndent = currentIndent;
-            prevBraceChange = startsWithClose ? 1 : currentBraceChange;
         }
     }
     return formattedCode;
-}
+};
+
