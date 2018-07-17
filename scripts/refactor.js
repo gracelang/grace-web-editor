@@ -80,13 +80,13 @@ function examineBraces(text) {
     for (let c of text) {
         if ((c === '"') && (prev !== '\\')) {
             inString= ! inString;
-        } else if ((c === '/') && (prev == '/')) {
-            return {
-                braceCount: braceCount,
-                unmatchedLeftBrace: unmatchedLeftBrace
-            };
         } else if (! inString) {
-            if (c === '{') {
+            if ((c === '/') && (prev == '/')) {
+                return {
+                    braceCount: braceCount,
+                    unmatchedLeftBrace: unmatchedLeftBrace
+                };
+            } else if (c === '{') {
                 braceCount++; unmatchedLeftBrace= true;
             } else if (c === '}') {
                 braceCount--; unmatchedLeftBrace= false;
