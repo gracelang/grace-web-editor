@@ -22,7 +22,7 @@
   "main": "scripts/boot.js",
   "scripts": {
     "lint": "node_modules/eslint/bin/eslint.js scripts",
-    "prepublish": "node_modules/browserify/bin/cmd.js . -o scripts/setup.js"
+    "prepare": "node_modules/browserify/bin/cmd.js . -o scripts/setup.js"
   },
   "homepage": "https://github.com/gracelang/grace-web-editor",
   "repository": {
