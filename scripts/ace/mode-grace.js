@@ -1017,12 +1017,12 @@ var GraceHighlightRules = function() {
 
     var keywords = lang.arrayToMap(
         (
-            "object|trait|use|alias|exclude|method|factory|self|outer|super|class|def|var|type|return|inherit|is|dialect|import|as"
+            "alias|as|class|def|dialect|exclude|import|inherit|interface|is|method|object|once|outer|return|self|trait|type|use|var|where"
         ).split("|")
     );
 
     var buildinConstants = lang.arrayToMap(
-        ("true|false|done").split("|")
+        ("true|false|done|Unknown|Self").split("|")
     );
 
     var langClasses = lang.arrayToMap(
