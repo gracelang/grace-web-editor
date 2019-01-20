@@ -3,7 +3,7 @@
 //-------------------------------------------------------------------------------------
 var message := "Hi! Welcome to the Grace Web Editor!"
 
-//Getting Started:
+// Getting Started:
 //     1. Use the buttons on the top of the sidebar to create new files and folders.
 //        Feel free to try creating a new file and directory now. Note that you can
 //        drag and drop files into and out of directories.
@@ -16,8 +16,8 @@ var message := "Hi! Welcome to the Grace Web Editor!"
 //     3. The current file can be compiled and run using the "Run" button at the bottom.
 //        Try this now by running this file! It will compile and run the code below:
 
-          print (message)
-          print "These two lines were printed by the code under #3"
+print (message)
+print "These two lines were printed by the code under #3"
 
 //     4. You might have noticed there is no save button. This is because your code
 //        is automatically saved as you type. So you don't need to worry about saving
@@ -42,6 +42,6 @@ var message := "Hi! Welcome to the Grace Web Editor!"
 // For further information and resources on Grace, you can visit the following pages:
 
 // Blog:            http://gracelang.org/applications/
-// Documentation:   http://www.cs.pdx.edu/~grace/doc/
+// Documentation:   http://www.cs.pdx.edu/~grace/doc/ (the "?" icon at the top of the editor)
 
 
