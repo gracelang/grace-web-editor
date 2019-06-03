@@ -55,7 +55,7 @@ audio = [];
 exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
   var download, imgDownload, audioDownload, remove, search, editor, fileName, opening, rename,
       session, fileSystem, selection, textFileName, imgFileName, audioFileName,
-      textRename, imgRename, audioRename;
+      textRename, imgRename, audioRename, undoStacks, redoStacks, dirtyCounters;
 
   var Range = ace.acequire('ace/range').Range;
   fileSystem = require("./fileSystem.js").setup();
@@ -129,6 +129,11 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
   //Search and remove
   search = view.find(".search");
   remove = $(".delete");
+
+  //Undo/Redo stacks for each file and dirty counters
+  undoStacks = {};
+  redoStacks = {};
+  dirtyCounters = {};
 
   function runProgram() {
     var escaped, modname;
@@ -251,6 +256,11 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
 
     //Store all of the code folds for the file
     fileSystem.storeAllFolds(name, editor.session.getAllFolds());
+
+    //Save undo/redo stack for current file
+    undoStacks[name] = editor.session.getUndoManager().$undoStack;
+    redoStacks[name] = editor.session.getUndoManager().$redoStack;
+    dirtyCounters[name] = editor.session.getUndoManager().dirtyCounter;
 
     session.clearAnnotations();
     clearMarkers(session);
@@ -418,6 +428,16 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
           editor.session.addFold("...",folds[i]);
         }
       }
+
+      // initialize stacks and counter if not done yet
+      if (undoStacks[name] == undefined) undoStacks[name] = [];
+      if (redoStacks[name] == undefined) redoStacks[name] = []; 
+      if (dirtyCounters[name] == undefined) dirtyCounters[name] = 0;
+
+      // grab undo/redo stack and dirty counter for file being opened
+      editor.session.getUndoManager().$undoStack = undoStacks[name];
+      editor.session.getUndoManager().$redoStack = redoStacks[name];
+      editor.session.getUndoManager().dirtyCounter = dirtyCounters[name];
 
       //Put the cursor in the correct place
       editor.gotoLine((cursor.row+1),(cursor.column+1), false);
