@@ -236,7 +236,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
 
   //Happens every time any text is changed in the editor
   session.on("change", function () {
-    var name, value, toCheck;
+    var name, value, toCheck, undoManager;
 
     //If the file is currently being loaded
     if (opening) { return; }
@@ -258,9 +258,10 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     fileSystem.storeAllFolds(name, editor.session.getAllFolds());
 
     //Save undo/redo stack for current file
-    undoStacks[name] = editor.session.getUndoManager().$undoStack;
-    redoStacks[name] = editor.session.getUndoManager().$redoStack;
-    dirtyCounters[name] = editor.session.getUndoManager().dirtyCounter;
+    undoManager = editor.session.getUndoManager();
+    undoStacks[name] = undoManager.$undoStack;
+    redoStacks[name] = undoManager.$redoStack;
+    dirtyCounters[name] = undoManager.dirtyCounter;
 
     session.clearAnnotations();
     clearMarkers(session);
@@ -399,6 +400,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     var cursor = fileSystem.getLastCursorPosition(name);
     var folds = fileSystem.getStoredFolds(name);
     var scrollPos = fileSystem.getScrollBarPosition(name);
+    var undoManager = editor.session.getUndoManager();
 
     //Look at the file type and set the tag globally
     if(type === "text"){ fileName = textFileName; rename = textRename; }
@@ -435,9 +437,9 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
       if (dirtyCounters[name] == undefined) dirtyCounters[name] = 0;
 
       // grab undo/redo stack and dirty counter for file being opened
-      editor.session.getUndoManager().$undoStack = undoStacks[name];
-      editor.session.getUndoManager().$redoStack = redoStacks[name];
-      editor.session.getUndoManager().dirtyCounter = dirtyCounters[name];
+      undoManager.$undoStack = undoStacks[name];
+      undoManager.$redoStack = redoStacks[name];
+      undoManager.dirtyCounter = dirtyCounters[name];
 
       //Put the cursor in the correct place
       editor.gotoLine((cursor.row+1),(cursor.column+1), false);
