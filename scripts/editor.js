@@ -55,7 +55,7 @@ audio = [];
 exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
   var download, imgDownload, audioDownload, remove, search, editor, fileName, opening, rename,
       session, fileSystem, selection, textFileName, imgFileName, audioFileName,
-      textRename, imgRename, audioRename;
+      textRename, imgRename, audioRename, undoStacks, redoStacks, dirtyCounters;
 
   var Range = ace.acequire('ace/range').Range;
   fileSystem = require("./fileSystem.js").setup();
@@ -129,6 +129,11 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
   //Search and remove
   search = view.find(".search");
   remove = $(".delete");
+
+  //Undo/Redo stacks for each file and dirty counters
+  undoStacks = {};
+  redoStacks = {};
+  dirtyCounters = {};
 
   function runProgram() {
     var escaped, modname;
@@ -251,6 +256,12 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
 
     //Store all of the code folds for the file
     fileSystem.storeAllFolds(name, editor.session.getAllFolds());
+
+    //Save undo/redo stack for current file
+    const undoManager = editor.session.getUndoManager();
+    undoStacks[name] = undoManager.$undoStack;
+    redoStacks[name] = undoManager.$redoStack;
+    dirtyCounters[name] = undoManager.dirtyCounter;
 
     session.clearAnnotations();
     clearMarkers(session);
@@ -389,6 +400,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     var cursor = fileSystem.getLastCursorPosition(name);
     var folds = fileSystem.getStoredFolds(name);
     var scrollPos = fileSystem.getScrollBarPosition(name);
+    var undoManager = editor.session.getUndoManager();
 
     //Look at the file type and set the tag globally
     if(type === "text"){ fileName = textFileName; rename = textRename; }
@@ -418,6 +430,16 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
           editor.session.addFold("...",folds[i]);
         }
       }
+
+      // initialize stacks and counter if not done yet
+      if (undoStacks[name] == undefined) undoStacks[name] = [];
+      if (redoStacks[name] == undefined) redoStacks[name] = []; 
+      if (dirtyCounters[name] == undefined) dirtyCounters[name] = 0;
+
+      // grab undo/redo stack and dirty counter for file being opened
+      undoManager.$undoStack = undoStacks[name];
+      undoManager.$redoStack = redoStacks[name];
+      undoManager.dirtyCounter = dirtyCounters[name];
 
       //Put the cursor in the correct place
       editor.gotoLine((cursor.row+1),(cursor.column+1), false);
