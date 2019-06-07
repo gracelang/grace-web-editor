@@ -236,7 +236,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
 
   //Happens every time any text is changed in the editor
   session.on("change", function () {
-    var name, value, toCheck, undoManager;
+    var name, value, toCheck;
 
     //If the file is currently being loaded
     if (opening) { return; }
@@ -258,7 +258,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     fileSystem.storeAllFolds(name, editor.session.getAllFolds());
 
     //Save undo/redo stack for current file
-    undoManager = editor.session.getUndoManager();
+    const undoManager = editor.session.getUndoManager();
     undoStacks[name] = undoManager.$undoStack;
     redoStacks[name] = undoManager.$redoStack;
     dirtyCounters[name] = undoManager.dirtyCounter;
