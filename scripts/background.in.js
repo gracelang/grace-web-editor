@@ -23,7 +23,6 @@ this.window = this;
   window.importScripts("../js/shasum.js");
   window.importScripts("../js/mirror.js");
   window.importScripts("../js/regularExpression.js");
-  window.importScripts("../js/dom.js");
   window.importScripts("../js/gtk.js");
   window.importScripts("../js/compiler.js");
   window.importScripts("../js/lexer.js");
@@ -38,7 +37,6 @@ this.window = this;
   window.importScripts("../js/xmodule.js");
   window.importScripts("../js/unicodedata.js");
   window.importScripts("../js/errormessages.js");
-  window.importScripts("../js/timer.js");
 
   // dynamically populated by tools/includeJSLibraries based on the Makefile
   // variable ALL_LIBRARY_MODULES.  The next line is the key for
