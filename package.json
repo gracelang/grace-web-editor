@@ -8,7 +8,7 @@
   ],
   "dependencies": {
     "brace": "./brace",
-    "jquery": "3.4.x",
+    "jquery": "3.5.x",
     "jquery-ui": "1.10.x",
     "setimmediate": "1.x",
     "sweetalert": "1.x",
