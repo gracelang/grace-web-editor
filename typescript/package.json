@@ -1,0 +1,25 @@
+{
+    "type": "module",
+    "scripts": {
+        "dev": "ts-node index.ts",
+        "test": "jest",
+        "coverage": "jest --coverage"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@babel/plugin-transform-modules-commonjs": "^7.10.4",
+        "@types/jest": "^26.0.14",
+        "jest": "^26.4.2",
+        "ts-jest": "^26.3.0",
+        "typescript": "^4.0.2"
+    },
+    "babel": {
+        "env": {
+            "test": {
+                "plugins": [
+                    "@babel/plugin-transform-modules-commonjs"
+                ]
+            }
+        }
+    }
+}
