@@ -42,7 +42,6 @@ export function kahnTopologicalSort(g:Graph) {
     while (s.length !== 0) {
         const n:GNode = (s.shift() as GNode);
         result.push(n);
-        console.log("added " + n.name);
         for (const m of g.nodes) {
             if ((m.incomingEdges.has(n))) {
                 g.removeEdge(n, m);
