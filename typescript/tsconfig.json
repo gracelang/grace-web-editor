@@ -6,9 +6,11 @@
         "sourceMap": true,
         "moduleResolution": "node",
         "esModuleInterop": true,
-        "strict": true
+        "strict": true,
+        "outDir": "transpiledJs"
     },
     "files": [
-        "src/toposort.ts"
+        "src/toposort.ts",
+        "src/extractDependencies.ts"
     ],
 }
