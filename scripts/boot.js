@@ -12,8 +12,8 @@ $(function () {
   require("./settings").setup(editor, $("#settings-view"));
 
   $(document).keyup(function (event) {
-    if (event.which === 49 && event.ctrlKey && event.shiftKey &&
-        confirm("Are you sure you want to clear your local storage?")) {
+    if (event.which === 49 && event.ctrlKey && event.shiftKey &&  // ctrl + shift + 1
+        confirm("Are you sure you want to clear your local storage?  This will delete all of the files in the Grace IDE files tab.")) {
       localStorage.clear();
       document.location.reload(true);
     }
