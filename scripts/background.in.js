@@ -200,6 +200,7 @@ this.window = this;
       //Set to undefined, rather than deleting, as system modules
       //cannot be deleted from the window object.
       window[graceModuleName(command.name)] = undefined;
+      gctCache[name] = undefined;
     }
   };
 

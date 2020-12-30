@@ -39,6 +39,7 @@ exports.forget = function (name) {
   //Set to undefined, rather than deleting, as system modules
   //cannot be deleted from the window object.
   global[graceModuleName(name)] = undefined;
+  gctCache[name] = undefined;
 
   worker.postMessage({
     "action": "forget",
