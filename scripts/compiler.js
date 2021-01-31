@@ -4,6 +4,8 @@ var $, path, queue, worker;
 
 $ = require("jquery");
 path = require("path");
+import extractDependencies from "../typescript/transpiledJs/extractDependencies.js";
+import {GNode, Graph, kahnTopologicalSort} from "../typescript/transpiledJs/toposort";
 
 queue = {};
 worker = new Worker("scripts/background.js");
@@ -47,7 +49,7 @@ exports.forget = function (name) {
   });
 };
 
-function compile(name, source, callback) {
+function compileOneModule(name, source, callback) {
   var callbacks = queue[name] || [];
 
   callbacks.push({
@@ -88,7 +90,36 @@ function compile(name, source, callback) {
   }
 }
 
-exports.compile = compile;
+function compileModuleGraph(sourceName, source, callback) {
+    const g = buildModuleGraph(sourceName);
+    const toBeCompiled = kahnTopologicalSort(g);
+    for (let ix = toBeCompiled.length - 1; ix >= 0; ix--) {
+        const moduleName = toBeCompiled[ix];
+        if (! isCompiled(moduleName)) {
+            console.warn(`compiling "${moduleName}"`);
+            compileOneModule(moduleName, file.contents(moduleName), callback);
+        }
+
+function buildModuleGraph(sourceName) {
+    const processedModules = new Set();
+    const unprocessedModules = [sourceName];
+    const g = new Graph();
+    while (unprocessedModules.length > 0) {
+        const sourceName = unprocessedModules.shift();
+        if processedModules.has(sourceName) continue;
+        const source = file.contents(sourceName);
+        const dependents = extractDependencies(source);
+        for (let ix = 0, nd = dependents.length; ix < nd; ix ++) {
+            const each = dependents[ix];
+            g.addEdgeByName(name, each);
+            unprocessedModules.push(each);
+        }
+        processedModules.add(sourceName);
+    }
+    return g;
+}
+
+exports.compile = compileModuleGraph;
 
 worker.onmessage = function (event) {
   var count, match, output, recompile, regexp, result;
