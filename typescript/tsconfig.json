@@ -11,6 +11,8 @@
     },
     "files": [
         "src/toposort.ts",
-        "src/extractDependencies.ts"
-    ],
+        "src/toposort.test.ts",
+        "src/extractDependencies.ts",
+        "src/extractDependencies.test.ts"
+    ]
 }

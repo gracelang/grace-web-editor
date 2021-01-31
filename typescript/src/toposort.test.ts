@@ -80,3 +80,71 @@ test("sort a cyclic graph of 3 nodes", () => {
     g.addEdge(d2, rootNode);
     expect(() => {kahnTopologicalSort(g)}).toThrowError("graph has cycle");
 });
+
+test("Make a Graph, new interface", () => {
+    let g:Graph = new Graph();
+    let rootNode:GNode = g.possiblyNewNode("R");
+    expect(g.hasEdges).toBe(false);
+    let requiredNode:GNode = g.possiblyNewNode("D")
+    g.addEdge(rootNode, requiredNode);
+    expect(g.hasEdges).toBe(true);        
+});
+
+test("sort a graph of 2 nodes, new interface", () => {
+    let g:Graph = new Graph();
+    let rootNode:GNode = g.possiblyNewNode("R");
+    let requiredNode:GNode = g.possiblyNewNode("D");
+    g.addEdge(rootNode, requiredNode);
+    expect(kahnTopologicalSort(g)).toStrictEqual([rootNode, requiredNode]);
+});
+
+test("sort a graph of 3 nodes in a chain, new interface", () => {
+    let g:Graph = new Graph();
+    let rootNode:GNode = g.possiblyNewNode("R");
+    let requiredNode1:GNode = g.possiblyNewNode("D1");
+    let requiredNode2:GNode = g.possiblyNewNode("D2");
+    g.addEdge(requiredNode1, requiredNode2);
+    expect(kahnTopologicalSort(g)).toStrictEqual([rootNode, requiredNode1, requiredNode2]);
+});
+
+test("sort a graph of 3 nodes in a V, new interface", () => {
+    let g:Graph = new Graph();
+    let rootNode:GNode = g.possiblyNewNode("R");
+    let requiredNode1:GNode = g.possiblyNewNode("D1");
+    let requiredNode2:GNode = g.possiblyNewNode("D2");
+    g.addEdge(rootNode, requiredNode2);
+    expect(kahnTopologicalSort(g)).toStrictEqual([rootNode, requiredNode1, requiredNode2]);
+});
+
+test("sort a graph of 5 nodes in a V, new interface", () => {
+    let g:Graph = new Graph();
+    let rootNode:GNode = g.possiblyNewNode("R");
+    let d1:GNode = g.possiblyNewNode("D1");
+    g.addEdgeByName("R", "D1");
+    let e1:GNode = g.possiblyNewNode("E1");
+    g.addEdgeByName("R", "E1");
+    let d2:GNode = g.possiblyNewNode("D2");
+    expect (g.numberOfNodes).toBe(4);
+    d2 = g.possiblyNewNode("D2");          // should have no effect
+    expect (g.numberOfNodes).toBe(4);
+    d2 = g.possiblyNewNode("D2");
+    expect (g.numberOfNodes).toBe(4)
+    g.addEdgeByName("R", "D2");
+    g.addEdgeByName("R", "D2");           // adding an edge multiple times
+    g.addEdgeByName("R", "D2");           // should have no effect
+    let e2:GNode = g.possiblyNewNode("E2");
+    g.addEdgeByName("R", "E2");
+    expect(kahnTopologicalSort(g)).toStrictEqual([rootNode, d1, e1, d2, e2]);
+});
+
+test("sort a cyclic graph of 3 nodes, new interface", () => {
+    let g:Graph = new Graph();
+    let rootNode:GNode = g.possiblyNewNode("R");
+    let d1:GNode = g.possiblyNewNode("D1");
+    g.addEdge(rootNode, d1);
+    let d2:GNode = g.possiblyNewNode("D2");
+    g.addEdge(d1, d2);
+    g.addEdge(d1, d2);      // adding an edge twice should have no effect
+    g.addEdge(d2, rootNode);
+    expect(() => {kahnTopologicalSort(g)}).toThrowError("graph has cycle");
+});
