@@ -279,7 +279,7 @@
               Grace Compiler Version (put here by function at end of compiler.js)
             </div>
             <div class="version">
-              IDE v219, commit 95610ec
+              IDE v220, commit 01b940e
             </div>
           </div>
         </div>
@@ -296,7 +296,11 @@
           </div>
           <div id="remove-unicode" class="button refactor-sidebar" value="files">
             <span class="icon">&#9100;</span>
-            <span class="label">Replace Unicode</span>
+            <span class="label">Convert Unicode into text</span>
+          </div>
+          <div id="add-unicode" class="button refactor-sidebar" value="files">
+            <span class="icon">&#9100;</span>
+            <span class="label">Convert text to Unicode</span>
           </div>
           <div id="download-all-files" class="button refactor-sidebar" value="files">
             <span class="icon">↯</span>
