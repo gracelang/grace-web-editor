@@ -43,7 +43,7 @@ exports.setup = function (editor, view) {
     });
 };
 
-//**************** Unicode Removal Functions ****************
+// Object with key & value pairs mapping text and unicode characters
 const unicodeReplacements = {
     "≠":"!=",
     "≥":">=",
@@ -53,6 +53,7 @@ const unicodeReplacements = {
     "⟧":"]]"
 };
 
+//**************** Unicode Removal Function ****************
 function removeUnicode(text) {
     //Replace each unicode value with its ascii equivalent
     for (let uCh in unicodeReplacements) {
@@ -62,24 +63,16 @@ function removeUnicode(text) {
     return text;
 }
 
-//************ Text to Unicode Functions  ************/
-const textReplacements = {
-    "!=":"≠",
-    ">=":"≥",
-    "<=":"≤",
-    "->":"→",
-    "[[":"⟦",
-    "]]":"⟧"
-};
-
+//************ Text to Unicode Function  ************/
 function addUnicode(text) {
     // Iterate over each key in textReplacements
-    for (let Ch in textReplacements) {
-        const regex = new RegExp(escapeRegExp(Ch), 'g');
-        text = text.replace(regex, textReplacements[Ch]);
+    for (let Ch in unicodeReplacements) {
+        const regEx = new RegExp(escapeRegExp(unicodeReplacements[Ch]), "g");
+        text = text.replace(regEx, Ch);
     }
     return text;
 }
+
 // Helper function to escape special characters in string for regular expression
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
