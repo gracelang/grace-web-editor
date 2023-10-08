@@ -5,11 +5,11 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (editor, view) {
 
-    var removeUnicodeButton,addUnicodeButton,reindentButton, downloadAllFiles;
+    var removeSpecialButton,insertSpecialButton,reindentButton, downloadAllFiles;
 
     reindentButton = view.find("#refactor-reindent");
-    removeUnicodeButton = view.find("#remove-unicode");
-    addUnicodeButton = view.find("#add-unicode");
+    removeSpecialButton = view.find("#remove-unicode");
+    insertSpecialButton = view.find("#add-unicode");
     downloadAllFiles = view.find("#download-all-files");
 
     //Re-indent event
@@ -19,16 +19,16 @@ exports.setup = function (editor, view) {
         editor.getSession().setValue(formatGrace(code, tabSize));
     });
 
-    //Button event to convert unicode into text
-    removeUnicodeButton.mouseup(function () {
+    //Button event to convert special characters into text
+    removeSpecialButton.mouseup(function () {
         var code = editor.getSession().getValue();
-        editor.getSession().setValue(removeUnicode(code));
+        editor.getSession().setValue(removeSpecial(code));
     });
 
-    //Button event to convert text into unicode
-    addUnicodeButton.mouseup(function () {
+    //Button event to convert text into special characters
+    insertSpecialButton.mouseup(function () {
         var code = editor.getSession().getValue();
-        editor.getSession().setValue(addUnicode(code));
+        editor.getSession().setValue(insertSpecial(code));
     });
 
     //Function to download all files as a zip file
@@ -44,7 +44,7 @@ exports.setup = function (editor, view) {
 };
 
 // Object with key & value pairs mapping text and unicode characters
-const unicodeReplacements = {
+const digraphReplacements = {
     "≠":"!=",
     "≥":">=",
     "≤":"<=",
@@ -54,20 +54,20 @@ const unicodeReplacements = {
 };
 
 //**************** Unicode Removal Function ****************
-function removeUnicode(text) {
+function removeSpecial(text) {
     //Replace each unicode value with its ascii equivalent
-    for (let uCh in unicodeReplacements) {
+    for (let uCh in digraphReplacements) {
         const regEx = new RegExp(uCh, "g");
-        text = text.replace(regEx, unicodeReplacements[uCh]);
+        text = text.replace(regEx, digraphReplacements[uCh]);
     }
     return text;
 }
 
 //************ Text to Unicode Function  ************/
-function addUnicode(text) {
-    // Iterate over each key in textReplacements
-    for (let Ch in unicodeReplacements) {
-        const regEx = new RegExp(escapeRegExp(unicodeReplacements[Ch]), "g");
+function insertSpecial(text) {
+    // Iterate over each key in digraphReplacements 
+    for (let Ch in digraphReplacements) {
+        const regEx = new RegExp(escapeRegExp(digraphReplacements[Ch]), "g");
         text = text.replace(regEx, Ch);
     }
     return text;
