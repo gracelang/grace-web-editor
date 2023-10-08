@@ -5,10 +5,11 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (editor, view) {
 
-    var unicodeButton, reindentButton, downloadAllFiles;
+    var removeSpecialButton,insertSpecialButton,reindentButton, downloadAllFiles;
 
     reindentButton = view.find("#refactor-reindent");
-    unicodeButton = view.find("#remove-unicode");
+    removeSpecialButton = view.find("#remove-unicode");
+    insertSpecialButton = view.find("#add-unicode");
     downloadAllFiles = view.find("#download-all-files");
 
     //Re-indent event
@@ -18,10 +19,16 @@ exports.setup = function (editor, view) {
         editor.getSession().setValue(formatGrace(code, tabSize));
     });
 
-    //Button event to convert unicode
-    unicodeButton.mouseup(function () {
+    //Button event to convert special characters into text
+    removeSpecialButton.mouseup(function () {
         var code = editor.getSession().getValue();
-        editor.getSession().setValue(removeUnicode(code));
+        editor.getSession().setValue(removeSpecial(code));
+    });
+
+    //Button event to convert text into special characters
+    insertSpecialButton.mouseup(function () {
+        var code = editor.getSession().getValue();
+        editor.getSession().setValue(insertSpecial(code));
     });
 
     //Function to download all files as a zip file
@@ -36,9 +43,8 @@ exports.setup = function (editor, view) {
     });
 };
 
-//**************** Unicode Removal Functions ****************
-
-const replacements = {
+// Object with key & value pairs mapping text and unicode characters
+const digraphReplacements = {
     "≠":"!=",
     "≥":">=",
     "≤":"<=",
@@ -47,21 +53,33 @@ const replacements = {
     "⟧":"]]"
 };
 
-function removeUnicode(text) {
-    //Replace each value with its ascii equivalent
-    for (let uCh in replacements) {
+//**************** Unicode Removal Function ****************
+function removeSpecial(text) {
+    //Replace each unicode value with its ascii equivalent
+    for (let uCh in digraphReplacements) {
         const regEx = new RegExp(uCh, "g");
-        text = text.replace(regEx, replacements[uCh]);
+        text = text.replace(regEx, digraphReplacements[uCh]);
     }
     return text;
 }
 
+//************ Text to Unicode Function  ************/
+function insertSpecial(text) {
+    // Iterate over each key in digraphReplacements 
+    for (let Ch in digraphReplacements) {
+        const regEx = new RegExp(escapeRegExp(digraphReplacements[Ch]), "g");
+        text = text.replace(regEx, Ch);
+    }
+    return text;
+}
 
-
+// Helper function to escape special characters in string for regular expression
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 
 //**************** Re-Indentation Functions ****************
-
 function stringRepeat(pattern, count) {
     if (count < 1) return '';
     var result = '';
