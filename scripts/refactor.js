@@ -19,13 +19,13 @@ exports.setup = function (editor, view) {
         editor.getSession().setValue(formatGrace(code, tabSize));
     });
 
-    //Button event to convert special characters into text
+    //Button event to convert special characters into ASCII digraphs
     removeSpecialButton.mouseup(function () {
         var code = editor.getSession().getValue();
         editor.getSession().setValue(removeSpecial(code));
     });
 
-    //Button event to convert text into special characters
+    //Button event to convert ASCII into special characters
     addSpecialButton.mouseup(function () {
         var code = editor.getSession().getValue();
         editor.getSession().setValue(addSpecial(code));
@@ -53,7 +53,6 @@ const digraphReplacements = {
     "⟧":"]]"
 };
 
-//**************** Unicode Removal Function ****************
 function removeSpecial(text) {
     //Replace each unicode value with its ascii equivalent
     for (let uCh in digraphReplacements) {
@@ -63,7 +62,6 @@ function removeSpecial(text) {
     return text;
 }
 
-//************ Text to Unicode Function  ************/
 function addSpecial(text) {
     // Iterate over each key in digraphReplacements 
     for (let Ch in digraphReplacements) {
