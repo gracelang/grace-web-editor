@@ -267,9 +267,13 @@ a {
 
 .directory-name {
   margin-left: 12px;
+  font-size: 10pt;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+  white-space: nowrap;
 }
 
-.file-name, .file-name-input, .directory-name {
+
+.file-name, .file-name-input {
   font-size: 10pt;
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
   white-space: nowrap;
@@ -553,7 +557,7 @@ a {
 }
 
 .version {
-  color: #000000;
+  color: ;
 }
 
 
