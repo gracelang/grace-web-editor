@@ -234,12 +234,12 @@ exports.setup = function (tree) {
 
     if (!noChange) {
       if (lastSelect !== undefined) {
-        lastSelect.css({ "font-weight": "", "color": "" });
+        lastSelect.css({ "font-weight": "", "background": "" });
       }
 
       tree.find('[data-name=' + JSON.stringify(fileName) + ']').css({
         "font-weight": "bold",
-        "color": "#FF0000"
+        "background": "#c0c2c3"
       });
 
       lastSelect = tree.find('[data-name=' + JSON.stringify(fileName) + ']');
@@ -647,10 +647,10 @@ exports.setup = function (tree) {
 
         //Add CSS and UI elements
         if (lastSelect && lastSelect.attr("data-name") === draggedName) {
-          lastSelect.css({ "font-weight": "", "color": "" });
+          lastSelect.css({ "font-weight": "", "background": "" });
           tree.find('[data-name=' + JSON.stringify(name) + ']').css({
             "font-weight": "bold",
-            "color": "#FF0000"
+            "background": "#c0c2c3"
           });
 
           lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
@@ -675,10 +675,10 @@ exports.setup = function (tree) {
 
       //Add CSS and UI elements
       if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
-        lastSelect.css({ "font-weight": "", "color": "" });
+        lastSelect.css({ "font-weight": "", "background": "" });
         tree.find('[data-name=' + JSON.stringify(name) + ']').css({
           "font-weight": "bold",
-          "color": "#FF0000"
+          "background": "#c0c2c3"
         });
 
         lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
@@ -901,9 +901,9 @@ exports.setup = function (tree) {
             modifyChildren(draggedDire, newDire);
             if (currentDirectory !== undefined) {
               if (currentDirectory.attr("dire-name") === draggedName) {
-                lastSelect.css({ "font-weight": "", "color": "" });
-                newDire.children().css({ "font-weight": "bold", "color": "#FF0000" });
-                newDire.children().find("*").css({ "color": "#000000" });
+                lastSelect.css({ "font-weight": "", "background": "" });
+                newDire.children().css({ "font-weight": "bold", "background": "#c0c2c3" });
+                newDire.children().find("*").css({ "background": "#000000" });
                 newDire.children().find(".file").css({ "font-weight": "normal" });
 
                 currentDirectory = newDire;
@@ -935,9 +935,9 @@ exports.setup = function (tree) {
 
         if (currentDirectory !== undefined) {
           if (currentDirectory.attr("dire-name") === draggedName) {
-            lastSelect.css({ "font-weight": "", "color": "" });
-            newDire.children().css({ "font-weight": "bold", "color": "#FF0000" });
-            newDire.children().find("*").css({ "color": "#000000" });
+            lastSelect.css({ "font-weight": "", "background": "" });
+            newDire.children().css({ "font-weight": "bold", "background": "#c0c2c3" });
+            newDire.children().find("*").css({ "background": "#000000" });
             newDire.children().find(".file").css({ "font-weight": "normal" });
 
             currentDirectory = newDire;
@@ -1403,11 +1403,11 @@ exports.setup = function (tree) {
 
     if (!noChange) {
       if (lastSelect !== undefined) {
-        lastSelect.css({ "font-weight": "", "color": "" });
+        lastSelect.css({ "font-weight": "", "background": "" });
       }
 
-      current.children().css({ "font-weight": "bold", "color": "#FF0000" });
-      current.children().find("*").css({ "color": "#000000" });
+      current.children().css({ "font-weight": "bold", "background": "#c0c2c3" });
+      current.children().find("*").css({ "background": "#000000" });
       current.children().find(".file").css({ "font-weight": "normal" });
 
       currentDirectory = current;
@@ -1440,7 +1440,7 @@ exports.setup = function (tree) {
 
   tree.on("click", function () {
     if (lastSelect !== undefined) {
-      lastSelect.css({ "font-weight": "", "color": "" });
+      lastSelect.css({ "font-weight": "", "background": "" });
     }
 
     currentDirectory = undefined;
