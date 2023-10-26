@@ -243,7 +243,6 @@ exports.setup = function (tree) {
       });
 
       lastSelect = tree.find('[data-name=' + JSON.stringify(fileName) + ']');
-      lastSelect.css()
     }
 
     slashIndex = fileName.lastIndexOf("/");
@@ -532,8 +531,9 @@ exports.setup = function (tree) {
     div.addClass("file-name");
 
     div.hover(function(){
-      if (lastSelect == undefined || lastSelect.attr("data-name") !== name) {
-          $(this).css("background", "#94c2da");
+      let lastSelectFileName = path.basename(lastSelect.attr("data-name"));
+      if (lastSelect == undefined || lastSelectFileName !== name) {
+          $(this).css("background", "#a6d5ed");
       }
     }, function(){
        $(this).css("background", "");
