@@ -267,15 +267,16 @@ a {
 
 .directory-name {
   margin-left: 12px;
-}
-
-.file-name, .file-name-input, .directory-name {
   font-size: 10pt;
   font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
   white-space: nowrap;
-  &:hover {
-    background-color: #c0c2c3;
-  }
+}
+
+
+.file-name, .file-name-input {
+  font-size: 10pt;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+  white-space: nowrap;
 }
 
 #file-tree .directory {
@@ -556,7 +557,7 @@ a {
 }
 
 .version {
-  color: #000000;
+  color: ;
 }
 
 
