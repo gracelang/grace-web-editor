@@ -5,11 +5,10 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (editor, view) {
 
-    var removeSpecialButton,addSpecialButton,reindentButton, downloadAllFiles;
+    var unicodeButton, reindentButton, downloadAllFiles;
 
     reindentButton = view.find("#refactor-reindent");
-    removeSpecialButton = view.find("#remove-unicode");
-    addSpecialButton = view.find("#add-unicode");
+    unicodeButton = view.find("#remove-unicode");
     downloadAllFiles = view.find("#download-all-files");
 
     //Re-indent event
@@ -19,16 +18,10 @@ exports.setup = function (editor, view) {
         editor.getSession().setValue(formatGrace(code, tabSize));
     });
 
-    //Button event to convert special characters into ASCII digraphs
-    removeSpecialButton.mouseup(function () {
+    //Button event to convert unicode
+    unicodeButton.mouseup(function () {
         var code = editor.getSession().getValue();
-        editor.getSession().setValue(removeSpecial(code));
-    });
-
-    //Button event to convert ASCII into special characters
-    addSpecialButton.mouseup(function () {
-        var code = editor.getSession().getValue();
-        editor.getSession().setValue(addSpecial(code));
+        editor.getSession().setValue(removeUnicode(code));
     });
 
     //Function to download all files as a zip file
@@ -43,8 +36,9 @@ exports.setup = function (editor, view) {
     });
 };
 
-// Object with key & value pairs mapping text and unicode characters
-const digraphReplacements = {
+//**************** Unicode Removal Functions ****************
+
+const replacements = {
     "≠":"!=",
     "≥":">=",
     "≤":"<=",
@@ -53,31 +47,21 @@ const digraphReplacements = {
     "⟧":"]]"
 };
 
-function removeSpecial(text) {
-    //Replace each unicode value with its ascii equivalent
-    for (let uCh in digraphReplacements) {
+function removeUnicode(text) {
+    //Replace each value with its ascii equivalent
+    for (let uCh in replacements) {
         const regEx = new RegExp(uCh, "g");
-        text = text.replace(regEx, digraphReplacements[uCh]);
+        text = text.replace(regEx, replacements[uCh]);
     }
     return text;
 }
 
-function addSpecial(text) {
-    // Iterate over each key in digraphReplacements 
-    for (let Ch in digraphReplacements) {
-        const regEx = new RegExp(escapeRegExp(digraphReplacements[Ch]), "g");
-        text = text.replace(regEx, Ch);
-    }
-    return text;
-}
 
-// Helper function to escape special characters in string for regular expression
-function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+
 
 
 //**************** Re-Indentation Functions ****************
+
 function stringRepeat(pattern, count) {
     if (count < 1) return '';
     var result = '';
