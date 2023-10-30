@@ -758,6 +758,16 @@ exports.setup = function (tree) {
     div = $("<div>");
     div.addClass("directory-name");
 
+    div.hover(function(){
+        $(this).css({
+          boxShadow: "inset 0 0 0 2px" + hoverColor
+        });
+    }, function(){
+        $(this).css({
+          boxShadow: ""
+        });
+    });
+
     slashIndex = name.lastIndexOf("/");
 
     if (slashIndex !== -1) {
