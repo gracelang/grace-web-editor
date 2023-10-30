@@ -28,6 +28,8 @@ exports.setup = function (tree) {
   downloadDir = $("#downloadFolder");
   searchBar = $("#search-bar");
 
+  let selectionColor = "#5eb0dd";       // light blue
+  let hoverColor = "#b9e6ff";           // same hue, less saturated
 
   onOpenCallbacks = [];
 
@@ -73,12 +75,12 @@ exports.setup = function (tree) {
     // category is a string: "file" or "directory"
     // if checkLocalStorage, then also check that there is no localStorage file with newName
     // If result is false, the global variable lastError will contain a descriptive message.
-    
+
     //Make sure that a newName has a .grace extension
     if (category === "file") {
         newName = fileSystem.addExtension(newName);
     }
-     
+
     //Name that is used in local storage
     var fileStorageName = newName; //Default with no directory
 
@@ -128,7 +130,7 @@ exports.setup = function (tree) {
       }
       return false;
   }
-  
+
   function checkForBuiltInConflict(filename, callback) {
     //Check if this name is one of the built-in modules
     filename = fileSystem.parseSlashName(fileSystem.removeExtension(filename));
@@ -233,17 +235,12 @@ exports.setup = function (tree) {
     localStorage.setItem("filePathName", fileName);
 
     if (!noChange) {
-      if (lastSelect !== undefined) {
-        lastSelect.css({ "font-weight": "", "background": ""});
+      if (lastSelect) {
+        lastSelect.css({"font-weight": "", "background": ""});
       }
 
-      tree.find('[data-name=' + JSON.stringify(fileName) + ']').css({
-        "font-weight": "bold",
-        "background": "#5eb0dd"
-      });
-
       lastSelect = tree.find('[data-name=' + JSON.stringify(fileName) + ']');
-      lastSelect.css()
+      lastSelect.css({"font-weight": "bold", "background": selectionColor});
     }
 
     slashIndex = fileName.lastIndexOf("/");
@@ -532,11 +529,9 @@ exports.setup = function (tree) {
     div.addClass("file-name");
 
     div.hover(function(){
-      if (lastSelect == undefined || lastSelect.attr("data-name") !== name) {
-          $(this).css("background", "#94c2da");
-      }
+        $(this).css("background", hoverColor);
     }, function(){
-       $(this).css("background", "");
+        $(this).css("background", "");
     });
 
     slashIndex = name.lastIndexOf("/");
@@ -659,7 +654,7 @@ exports.setup = function (tree) {
           lastSelect.css({ "font-weight": "", "background": "" });
           tree.find('[data-name=' + JSON.stringify(name) + ']').css({
             "font-weight": "bold",
-            "background": "#5eb0dd"
+            "background": selectionColor
           });
 
           lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
@@ -683,11 +678,11 @@ exports.setup = function (tree) {
       tree.find('[data-name=' + JSON.stringify(draggedName) + ']').remove();
 
       //Add CSS and UI elements
-      if (lastSelect !== undefined && lastSelect.attr("data-name") === draggedName) {
+      if (lastSelect && lastSelect.attr("data-name") === draggedName) {
         lastSelect.css({ "font-weight": "", "background": "" });
         tree.find('[data-name=' + JSON.stringify(name) + ']').css({
           "font-weight": "bold",
-          "background": "#5eb0dd"
+          "background": selectionColor
         });
 
         lastSelect = tree.find('[data-name=' + JSON.stringify(name) + ']');
@@ -911,7 +906,7 @@ exports.setup = function (tree) {
             if (currentDirectory !== undefined) {
               if (currentDirectory.attr("dire-name") === draggedName) {
                 lastSelect.css({ "font-weight": "", "background": "" });
-                newDire.children().css({ "font-weight": "bold", "background": "#5eb0dd" });
+                newDire.children().css({ "font-weight": "bold", "background": selectionColor });
                 newDire.children().find("*").css({ "background": "" });
                 newDire.children().find(".file").css({ "font-weight": "normal" });
                 currentDirectory = newDire;
@@ -944,7 +939,7 @@ exports.setup = function (tree) {
         if (currentDirectory !== undefined) {
           if (currentDirectory.attr("dire-name") === draggedName) {
             lastSelect.css({ "font-weight": "", "background": "" });
-            newDire.children().css({ "font-weight": "bold", "background": "#5eb0dd" });
+            newDire.children().css({ "font-weight": "bold", "background": selectionColor });
             newDire.children().find("*").css({ "background": "" });
             newDire.children().find(".file").css({ "font-weight": "normal" });
 
@@ -1286,7 +1281,7 @@ exports.setup = function (tree) {
       createDirectory();
   });
 
-  //Detect a request from the gracelib io module to add/remove files from the UI file tree 
+  //Detect a request from the gracelib io module to add/remove files from the UI file tree
   addFileAPI.click(function () {
     addFile(addFileAPI.html());
   });
