@@ -5,11 +5,11 @@ var fileSystem = require("./fileSystem.js").setup();
 
 exports.setup = function (editor, view) {
 
-    var removeSpecialButton,insertSpecialButton,reindentButton, downloadAllFiles;
+    var removeSpecialButton,addSpecialButton,reindentButton, downloadAllFiles;
 
     reindentButton = view.find("#refactor-reindent");
     removeSpecialButton = view.find("#remove-unicode");
-    insertSpecialButton = view.find("#add-unicode");
+    addSpecialButton = view.find("#add-unicode");
     downloadAllFiles = view.find("#download-all-files");
 
     //Re-indent event
@@ -26,9 +26,9 @@ exports.setup = function (editor, view) {
     });
 
     //Button event to convert text into special characters
-    insertSpecialButton.mouseup(function () {
+    addSpecialButton.mouseup(function () {
         var code = editor.getSession().getValue();
-        editor.getSession().setValue(insertSpecial(code));
+        editor.getSession().setValue(addSpecial(code));
     });
 
     //Function to download all files as a zip file
@@ -64,7 +64,7 @@ function removeSpecial(text) {
 }
 
 //************ Text to Unicode Function  ************/
-function insertSpecial(text) {
+function addSpecial(text) {
     // Iterate over each key in digraphReplacements 
     for (let Ch in digraphReplacements) {
         const regEx = new RegExp(escapeRegExp(digraphReplacements[Ch]), "g");
