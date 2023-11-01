@@ -34,3 +34,7 @@ js/
 
 # included git repository
 brace
+
+# MacOS
+.DS_Store
+
