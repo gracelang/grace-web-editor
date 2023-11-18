@@ -12,7 +12,7 @@
     "jquery-ui": "1.10.x",
     "setimmediate": "1.x",
     "sweetalert": "1.x",
-    "jszip": "3.1.x",
+    "jszip": "3.8.x",
     "filesaver.js": "0.2.x"
   },
   "devDependencies": {
