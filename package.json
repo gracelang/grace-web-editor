@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "browserify": "9.x",
-    "eslint": "4.18.x"
+    "eslint": "8.54.x"
   },
   "main": "scripts/boot.js",
   "scripts": {
