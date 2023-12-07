@@ -1,18 +1,21 @@
-editor
+Grace Educational Development Environment
 ======
 
-A simple editor for Grace
+A Simple Code Editor and Development Environment for Grace
 
 Phase One:
-- [X] Make the Run button the default button, so that it builds and runs - *John*
-- [X] Ability to dismiss the file and console drawer - *Ruben*
-- [X] Add the ability to change the font size, background color, color scheme, default indent and other variables of the inbuilt editor - *Ruben*
+- [X] ~~Make the Run button the default button, so that it builds and runs~~ - *John*
+- [X] ~~Ability to hide the file and console drawer~~ – *Ruben*
+- [X] ~~Ability to change the font size, background color, color scheme, default indent and other variables of the inbuilt editor~~ – *Ruben*
 
 Phase Two:
 - [ ] Get Stdin working
 - [X] ~~Renaming files~~ (already implemented)
-- [ ] Group files into folders and download those folders
-- [X] ~~Simple refactoring like renaming variables~~ (already implemented)
-- [X] Re-indenting files - *Ruben*
-- [ ] Show inline documentation/standard library when using standard functions
+- [X] ~~Group files into folders and download those folders~~
+- [ ] Simple refactoring like renaming variables
+- [X] Re-indenting files - Andrew Black
+- [ ] Show documentation for standard dialect when using its features
+
+Phase Three:
+- [ ] Integrate with github, so changes can be pulled and pushed.
 
