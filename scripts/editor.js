@@ -639,15 +639,19 @@ function setupCharacterEquivalencies(editor) {
           var leftText = editor.session.getTextRange(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column));
           var rightText = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
 
+
           if (leftText === '[[' && rightText === ']]') {
+            var leftReplacement = replacements[leftText];
+            var rightReplacement = replacements[rightText];
+            
             var autoPairActive = editor.getBehavioursEnabled();
             if (autoPairActive) {
               // Replace both sides of the cursor with ⟦ and ⟧
-              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), '⟦⟧');
+              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
               editor.navigateLeft(1); // Navigate cursor between the ⟦ and ⟧ symbol
             } else {
               // Insert ⟦⟧ normally
-              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), '⟦⟧');
+              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
             }
           }
           else if (text in replacements) {
