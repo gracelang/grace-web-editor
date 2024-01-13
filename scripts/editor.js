@@ -616,30 +616,51 @@ function setupCharacterEquivalencies(editor) {
   }
 
   function addCharEq(a) {
+
     editor.commands.addCommand({
-      name: 'myCommand'+a,
-      bindKey: {win: a,  mac: a},
-      exec: function(editor) {
-        //Insert `a` to support standard functionality
+      name: 'myCommand' + a,
+      bindKey: { win: a, mac: a },
+      exec: function (editor) {
+        // Insert 'a' to support standard functionality
         editor.insert(a);
-
-        cursorMoved = false;    // to allow backspace replacement
-
-        //Calculate the cursor position
+  
+        cursorMoved = false; // To allow backspace replacement
+  
+        // Calculate the cursor position
         var cursor = editor.getCursorPosition();
-
-        //Check if replacement is possible
+  
+        // Check if replacement is possible
         if (cursor.column >= 2) {
-          //Get the range and the text
-          var replacementRange = new Range(cursor.row, cursor.column-2, cursor.row, cursor.column);
+          // Get the range and the text
+          var replacementRange = new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column);
           var text = editor.session.getTextRange(replacementRange);
-          if (text in replacements) {
-            //Insert the matching symbol
-            editor.session.replace(replacementRange, replacements[text]);
+          
+          // Get the left and right substrings
+          var leftText = editor.session.getTextRange(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column));
+          var rightText = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
+
+
+          if (leftText === '[[' && rightText === ']]') {
+            var leftReplacement = replacements[leftText];
+            var rightReplacement = replacements[rightText];
+            
+            var autoPairActive = editor.getBehavioursEnabled();
+            if (autoPairActive) {
+              // Replace both sides of the cursor with ⟦ and ⟧
+              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
+              editor.navigateLeft(1); // Navigate cursor between the ⟦ and ⟧ symbol
+            } else {
+              // Insert ⟦⟧ normally
+              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
+            }
+          }
+          else if (text in replacements) {
+                //Insert the matching symbol
+                editor.session.replace(replacementRange, replacements[text]);
           }
         }
       },
-      readOnly: false // false if this command should not apply in readOnly mode
+      readOnly: false, // False if this command should not apply in readOnly mode
     });
   }
 
