@@ -615,6 +615,10 @@ function setupCharacterEquivalencies(editor) {
       addCharEq(finalChars[i]);
   }
 
+  var bracket_replacements =   {     // dictionary of replacements for bracket clash in the editor
+    "[[":"⟦",
+    "]]":"⟧"
+};
   function addCharEq(a) {
 
     editor.commands.addCommand({
@@ -633,16 +637,12 @@ function setupCharacterEquivalencies(editor) {
         if (cursor.column >= 2) {
           // Get the range and the text
           var replacementRange = new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column);
-          var text = editor.session.getTextRange(replacementRange);
-          
-          // Get the left and right substrings
-          var leftText = editor.session.getTextRange(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column));
+          var leftText = editor.session.getTextRange(replacementRange);
           var rightText = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
 
-
-          if (leftText === '[[' && rightText === ']]') {
-            var leftReplacement = replacements[leftText];
-            var rightReplacement = replacements[rightText];
+          if (bracket_replacements.hasOwnProperty(leftText) && bracket_replacements.hasOwnProperty(rightText)) {            
+            var leftReplacement = bracket_replacements[leftText];
+            var rightReplacement = bracket_replacements[rightText];
             
             var autoPairActive = editor.getBehavioursEnabled();
             if (autoPairActive) {
@@ -654,9 +654,9 @@ function setupCharacterEquivalencies(editor) {
               editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
             }
           }
-          else if (text in replacements) {
+          else if (leftText in replacements) {
                 //Insert the matching symbol
-                editor.session.replace(replacementRange, replacements[text]);
+                editor.session.replace(replacementRange, replacements[leftText]);
           }
         }
       },
