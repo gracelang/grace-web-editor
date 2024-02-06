@@ -616,11 +616,12 @@ function setupCharacterEquivalencies(editor) {
   }
 
   function addCharEq(a) {
+
     editor.commands.addCommand({
-      name: 'myCommand'+a,
-      bindKey: {win: a,  mac: a},
-      exec: function(editor) {
-        //Insert `a` to support standard functionality
+      name: 'myCommand' + a,
+      bindKey: { win: a, mac: a },
+      exec: function (editor) {
+        // Insert 'a' to support standard functionality
         editor.insert(a);
 
         cursorMoved = false;    // to allow backspace replacement
