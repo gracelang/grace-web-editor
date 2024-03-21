@@ -615,6 +615,10 @@ function setupCharacterEquivalencies(editor) {
       addCharEq(finalChars[i]);
   }
 
+  var bracket_replacements =   {     // dictionary of replacements for bracket clash in the editor
+    "[[":"⟦",
+    "]]":"⟧"
+};
   function addCharEq(a) {
 
     editor.commands.addCommand({
@@ -624,25 +628,41 @@ function setupCharacterEquivalencies(editor) {
         // Insert 'a' to support standard functionality
         editor.insert(a);
 
-        cursorMoved = false;    // to allow backspace replacement
+        cursorMoved = false; // To allow backspace replacement
 
-        //Calculate the cursor position
-        var cursor = editor.getCursorPosition();
+        // Check if autoPair is enabled
+        const autoPairActive = editor.getBehavioursEnabled();
+        const selectionRange = editor.getSelectionRange(); // selectionRange.start is always less than selectionRange.end
+        // Check if replacement is possible
+        if (selectionRange.start.column >= 2) {
+          // Get the word length and corresponding text range
+          const leftReplacementRange = new Range(selectionRange.start.row, selectionRange.start.column - 2, selectionRange.start.row, selectionRange.start.column);
+          const rightReplacementRange = new Range(selectionRange.end.row, selectionRange.end.column, selectionRange.end.row, selectionRange.end.column + 2);
+          const leftText = editor.session.getTextRange(leftReplacementRange);
+          const rightText = editor.session.getTextRange(rightReplacementRange);
 
-        //Check if replacement is possible
-        if (cursor.column >= 2) {
-          //Get the range and the text
-          var replacementRange = new Range(cursor.row, cursor.column-2, cursor.row, cursor.column);
-          var text = editor.session.getTextRange(replacementRange);
-          if (text in replacements) {
-            //Insert the matching symbol
-            editor.session.replace(replacementRange, replacements[text]);
+          if (bracket_replacements.hasOwnProperty(leftText) && bracket_replacements.hasOwnProperty(rightText)) {
+            const leftReplacement = bracket_replacements[leftText];
+            const rightReplacement = bracket_replacements[rightText];
+
+            if (autoPairActive) {
+              // Replace both sides of the word with ⟦ and ⟧. 
+              // Right replacement first, because the left replacement changes the coordinates of everything to its right 
+              editor.session.replace(rightReplacementRange, rightReplacement);
+              editor.session.replace(leftReplacementRange, leftReplacement);
+              editor.navigateLeft(1);
+            }
+          }
+          else if (leftText in replacements) {
+                //Insert the matching symbol
+                editor.session.replace(leftReplacementRange, replacements[leftText]);
           }
         }
       },
       readOnly: false // false if this command should not apply in readOnly mode
     });
   }
+
 
   //****** BACKSPACE Command Key ********//
   editor.commands.addCommand({
