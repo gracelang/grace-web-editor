@@ -205,7 +205,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
   $(document).on("hideEditor", function () {
     view.addClass("hidden");
   });
-  
+
   //Change event responder to keep track of cursor position
   selection.on("changeCursor", function(){
     var name, cursor, lastRow, lastColumn;
@@ -433,7 +433,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
 
       // initialize stacks and counter if not done yet
       if (undoStacks[name] == undefined) undoStacks[name] = [];
-      if (redoStacks[name] == undefined) redoStacks[name] = []; 
+      if (redoStacks[name] == undefined) redoStacks[name] = [];
       if (dirtyCounters[name] == undefined) dirtyCounters[name] = 0;
 
       // grab undo/redo stack and dirty counter for file being opened
@@ -465,7 +465,7 @@ exports.setup = function (files, view, imgView, audioView, fdbk, hideReveal) {
     }
   });
 
-  //Function to respond to a "Delete" button click 
+  //Function to respond to a "Delete" button click
   remove.click(function () {
     files.confirmDelete("Are you sure you want to delete this file?", function () {
       files.remove();
