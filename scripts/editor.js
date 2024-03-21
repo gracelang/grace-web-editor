@@ -615,6 +615,10 @@ function setupCharacterEquivalencies(editor) {
       addCharEq(finalChars[i]);
   }
 
+  var bracket_replacements =   {     // dictionary of replacements for bracket clash in the editor
+    "[[":"⟦",
+    "]]":"⟧"
+};
   function addCharEq(a) {
 
     editor.commands.addCommand({
@@ -624,19 +628,35 @@ function setupCharacterEquivalencies(editor) {
         // Insert 'a' to support standard functionality
         editor.insert(a);
 
-        cursorMoved = false;    // to allow backspace replacement
+        cursorMoved = false; // To allow backspace replacement
 
-        //Calculate the cursor position
+        // Calculate the cursor position
         var cursor = editor.getCursorPosition();
 
-        //Check if replacement is possible
+        // Check if replacement is possible
         if (cursor.column >= 2) {
-          //Get the range and the text
-          var replacementRange = new Range(cursor.row, cursor.column-2, cursor.row, cursor.column);
-          var text = editor.session.getTextRange(replacementRange);
-          if (text in replacements) {
-            //Insert the matching symbol
-            editor.session.replace(replacementRange, replacements[text]);
+          // Get the range and the text
+          var replacementRange = new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column);
+          var leftText = editor.session.getTextRange(replacementRange);
+          var rightText = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
+
+          if (bracket_replacements.hasOwnProperty(leftText) && bracket_replacements.hasOwnProperty(rightText)) {
+            var leftReplacement = bracket_replacements[leftText];
+            var rightReplacement = bracket_replacements[rightText];
+
+            var autoPairActive = editor.getBehavioursEnabled();
+            if (autoPairActive) {
+              // Replace both sides of the cursor with ⟦ and ⟧
+              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
+              editor.navigateLeft(1); // Navigate cursor between the ⟦ and ⟧ symbol
+            } else {
+              // Insert ⟦⟧ normally
+              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
+            }
+          }
+          else if (leftText in replacements) {
+                //Insert the matching symbol
+                editor.session.replace(replacementRange, replacements[leftText]);
           }
         }
       },
