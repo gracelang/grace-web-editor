@@ -632,6 +632,8 @@ function setupCharacterEquivalencies(editor) {
 
         // Calculate the cursor position
         var cursor = editor.getCursorPosition();
+        // Check if autoPair is enabled
+        var autoPairActive = editor.getBehavioursEnabled();
 
         // Check if replacement is possible
         if (cursor.column >= 2) {
@@ -639,19 +641,31 @@ function setupCharacterEquivalencies(editor) {
           var replacementRange = new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column);
           var leftText = editor.session.getTextRange(replacementRange);
           var rightText = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
+          // Get the word length and corresponding text range
+          var wordHighlighted = isWordHighlighted(editor);
+          var wordlength = getHighlightedWordLength(editor);
+          var leftTextWord = editor.session.getTextRange(new Range(cursor.row, cursor.column - wordlength - 2, cursor.row, cursor.column - wordlength))
+          var rightTextWord = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
 
+          if (wordHighlighted && bracket_replacements.hasOwnProperty(leftTextWord) && bracket_replacements.hasOwnProperty(rightTextWord)) {
+            var leftReplacement = bracket_replacements[leftTextWord];
+            var rightReplacement = bracket_replacements[rightTextWord];
+
+            if (autoPairActive) {
+              // Replace both sides of the word with ⟦ and ⟧
+              editor.session.replace(new Range(cursor.row, cursor.column - wordlength - 2, cursor.row, cursor.column - wordlength), leftReplacement);
+              editor.session.replace(new Range(cursor.row, cursor.column - 1, cursor.row, cursor.column + 1), rightReplacement);
+              editor.navigateLeft(1);
+            }
+          }
           if (bracket_replacements.hasOwnProperty(leftText) && bracket_replacements.hasOwnProperty(rightText)) {
             var leftReplacement = bracket_replacements[leftText];
             var rightReplacement = bracket_replacements[rightText];
 
-            var autoPairActive = editor.getBehavioursEnabled();
             if (autoPairActive) {
               // Replace both sides of the cursor with ⟦ and ⟧
               editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
               editor.navigateLeft(1); // Navigate cursor between the ⟦ and ⟧ symbol
-            } else {
-              // Insert ⟦⟧ normally
-              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
             }
           }
           else if (leftText in replacements) {
@@ -664,6 +678,34 @@ function setupCharacterEquivalencies(editor) {
     });
   }
 
+  function isWordHighlighted(editor) {
+    var selectionRange = editor.getSelectionRange();
+    return selectionRange.start.row !== selectionRange.end.row || selectionRange.start.column !== selectionRange.end.column;
+}
+  
+  function getHighlightedWordLength(editor) {
+    var selectionRange = editor.getSelectionRange();
+    if (selectionRange.start.row === selectionRange.end.row) {
+        // Single-line selection
+        return Math.abs(selectionRange.end.column - selectionRange.start.column);
+    } else {
+        // Multi-line selection, count the number of characters in each line
+        var numLines = Math.abs(selectionRange.end.row - selectionRange.start.row) + 1;
+        var totalLength = 0;
+        for (var i = 0; i < numLines; i++) {
+            var lineLength = editor.session.getLine(selectionRange.start.row + i).length;
+            if (i === 0) {
+                // First line
+                lineLength -= selectionRange.start.column;
+            } else if (i === numLines - 1) {
+                // Last line
+                lineLength = selectionRange.end.column;
+            }
+            totalLength += lineLength;
+        }
+        return totalLength;
+    }
+}
   //****** BACKSPACE Command Key ********//
   editor.commands.addCommand({
     name: 'BACK',
