@@ -632,11 +632,14 @@ function setupCharacterEquivalencies(editor) {
 
         // Calculate the cursor position
         var cursor = editor.getCursorPosition();
+        // Check if autoPair is enabled
+        var autoPairActive = editor.getBehavioursEnabled();
 
         // Check if replacement is possible
         if (cursor.column >= 2) {
-          // Get the range and the text
-          var replacementRange = new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column);
+          // Get the word length and corresponding text range
+          var wordlength = getHighlightedWordLength(editor);
+          var replacementRange = new Range(cursor.row, cursor.column - wordlength - 2, cursor.row, cursor.column - wordlength);
           var leftText = editor.session.getTextRange(replacementRange);
           var rightText = editor.session.getTextRange(new Range(cursor.row, cursor.column, cursor.row, cursor.column + 2));
 
@@ -644,16 +647,14 @@ function setupCharacterEquivalencies(editor) {
             var leftReplacement = bracket_replacements[leftText];
             var rightReplacement = bracket_replacements[rightText];
 
-            var autoPairActive = editor.getBehavioursEnabled();
             if (autoPairActive) {
-              // Replace both sides of the cursor with ⟦ and ⟧
-              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
-              editor.navigateLeft(1); // Navigate cursor between the ⟦ and ⟧ symbol
-            } else {
-              // Insert ⟦⟧ normally
-              editor.session.replace(new Range(cursor.row, cursor.column - 2, cursor.row, cursor.column + 2), leftReplacement+rightReplacement);
+              // Replace both sides of the word with ⟦ and ⟧
+              editor.session.replace(new Range(cursor.row, cursor.column - wordlength - 2, cursor.row, cursor.column - wordlength), leftReplacement);
+              editor.session.replace(new Range(cursor.row, cursor.column - 1, cursor.row, cursor.column + 1), rightReplacement);
+              editor.navigateLeft(1);
             }
           }
+
           else if (leftText in replacements) {
                 //Insert the matching symbol
                 editor.session.replace(replacementRange, replacements[leftText]);
@@ -664,6 +665,28 @@ function setupCharacterEquivalencies(editor) {
     });
   }
 
+  function getHighlightedWordLength(editor) {
+    var selectionRange = editor.getSelectionRange();
+    if (selectionRange.start.row === selectionRange.end.row) {
+        // Single-line selection
+        return selectionRange.end.column - selectionRange.start.column;
+    } 
+    // Multi-line selection, count the number of characters in each line
+    var numLines = (selectionRange.end.row - selectionRange.start.row) + 1;
+    var totalLength = 0;
+    for (var i = 0; i < numLines; i++) {
+        var lineLength = editor.session.getLine(selectionRange.start.row + i).length;
+        if (i === 0) {
+            // First line
+            lineLength -= selectionRange.start.column;
+        } else if (i === numLines - 1) {
+            // Last line
+            lineLength = selectionRange.end.column;
+        }
+        totalLength += lineLength;
+    }
+    return totalLength;
+}  
   //****** BACKSPACE Command Key ********//
   editor.commands.addCommand({
     name: 'BACK',
